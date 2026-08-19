@@ -1,0 +1,14 @@
+<Project>
+
+  <!-- api/Directory.Build.props zincirini kırmadan devam et. -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove($(MSBuildThisFile), $(MSBuildThisFileDirectory)..))" />
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+
+    <!-- CA1707: alt çizgili üye adı. Test adlarında (Should_do_X_when_Y) bu
+         kasıtlı ve yaygın bir okunabilirlik tercihidir; yalnızca testlerde kapalı. -->
+    <NoWarn>$(NoWarn);CA1707</NoWarn>
+  </PropertyGroup>
+
+</Project>

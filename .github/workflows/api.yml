@@ -1,0 +1,33 @@
+name: api
+
+# Monorepo: yalnızca backend'e dokunan değişikliklerde koş.
+on:
+  push:
+    branches: [main]
+    paths: ['api/**', 'global.json', '.github/workflows/api.yml']
+  pull_request:
+    paths: ['api/**', 'global.json', '.github/workflows/api.yml']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: .NET
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          # Sürüm global.json'dan gelir; burada tekrarlanmaz.
+          global-json-file: global.json
+
+      - run: dotnet restore
+      # Directory.Build.props uyarıları hata sayar; ayrı lint adımı gerekmez.
+      - run: dotnet build --no-restore --configuration Release
+      - run: dotnet test --no-build --configuration Release --verbosity normal
