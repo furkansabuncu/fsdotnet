@@ -1,6 +1,38 @@
 import type { ComponentType, LazyExoticComponent } from 'react';
+import type { LucideIcon } from 'lucide-react';
 
-export type ToolCategory = 'converters' | 'formatters' | 'security' | 'testing' | 'web';
+export type ToolCategory =
+  | 'dotnet'
+  | 'converters'
+  | 'formatters'
+  | 'security'
+  | 'testing'
+  | 'web';
+
+/**
+ * Katalogdaki her aracın kimliği.
+ *
+ * Açık bir birleşim tipi olması, sözlükteki `toolDescriptions` nesnesinin
+ * `Record<ToolId, string>` ile doğrulanabilmesini sağlıyor: yeni bir araç
+ * eklenip açıklaması yazılmazsa proje derlenmez.
+ */
+export type ToolId =
+  | 'base64'
+  | 'mojibake'
+  | 'json-to-csharp'
+  | 'sql-to-linq'
+  | 'xml-json'
+  | 'csv-json'
+  | 'epoch'
+  | 'sql-format'
+  | 'code-format'
+  | 'jwt'
+  | 'hash'
+  | 'uuid'
+  | 'regex'
+  | 'cron'
+  | 'http-status'
+  | 'color';
 
 /**
  * Aracın nerede çalıştığı.
@@ -11,30 +43,55 @@ export type ToolCategory = 'converters' | 'formatters' | 'security' | 'testing' 
  */
 export type ToolRuntime = 'client' | 'server';
 
-export interface ToolDefinition {
-  /** URL slug — /t/<id>. Registry içinde benzersiz olmalı. */
-  id: string;
+interface ToolBase {
+  /** URL slug — /t/<id>. */
+  id: ToolId;
+  /**
+   * Araç adı çevrilmez: "Base64", "JWT Decoder", "SQL → LINQ" gibi teknik
+   * terimler Türkçe arayüzde de aynı okunur. Açıklama sözlükte
+   * (`toolDescriptions`), ad burada.
+   */
   name: string;
-  /** Kart ve komut paletinde görünen tek satır. */
-  description: string;
-  category: ToolCategory;
-  /** İsim ve açıklamada GEÇMEYEN arama terimleri (eş anlamlılar, kısaltmalar). */
+  /**
+   * İsimde GEÇMEYEN arama terimleri — her iki dilde de. Arama açıklamaya
+   * bakmaz (açıklama artık sözlükte), o yüzden Türkçe karşılıklar buraya
+   * yazılır: kullanıcı "bozuk metin" arayınca Mojibake çıkmalı.
+   */
   keywords: string[];
+  category: ToolCategory;
   runtime: ToolRuntime;
-  /** Lazy: aracın kodu ve ağır bağımlılıkları yalnızca açıldığında indirilir. */
-  component: LazyExoticComponent<ComponentType>;
+  icon: LucideIcon;
 }
+
+/**
+ * Araç durumu bir birleşim tipi: 'soon' bir aracın component'i olamaz,
+ * 'ready' bir aracın component'i olmak zorunda. Planlanan bir aracı
+ * yanlışlıkla route'lamak derleme hatası verir.
+ */
+export type ToolDefinition = ToolBase &
+  (
+    | { status: 'ready'; component: LazyExoticComponent<ComponentType> }
+    | { status: 'soon'; component?: never }
+  );
+
+/**
+ * Araç fonksiyonlarının döndürebileceği hata türleri.
+ *
+ * Düz metin değil ANAHTAR: mesajın kendisi sözlükte (`errors`), çünkü saf bir
+ * dönüşüm fonksiyonu hangi dilde konuşulduğunu bilemez ve bilmemeli.
+ */
+export type ToolErrorKey = 'base64Alphabet' | 'base64Length' | 'base64Utf8';
 
 /**
  * Her araç fonksiyonunun ortak dönüş tipi. Araçlar exception fırlatmaz —
  * geçersiz girdi beklenen bir durumdur, istisna değil.
  */
-export type ToolResult<T> = { ok: true; value: T } | { ok: false; error: string };
+export type ToolResult<T> = { ok: true; value: T } | { ok: false; error: ToolErrorKey };
 
 export function ok<T>(value: T): ToolResult<T> {
   return { ok: true, value };
 }
 
-export function err<T = never>(error: string): ToolResult<T> {
+export function err<T = never>(error: ToolErrorKey): ToolResult<T> {
   return { ok: false, error };
 }

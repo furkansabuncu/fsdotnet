@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +8,28 @@
       name="description"
       content="Fast, private developer tools for .NET and web developers. Everything runs in your browser unless a real compiler is required."
     />
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Temayı React yüklenmeden önce uygula. Bu script olmadan koyu tema
+         seçili kullanıcıda ilk boyama beyaz gelir ve göz alıcı bir sıçrama
+         olur (FOUC). useTheme.ts ile aynı anahtarı okur. -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('fsbox.theme');
+          var dark =
+            stored === 'dark' ||
+            (stored !== 'light' && !window.matchMedia('(prefers-color-scheme: light)').matches);
+          document.documentElement.classList.toggle('dark', dark);
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

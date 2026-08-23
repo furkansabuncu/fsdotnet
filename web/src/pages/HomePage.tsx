@@ -1,52 +1,102 @@
-import { Link } from 'react-router';
-import { CATEGORY_LABELS } from '../tools/categories';
-import { TOOLS, toolsByCategory } from '../tools/registry';
+import { Keyboard, ShieldCheck, Zap } from 'lucide-react';
+import { useI18n } from '../i18n/I18nProvider';
+import { CATEGORIES, categoryVars } from '../tools/categories';
+import { READY_COUNT, TOOLS, TOTAL_COUNT, toolsByCategory } from '../tools/registry';
+import HeroDemo from '../shared/HeroDemo';
+import ToolCard from '../shared/ToolCard';
+
+const CLIENT_COUNT = TOOLS.filter((t) => t.runtime === 'client').length;
+
+/**
+ * Kart girişi açılışta bir kez oynar, scroll'da DEĞİL — scroll ile beliren
+ * içerik, günde defalarca giren kullanıcıyı animasyon bitene kadar bekletir.
+ * Gecikme 300ms'de sınırlanıyor ki alttaki kartlar sıraya girmesin.
+ */
+const staggerDelay = (index: number) => ({
+  animationDelay: `${Math.min(index * 20, 300)}ms`,
+});
 
 export default function HomePage() {
+  const { t } = useI18n();
   const groups = toolsByCategory();
+  let cardIndex = 0;
+
+  const stats = [
+    { icon: Zap, label: t.home.statReady(READY_COUNT, TOTAL_COUNT) },
+    { icon: ShieldCheck, label: t.home.statClient(CLIENT_COUNT) },
+    { icon: Keyboard, label: t.home.statPrivacy },
+  ];
 
   return (
-    <div className="flex flex-col gap-10">
-      <header className="flex flex-col gap-3">
-        <h1 className="text-3xl font-bold tracking-tight">Developer tools for the .NET ecosystem</h1>
-        <p className="max-w-2xl text-slate-600 dark:text-slate-400">
-          {TOOLS.length} tool{TOOLS.length === 1 ? '' : 's'} and counting. Everything runs in your browser unless a real
-          parser or compiler is required — your tokens, secrets and payloads never leave this tab.
-        </p>
-        <p className="text-sm text-slate-500">
-          Press <kbd className="rounded border border-slate-600 px-1.5 py-0.5 font-mono text-xs">Ctrl</kbd>
-          <span className="mx-1">+</span>
-          <kbd className="rounded border border-slate-600 px-1.5 py-0.5 font-mono text-xs">K</kbd> to search.
-        </p>
-      </header>
+    <div className="flex flex-col gap-10 py-8">
+      <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)]">
+        <div className="flex flex-col gap-4">
+          <h1 className="max-w-2xl text-[28px] leading-9 font-semibold tracking-tight text-fg">
+            {t.home.titleBefore}
+            <span
+              style={categoryVars('dotnet')}
+              className="bg-gradient-to-r from-cat to-accent bg-clip-text text-transparent"
+            >
+              {t.home.titleAccent}
+            </span>
+            {t.home.titleAfter}
+          </h1>
 
-      {groups.map(({ category, tools }) => (
-        <section key={category} className="flex flex-col gap-3">
-          <h2 className="text-xs font-semibold tracking-widest text-slate-500 uppercase">
-            {CATEGORY_LABELS[category]}
-          </h2>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {tools.map((tool) => (
-              <li key={tool.id}>
-                <Link
-                  to={`/t/${tool.id}`}
-                  className="flex h-full flex-col gap-1 rounded-lg border border-slate-200 p-4 transition hover:border-sky-500 dark:border-slate-800 dark:hover:border-sky-500"
-                >
-                  <span className="flex items-center gap-2 font-medium">
-                    {tool.name}
-                    {tool.runtime === 'server' ? (
-                      <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-amber-600 uppercase dark:text-amber-400">
-                        API
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="text-sm text-slate-500 dark:text-slate-400">{tool.description}</span>
-                </Link>
+          <p className="max-w-xl text-sm leading-6 text-muted">{t.home.subtitle}</p>
+
+          <ul className="flex flex-wrap items-center gap-2">
+            {stats.map(({ icon: Icon, label }) => (
+              <li
+                key={label}
+                className="flex items-center gap-1.5 rounded-md border border-border-subtle bg-surface px-2.5 py-1 text-[11px] text-muted"
+              >
+                <Icon size={12} className="text-subtle" aria-hidden="true" />
+                {label}
               </li>
             ))}
           </ul>
-        </section>
-      ))}
+        </div>
+
+        <HeroDemo />
+      </section>
+
+      {groups.map(({ category, tools }) => {
+        const Icon = CATEGORIES[category].icon;
+        const meta = t.categories[category];
+
+        return (
+          /* id: sol raydaki ve footer'daki /#<kategori> bağlantılarının hedefi.
+             scroll-mt: yapışkan header'ın altında kalmasın. */
+          <section
+            key={category}
+            id={category}
+            style={categoryVars(category)}
+            className="flex scroll-mt-16 flex-col gap-3"
+          >
+            <header className="flex items-center gap-3">
+              <span className="flex size-7 shrink-0 items-center justify-center rounded-md bg-cat-bg">
+                <Icon size={15} className="text-cat" aria-hidden="true" />
+              </span>
+              <h2 className="shrink-0 text-[15px] font-semibold tracking-tight text-fg">
+                {meta.label}
+              </h2>
+              <span className="hidden shrink-0 text-xs text-subtle md:inline">{meta.blurb}</span>
+              {/* Bölüm sınırını görünür kılan ince çizgi: başlıkla sayaç
+                  arasındaki boşluğu doldurur, bölümleri birbirinden ayırır. */}
+              <span aria-hidden="true" className="h-px flex-1 bg-border-subtle" />
+              <span className="shrink-0 font-mono text-[11px] text-subtle">{tools.length}</span>
+            </header>
+
+            <ul className="grid grid-cols-[repeat(auto-fill,minmax(260px,1fr))] gap-3">
+              {tools.map((tool) => (
+                <li key={tool.id} className="card-in" style={staggerDelay(cardIndex++)}>
+                  <ToolCard tool={tool} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        );
+      })}
     </div>
   );
 }

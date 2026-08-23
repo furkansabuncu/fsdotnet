@@ -17,6 +17,7 @@ export default defineConfig({
         'src/tools/types.ts',
         'src/tools/registry.ts',
         'src/tools/categories.ts',
+        'src/tools/planned.ts',
       ],
       thresholds: { lines: 90, functions: 90, branches: 85, statements: 90 },
     },

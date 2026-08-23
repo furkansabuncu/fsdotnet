@@ -29,7 +29,7 @@ export function decodeBase64(input: string): ToolResult<string> {
 
   const normalized = cleaned.replace(/-/g, '+').replace(/_/g, '/');
   if (!/^[A-Za-z0-9+/]+={0,2}$/.test(normalized)) {
-    return err('Geçersiz Base64: alfabede olmayan karakter var.');
+    return err('base64Alphabet');
   }
 
   // url-safe girdide padding kırpılmış olur; atob() tam blok ister.
@@ -39,13 +39,13 @@ export function decodeBase64(input: string): ToolResult<string> {
   try {
     binary = atob(padded);
   } catch {
-    return err('Geçersiz Base64: uzunluk 4’ün katı değil.');
+    return err('base64Length');
   }
 
   const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
   try {
     return ok(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
   } catch {
-    return err('Base64 çözüldü ama sonuç geçerli UTF-8 metin değil (ikili veri olabilir).');
+    return err('base64Utf8');
   }
 }

@@ -1,11 +1,156 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=JetBrains+Mono:wght@400;500;700&display=swap');
 @import 'tailwindcss';
 
 /* Tailwind v4'te dark varyantı varsayılan olarak prefers-color-scheme'e bakar.
    Kullanıcı tercihini saklayabilmek için sınıf tabanlıya çeviriyoruz. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
+/* ---------------------------------------------------------------------------
+   Token sözleşmesi.
+
+   Component'lerde ASLA ham renk sınıfı (bg-zinc-900, text-gray-400) kullanma —
+   yalnızca semantik token (bg-surface, text-muted). Açık tema bu kurala
+   uymayan her yerde kırılır.
+
+   Değerler ölçülmüş referanslardan: koyu ölçek Raycast + jwt.io, tipografi
+   Linear, sözdizimi renkleri jwt.io. Kontrast oranları docs/design.md'de.
+--------------------------------------------------------------------------- */
+
+:root {
+  /* Açık temada katman sırası KOYU temanın tersidir: sayfa gri, kart beyaz.
+     Beyazdan daha açık bir renk olmadığı için "yükselen yüzey daha açık"
+     kuralı burada çalışmaz — kart sayfadan koyu olursa çukur gibi görünür.
+     Derinlik bu yüzden gölgeyle kuruluyor (--elev-*). */
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #f0f2f5;
+  --surface-3: #e4e7ec;
+  --border: #e3e6ea;
+  --border-strong: #cbd0d8;
+
+  --fg: #1a1d21;
+  --fg-muted: #565d66;
+  --fg-subtle: #858c96;
+
+  /* Yükseklik. Açık temada gerçek gölge, koyu temada yok — koyuda derinlik
+     zaten yüzey farkından ve ince kenarlıktan geliyor, siyah üstüne siyah
+     gölge görünmez. */
+  --elev-1: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --elev-2: 0 2px 4px rgba(16, 24, 40, 0.05), 0 6px 16px rgba(16, 24, 40, 0.08);
+
+  --accent: #0069d9;
+  --accent-fg: #ffffff;
+  --accent-bg: #0069d91f;
+  --ring: #0069d966;
+
+  --success: #12864f;  --success-bg: #12864f1f;
+  --warning: #9a6700;  --warning-bg: #9a67001f;
+  --error:   #d1242f;  --error-bg:   #d1242f1f;
+  --info:    #0969da;  --info-bg:    #0969da1f;
+
+  --syn-key: #3f59e4;
+  --syn-string: #1a7f37;
+  --syn-number: #b45309;
+  --syn-literal: #7c3aed;
+  --syn-punct: #57606a;
+  --syn-comment: #6e7781;
+
+  /* Kategori aksanları — sayfadaki kroma buradan gelir. Altı ayrı ton,
+     renk çemberine eşit dağıtıldı ki kategoriler tek bakışta ayrılsın. */
+  /* Alfa koyu temadakinden yüksek (%18 vs %15): beyaz zeminde düşük alfalı
+     bir ton neredeyse görünmez, ikon çipi soluk kalıyordu. */
+  --cat-dotnet:     #7c3aed;  --cat-dotnet-bg:     #7c3aed2e;
+  --cat-converters: #0b63ce;  --cat-converters-bg: #0b63ce2e;
+  --cat-formatters: #12864f;  --cat-formatters-bg: #12864f2e;
+  --cat-security:   #b45309;  --cat-security-bg:   #b453092e;
+  --cat-testing:    #be1a6b;  --cat-testing-bg:    #be1a6b2e;
+  --cat-web:        #0f766e;  --cat-web-bg:        #0f766e2e;
+}
+
+.dark {
+  --bg: #0a0a0a;
+  --surface: #141414;
+  --surface-2: #1c1c1c;
+  --surface-3: #262626;
+  --border: #232323;
+  --border-strong: #2e2e2e;
+
+  --fg: #fafafa;
+  --fg-muted: #a1a1a1;
+  --fg-subtle: #6f6f6f;
+
+  /* Koyuda gölge yok: derinlik yüzey farkından (#0a0a0a → #141414) ve ince
+     kenarlıktan geliyor. Siyah üstüne siyah gölge hiçbir şey eklemez. */
+  --elev-1: none;
+  --elev-2: none;
+
+  --accent: #4d9fff;
+  --accent-fg: #0a0a0a;
+  --accent-bg: #4d9fff26;
+  --ring: #4d9fff66;
+
+  --success: #59d499;  --success-bg: #59d49926;
+  --warning: #ffc533;  --warning-bg: #ffc53326;
+  --error:   #ff6161;  --error-bg:   #ff616126;
+  --info:    #57c1ff;  --info-bg:    #57c1ff26;
+
+  --syn-key: #7487eb;
+  --syn-string: #52af6d;
+  --syn-number: #e7834e;
+  --syn-literal: #ccbcfa;
+  --syn-punct: #8a8a8a;
+  --syn-comment: #6f6f6f;
+
+  --cat-dotnet:     #b18cff;  --cat-dotnet-bg:     #b18cff26;
+  --cat-converters: #4d9fff;  --cat-converters-bg: #4d9fff26;
+  --cat-formatters: #59d499;  --cat-formatters-bg: #59d49926;
+  --cat-security:   #ffc533;  --cat-security-bg:   #ffc53326;
+  --cat-testing:    #ff8ac5;  --cat-testing-bg:    #ff8ac526;
+  --cat-web:        #4fd1c5;  --cat-web-bg:        #4fd1c526;
+}
+
+/* @theme inline: değerler var() referansı olduğu için üretilen utility'ler
+   cascade'e uyar; .dark sınıfı eklendiğinde bg-surface kendiliğinden değişir. */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-border-subtle: var(--border);
+  --color-border-strong: var(--border-strong);
+
+  --color-fg: var(--fg);
+  --color-muted: var(--fg-muted);
+  --color-subtle: var(--fg-subtle);
+
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-bg: var(--accent-bg);
+
+  --color-success: var(--success);
+  --color-success-bg: var(--success-bg);
+  --color-warning: var(--warning);
+  --color-warning-bg: var(--warning-bg);
+  --color-error: var(--error);
+  --color-error-bg: var(--error-bg);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+
+  /* Kategori rengi component'e --cat/--cat-bg olarak geçirilir; bu iki
+     utility onu okur. Böylece 6 kategori için 6 ayrı sınıf seti gerekmez. */
+  --color-cat: var(--cat);
+  --color-cat-bg: var(--cat-bg);
+
+  --shadow-elev-1: var(--elev-1);
+  --shadow-elev-2: var(--elev-2);
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 }
 
 html,
@@ -15,5 +160,139 @@ body,
 }
 
 body {
-  @apply bg-white text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100;
+  background-color: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Odak halkası: klavyeyle gezinme birinci sınıf vatandaş. */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--accent-bg);
+}
+
+/* İnce kaydırma çubuğu — yoğun panellerde varsayılan çubuk fazla yer kaplıyor. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+/* ---------------------------------------------------------------------------
+   Arkaplan atmosferi.
+   Sayfaya "canlı" hissi veren tek efekt: çok düşük alfalı iki renk lekesi,
+   yavaşça sürükleniyor. Scroll animasyonu değil — sayfa durduğunda da yaşıyor.
+--------------------------------------------------------------------------- */
+.aurora::before {
+  content: '';
+  position: fixed;
+  inset: -20% -10% auto -10%;
+  height: 70vh;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(42% 55% at 18% 8%, var(--cat-converters-bg) 0%, transparent 70%),
+    radial-gradient(38% 50% at 78% 0%, var(--cat-dotnet-bg) 0%, transparent 70%),
+    radial-gradient(30% 45% at 50% 22%, var(--cat-web-bg) 0%, transparent 70%);
+  filter: blur(28px);
+  animation: aurora-drift 24s ease-in-out infinite alternate;
+}
+
+@keyframes aurora-drift {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); }
+  to   { transform: translate3d(3%, 2%, 0) scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora::before {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Hareket.
+
+   Kural: hiçbir animasyon içeriği GECİKTİRMEZ veya GİZLEMEZ. Scroll ile beliren
+   kart yok — günde 20 kez giren kullanıcı animasyonun bitmesini beklemez.
+   İzin verilen üç tür: (1) açılışta bir kez, kısa · (2) etkileşimle tetiklenen ·
+   (3) ortamda dönen, hiçbir şeyi engellemeyen.
+--------------------------------------------------------------------------- */
+
+/* Kart girişi <li> üzerinde çalışır, kartın kendisinde değil: fill-mode 'both'
+   son kareyi kalıcı yapar ve kartın hover'daki -translate-y-px'ini ezerdi. */
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.card-in {
+  animation: card-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* İmleci takip eden ışık. --mx/--my kart üzerinde JS ile güncellenir; ışığın
+   kendisi tamamen CSS, her frame'de React render'ı yok. */
+.spotlight::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 200ms;
+  background: radial-gradient(
+    180px circle at var(--mx, 50%) var(--my, 50%),
+    var(--cat-bg),
+    transparent 60%
+  );
+}
+
+.spotlight:hover::after,
+.spotlight:focus-visible::after {
+  opacity: 1;
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+.caret {
+  animation: caret-blink 1s step-end infinite;
+}
+
+/* Çıktı değiştiğinde tek seferlik parlama — dekorasyon değil, dönüşümün
+   gerçekleştiğinin geri bildirimi. */
+@keyframes output-flash {
+  from {
+    background-color: var(--cat-bg);
+  }
+}
+
+.output-flash {
+  animation: output-flash 320ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-in,
+  .caret,
+  .output-flash {
+    animation: none;
+  }
+  .spotlight::after {
+    display: none;
+  }
 }

@@ -1,0 +1,28 @@
+{
+  // Tailwind v4 at-rule'ları (@theme, @apply, @custom-variant) yerleşik CSS
+  // dil servisi tarafından bilinmez ve sahte hata üretir.
+  "css.lint.unknownAtRules": "ignore",
+
+  // C# eklentisinin doğru çözümü açması için — .slnx, .NET 10'un XML formatı.
+  "dotnet.defaultSolution": "api/Fsbox.slnx",
+
+  // Global TypeScript yerine web/ altındaki sürümü kullan.
+  "typescript.tsdk": "web/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": { "source.organizeImports": "explicit" },
+
+  // Derleme çıktıları dosya ağacını ve aramayı kirletmesin.
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/coverage": true,
+    "**/bin": true,
+    "**/obj": true
+  }
+}

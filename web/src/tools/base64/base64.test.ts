@@ -55,7 +55,7 @@ describe('decodeBase64', () => {
   it('geçerli UTF-8 olmayan byte dizisini hata olarak bildirir', () => {
     // 0xFF tek başına geçerli bir UTF-8 dizisi değildir.
     const result = decodeBase64('/w==');
-    expect(result).toEqual({ ok: false, error: expect.stringContaining('UTF-8') });
+    expect(result).toEqual({ ok: false, error: 'base64Utf8' });
   });
 });
 

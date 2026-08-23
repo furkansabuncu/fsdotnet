@@ -1,0 +1,76 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "web: dev",
+      "type": "shell",
+      "command": "npm run dev",
+      "options": { "cwd": "${workspaceFolder}/web" },
+      "isBackground": true,
+      "presentation": { "group": "fsbox", "panel": "dedicated" },
+      // Vite'ın yerleşik bir problemMatcher'ı yok; "ready in" satırı görülünce
+      // görev başlamış sayılır, yoksa launch.json sonsuza kadar bekler.
+      "problemMatcher": {
+        "owner": "vite",
+        "pattern": { "regexp": "^$" },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*VITE v.*",
+          "endsPattern": ".*ready in.*"
+        }
+      }
+    },
+    {
+      "label": "web: test",
+      "type": "shell",
+      "command": "npm test",
+      "options": { "cwd": "${workspaceFolder}/web" },
+      "group": { "kind": "test", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "web: test:watch",
+      "type": "shell",
+      "command": "npm run test:watch",
+      "options": { "cwd": "${workspaceFolder}/web" },
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "web: coverage",
+      "type": "shell",
+      "command": "npm run test:coverage",
+      "options": { "cwd": "${workspaceFolder}/web" },
+      "problemMatcher": []
+    },
+    {
+      "label": "web: typecheck",
+      "type": "shell",
+      "command": "npm run typecheck",
+      "options": { "cwd": "${workspaceFolder}/web" },
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "api: build",
+      "type": "shell",
+      "command": "dotnet build",
+      "options": { "cwd": "${workspaceFolder}/api" },
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "api: test",
+      "type": "shell",
+      "command": "dotnet test",
+      "options": { "cwd": "${workspaceFolder}/api" },
+      "group": "test",
+      "problemMatcher": ["$msCompile"]
+    },
+    {
+      "label": "check: all",
+      "dependsOn": ["web: typecheck", "web: test", "api: test"],
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    }
+  ]
+}

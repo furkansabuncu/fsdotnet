@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "ms-dotnettools.csharp",
+    "bradlc.vscode-tailwindcss",
+    "vitest.explorer",
+    "editorconfig.editorconfig"
+  ]
+}
