@@ -28,6 +28,28 @@ const ssrDir = join(web, '.ssr');
 const template = readFileSync(join(dist, 'index.html'), 'utf8');
 const { render } = await import(pathToFileURL(join(ssrDir, 'entry-server.js')).href);
 
+/*
+ * Yol öneki iki farklı yerde farklı biçimde gerekiyor ve karıştırmak sessiz
+ * hata üretir:
+ *
+ *   - `render()`e verilen adres önek TAŞIMALI, çünkü SSR router'ının
+ *     `basename`i var ve gelen konumdan onu soyuyor.
+ *   - Dosya yolu önek TAŞIMAMALI, çünkü barındırıcı `dist`in kendisini
+ *     zaten o önekin altına eşliyor. Klasöre de eklersek adres
+ *     `/fsdotnet/fsdotnet/tr` olur.
+ *
+ * Kaynak `vite.config.ts` ile aynı: `VITE_SITE_URL`'in yolu.
+ */
+const basePath = (() => {
+  const site = process.env.VITE_SITE_URL;
+  if (!site) return '';
+  try {
+    return new URL(site).pathname.replace(/\/+$/, '');
+  } catch {
+    return '';
+  }
+})();
+
 /**
  * React 19, component içinde render edilen `<title>`, `<meta>` ve `<link>`
  * etiketlerini tarayıcıda `<head>`e taşıyor. `renderToString`in bir belge
@@ -43,7 +65,14 @@ const HEAD_TAG = /<(title|meta|link)\b[^>]*?(?:\/>|>(?:[^<]*<\/title>)?)/g;
 function hoistHeadTags(html) {
   const head = [];
   const body = html.replace(HEAD_TAG, (tag) => {
-    head.push(tag);
+    /*
+     * `data-ssr-head` şart: React bu etiketleri KENDİ ürettiği saymıyor
+     * (onları beklediği konumda bulmuyor) ve mount olurken kendi kopyalarını
+     * ekliyor. İşaretlenmeseler `main.tsx` hangilerini kaldıracağını bilemez
+     * ve sayfada iki başlık, iki açıklama, İKİ CANONICAL kalırdı — sonuncusu
+     * arama motoruna çelişkili sinyal vermek demek.
+     */
+    head.push(tag.replace(/^<(title|meta|link)\b/, '<$1 data-ssr-head'));
     return '';
   });
   return { head: head.join('\n    '), body };
@@ -57,7 +86,7 @@ const routes = LOCALES.flatMap((locale) => paths.map((path) => localePath(locale
 let written = 0;
 
 for (const route of routes) {
-  const { head, body } = hoistHeadTags(render(route));
+  const { head, body } = hoistHeadTags(render(basePath + route));
 
   const html = template
     .replace('<div id="root"></div>', `<div id="root">${body}</div>`)
@@ -84,7 +113,7 @@ for (const route of routes) {
  * işaretlemeyi gösterip hemen ardından React tarafından değiştiriliyor. Bunu
  * boş bir kabukla değiştirmek, kök adresi paylaşılamaz kılardı.
  */
-const root = hoistHeadTags(render(localePath('en')));
+const root = hoistHeadTags(render(basePath + localePath('en')));
 writeFileSync(
   join(dist, 'index.html'),
   template
@@ -106,13 +135,18 @@ writeFileSync(
  * olmayan adresler ve onların 404 dönmesi gerekiyor — yeniden yazma kuralı
  * onlara da 200 verirdi, ki bu arama motoruna yalan söylemek olurdu.
  */
-const notFound = hoistHeadTags(render(localePath('en', '/__not-found__')));
+const notFound = hoistHeadTags(render(basePath + localePath('en', '/__not-found__')));
 writeFileSync(
   join(dist, '404.html'),
   template
     .replace('<div id="root"></div>', `<div id="root">${notFound.body}</div>`)
     .replace('</head>', `  ${notFound.head}\n  </head>`),
 );
+
+/* GitHub Pages çıktıyı varsayılan olarak Jekyll ile işliyor ve alt çizgiyle
+   başlayan dosya/klasörleri atıyor. Bu işaret dosyası onu kapatıyor —
+   olmadığında sorun ileride bir varlık sessizce kaybolduğunda anlaşılırdı. */
+writeFileSync(join(dist, ".nojekyll"), "");
 
 // SSR paketi yalnızca bu adım için vardı; yayınlanacak çıktıya girmiyor.
 rmSync(ssrDir, { recursive: true, force: true });

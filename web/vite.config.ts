@@ -1,8 +1,34 @@
 import { defineConfig } from 'vitest/config';
+import { loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
-export default defineConfig({
+/**
+ * Varlıkların ve bağlantıların taşıyacağı yol öneki.
+ *
+ * GitHub Pages proje siteleri depo adının altında yayınlanıyor
+ * (`/fsdotnet/`), kendi alan adı ya da kullanıcı sitesi ise kökte. İkisini
+ * ayrı ayarlarda tutmak yerine tek kaynaktan — `VITE_SITE_URL`'in yolundan —
+ * çıkarılıyor; böylece adres değişince önek kendiliğinden doğru oluyor.
+ *
+ * Değer `loadEnv` ile okunuyor, `process.env` ile değil: bu dosya da tip
+ * denetiminden geçiyor ve `process` için yalnızca bunun uğruna `@types/node`
+ * eklemek gerekirdi.
+ */
+function basePath(mode: string): string {
+  const site = loadEnv(mode, '.', 'VITE_').VITE_SITE_URL;
+  if (!site) return '/';
+  try {
+    const path = new URL(site).pathname.replace(/\/+$/, '');
+    return path === '' ? '/' : `${path}/`;
+  } catch {
+    // Bozuk adres derlemeyi durdurmasın; kök varsayılır.
+    return '/';
+  }
+}
+
+export default defineConfig(({ mode }) => ({
+  base: basePath(mode),
   plugins: [react(), tailwindcss()],
   server: {
     watch: {
@@ -43,4 +69,4 @@ export default defineConfig({
       thresholds: { lines: 90, functions: 90, branches: 85, statements: 90 },
     },
   },
-});
+}));

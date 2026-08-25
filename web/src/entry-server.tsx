@@ -1,6 +1,7 @@
 import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router';
 import App from './App';
+import { BASE_PATH } from './basePath';
 
 /**
  * Ön-render giriş noktası.
@@ -17,7 +18,7 @@ import App from './App';
  */
 export function render(url: string): string {
   return renderToString(
-    <StaticRouter location={url}>
+    <StaticRouter basename={BASE_PATH} location={url}>
       <App />
     </StaticRouter>,
   );

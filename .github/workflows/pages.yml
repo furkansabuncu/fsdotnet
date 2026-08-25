@@ -1,0 +1,73 @@
+name: pages
+
+# Siteyi GitHub Pages'e yayınlar.
+#
+# Neden Cloudflare Pages değil: `*.pages.dev` bölgesi Türkiye'den erişime
+# kapalı (ölçüldü — `cloudflare.com` açılıyor, `pages.dev` açılmıyor), yani
+# sitenin birincil hedef kitlesi ona ulaşamıyordu.
+on:
+  push:
+    branches: [main]
+    paths: ['web/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Aynı anda tek yayın; sıradaki beklesin, çalışan iptal edilmesin.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+
+    env:
+      # Adres depo adından türetiliyor: proje siteleri
+      # `<kullanıcı>.github.io/<depo>/` altında yayınlanıyor. Elle yazılsaydı
+      # depo yeniden adlandırıldığında canonical, sitemap ve varlık yolları
+      # sessizce yanlış adresi göstermeye devam ederdi.
+      VITE_SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          # Sitemap ve ön-render betikleri TypeScript'i doğrudan çalıştırıyor;
+          # tip sıyırma Node 22.6+ gerektiriyor.
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - run: npm ci
+
+      # Yayınlanan şeyin testten geçtiğinden emin olmadan yayınlamıyoruz.
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run build
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

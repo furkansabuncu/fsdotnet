@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://fsdotnet.pages.dev/sitemap.xml
+Sitemap: https://furkansabuncu.github.io/fsdotnet/sitemap.xml

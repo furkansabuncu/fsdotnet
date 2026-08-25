@@ -23,7 +23,7 @@ const SITE_NAME = 'fsdotnet';
  */
 export const SITE_URL =
   (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ??
-  'https://fsdotnet.pages.dev';
+  'https://furkansabuncu.github.io/fsdotnet';
 
 interface SeoProps {
   /** Site adı eklenmemiş hâli — "Base64" gibi. */
