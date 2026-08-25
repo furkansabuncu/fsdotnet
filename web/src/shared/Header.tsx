@@ -63,21 +63,15 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border-subtle bg-bg/80 backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-[1400px] items-center gap-3 px-4">
-        {/* Logo — "beta" çipi link dışında; linkin erişilebilir adı "fsdev" kalsın. */}
-        <div className="flex shrink-0 items-center gap-2">
-          <Link to="/" className="font-mono text-base leading-6 font-bold tracking-tight">
-            {/* categoryVars --cat tanımlar; gradyan onu from-cat ile okur. */}
-            <span style={categoryVars('dotnet')}>
-              <span className="text-fg">fs</span>
-              <span className="bg-gradient-to-r from-cat to-accent bg-clip-text text-transparent">
-                dev
-              </span>
+        <Link to="/" className="shrink-0 font-mono text-base leading-6 font-bold tracking-tight">
+          {/* categoryVars --cat tanımlar; gradyan onu from-cat ile okur. */}
+          <span style={categoryVars('dotnet')}>
+            <span className="text-fg">fs</span>
+            <span className="bg-gradient-to-r from-cat to-accent bg-clip-text text-transparent">
+              dev
             </span>
-          </Link>
-          <span className="rounded bg-surface-3 px-1.5 py-0.5 font-mono text-[11px] leading-4 text-subtle">
-            beta
           </span>
-        </div>
+        </Link>
 
         {/* Arama — sm altında kare ikon düğmesine küçülür. aria-label şart:
             mobilde görünür metin kalmıyor. */}
