@@ -19,6 +19,8 @@ export default defineConfig({
     // Araç mantığı saf TypeScript; DOM gerektiren component testleri dosya
     // başında `// @vitest-environment jsdom` ile kendi ortamını seçer.
     environment: 'node',
+    // jest-dom eşleştiricileri ve testler arası DOM temizliği.
+    setupFiles: ['./src/test/setup.ts'],
     globals: true,
     coverage: {
       provider: 'v8',
