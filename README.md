@@ -33,6 +33,7 @@ One repository, two applications, deployed independently.
 ```
 fsdev/
 ├── web/            React 19 · TypeScript · Vite · Tailwind CSS
+│   └── scripts/    sitemap, prerender, and the Open Graph card
 ├── api/            .NET 10 · Minimal API · vertical slices
 │   ├── src/Fsdev.Api/
 │   └── tests/Fsdev.Api.Tests/
@@ -105,6 +106,25 @@ outcome for a converter, so error rendering is uniform and free.
 → [ADR-0002: Single API, vertical slices](docs/adr/0002-single-api-vertical-slices.md) ·
 [ADR-0003: Tool registry](docs/adr/0003-tool-registry.md)
 
+### 3. Every page has an address, in both languages
+
+Language used to live in `localStorage`. That is invisible to a crawler: it arrives once, in one
+language, and never sees the other dictionary — so half the site was unreachable from search, and a
+Turkish page could not be shared, because the recipient got English.
+
+Every page now answers at `/en/…` and `/tr/…`, switching language is a navigation rather than a
+state change, and each route carries its own `<title>`, description, canonical URL and reciprocal
+`hreflang` links. React 19 hoists metadata rendered inside components, so no helmet library is
+involved.
+
+`sitemap.xml` and `robots.txt` are generated from the catalogue at build time — 48 addresses that
+would otherwise be maintained by hand and quietly fall behind.
+
+The build then renders all 48 to static HTML. That is not an optimisation: **share crawlers do not run
+JavaScript**, so without it the Open Graph cards were invisible to exactly the clients they exist for.
+Lazily loaded tools are deliberately not awaited — the crawler needs the heading, the description and
+the guide text, all of which live outside the lazy boundary, not the interactive widget.
+
 ## Adding a tool
 
 Frontend:
@@ -113,7 +133,8 @@ Frontend:
 2. `my-tool.test.ts` — table-driven cases, including the ugly inputs
 3. `MyTool.tsx` — UI, usually just `<ConverterShell>` plus a toolbar
 4. `index.ts` — the `ToolDefinition`
-5. One line in `registry.ts`
+5. One line in `registry.ts`, and its id in `TOOL_IDS`
+6. A description in both dictionaries — the compiler will not let you skip one
 
 Routing, search, the palette and the home page pick it up automatically. If the tool needs the API, add
 a matching slice under `api/src/Fsdev.Api/Features/` — it self-registers under `/api/v1`.
@@ -140,7 +161,8 @@ npm run dev           # → http://localhost:5173
 | `npm test` | frontend test suite |
 | `npm run test:coverage` | coverage, gated at 90% on tool logic |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run build` | typecheck + production build |
+| `npm run build` | sitemap + typecheck + build + prerender |
+| `npm run sitemap` | regenerate `sitemap.xml` and `robots.txt` |
 | `npm run api` | .NET API on :5106, OpenAPI at `/openapi/v1.json` |
 | `npm run api:build` | build the API — warnings are errors |
 | `npm run api:test` | backend test suite |

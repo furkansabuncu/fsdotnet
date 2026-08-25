@@ -22,6 +22,15 @@ export default defineConfig({
     // jest-dom eşleştiricileri ve testler arası DOM temizliği.
     setupFiles: ['./src/test/setup.ts'],
     globals: true,
+    /*
+     * Varsayılan 5 sn, component testleri için coverage açıkken yetmiyor:
+     * ilk render bütün kayıt defterini (23 araç tanımı ve ikonları) içe
+     * aktarıyor ve enstrümantasyon altında bu tek başına ~9 sn sürebiliyor.
+     * Saf mantık testleri milisaniyeler içinde bittiği için üst sınırı
+     * yükseltmek onların geri bildirimini yavaşlatmıyor; CI makinesi bu
+     * masrafı yerelden daha da pahalı ödüyor.
+     */
+    testTimeout: 30_000,
     coverage: {
       provider: 'v8',
       include: ['src/tools/**/*.ts'],
