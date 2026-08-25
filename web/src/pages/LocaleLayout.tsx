@@ -1,13 +1,21 @@
 import { Navigate, Outlet, useLocation, useParams } from 'react-router';
 import { I18nProvider } from '../i18n/I18nProvider';
-import { LOCALE_STORAGE_KEY, detectLocale, isLocale, localePath } from '../i18n/locale';
+import { DEFAULT_LOCALE, LOCALE_STORAGE_KEY, detectLocale, isLocale, localePath } from '../i18n/locale';
 import CommandPalette from '../shared/CommandPalette';
 import Footer from '../shared/Footer';
 import Header from '../shared/Header';
 import Sidebar from '../shared/Sidebar';
 
-/** Tarayıcıdan okunabilen ipuçlarıyla dil seçer. */
+/**
+ * Tarayıcıdan okunabilen ipuçlarıyla dil seçer.
+ *
+ * Ön-render sırasında tarayıcı yok. Bu yolun oraya düşmemesi gerekiyor —
+ * ön-render edilen her adres zaten geçerli bir dil öneki taşıyor — ama
+ * düşerse render'ı düşürmek yerine varsayılan dile inmesi doğru.
+ */
 function preferredLocale() {
+  if (typeof window === 'undefined') return DEFAULT_LOCALE;
+
   let stored: string | null = null;
   try {
     stored = localStorage.getItem(LOCALE_STORAGE_KEY);
