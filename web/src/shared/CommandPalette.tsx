@@ -15,15 +15,14 @@ import { commandPalette, useCommandPaletteOpen } from './useCommandPalette';
  * paleti Header'daki arama düğmesi de açıyor. Global Ctrl+K dinleyicisi ise
  * burada kalır: palet App'te koşulsuz mount edildiği için bu component
  * kısayolun tek sahibi olabiliyor.
+ *
+ * Gövde ayrı bir component: arama metni ve seçili satır ancak palet AÇIKKEN
+ * var olsun diye. Böylece "açılışta sıfırla" işini bir effect yapmıyor —
+ * mount ediliyor. Effect'ten state yazmak zincirleme render tetikler ve
+ * React'in "bir effect'e ihtiyacınız olmayabilir" dediği tam bu durumdur.
  */
 export default function CommandPalette() {
-  const { t } = useI18n();
   const open = useCommandPaletteOpen();
-  const [query, setQuery] = useState('');
-  const [activeIndex, setActiveIndex] = useState(0);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -38,34 +37,42 @@ export default function CommandPalette() {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, []);
 
+  return open ? <PaletteDialog /> : null;
+}
+
+function PaletteDialog() {
+  const { t } = useI18n();
+  const [query, setQuery] = useState('');
+  const [activeIndex, setActiveIndex] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
+
+  // Odaklama bir DOM yan etkisi, state yazımı değil — effect burada yerinde.
   useEffect(() => {
-    if (!open) return;
-    setQuery('');
-    setActiveIndex(0);
     inputRef.current?.focus();
-  }, [open]);
+  }, []);
 
   // Palet açıkken arkadaki sayfa kaymasın.
   useEffect(() => {
-    if (!open) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [open]);
+  }, []);
 
   // Seçili satır görünür alanın dışına çıktıysa geri getir. Satırı ref
   // tutmak yerine data attribute'undan buluyoruz: liste her aramada
   // baştan kuruluyor, ref dizisini senkron tutmak fazladan iş.
   useEffect(() => {
-    if (!open) return;
     listRef.current
       ?.querySelector<HTMLElement>(`[data-row="${activeIndex}"]`)
       ?.scrollIntoView({ block: 'nearest' });
-  }, [open, activeIndex, query]);
-
-  if (!open) return null;
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- query
+    // effect içinde okunmuyor ama liste onunla yeniden kuruluyor; seçili satır
+    // yeni listede başka bir yere düştüğü için tekrar kaydırmak gerekiyor.
+  }, [activeIndex, query]);
 
   const results = searchTools(query);
   const groups = toolsByCategory(results);

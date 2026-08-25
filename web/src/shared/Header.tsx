@@ -6,7 +6,7 @@ import { LOCALES, useI18n } from '../i18n/I18nProvider';
 import { commandPalette } from './useCommandPalette';
 import { useTheme } from './useTheme';
 
-const REPO_URL = 'https://github.com/furkansabuncu/fsbox';
+const REPO_URL = 'https://github.com/furkansabuncu/fsdev';
 
 /**
  * Kare ikon düğmesi sınıfları. Tema düğmesi bir <button>, GitHub bir <a> —
@@ -63,14 +63,14 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-40 border-b border-border-subtle bg-bg/80 backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-[1400px] items-center gap-3 px-4">
-        {/* Logo — "beta" çipi link dışında; linkin erişilebilir adı "fsbox" kalsın. */}
+        {/* Logo — "beta" çipi link dışında; linkin erişilebilir adı "fsdev" kalsın. */}
         <div className="flex shrink-0 items-center gap-2">
           <Link to="/" className="font-mono text-base leading-6 font-bold tracking-tight">
             {/* categoryVars --cat tanımlar; gradyan onu from-cat ile okur. */}
             <span style={categoryVars('dotnet')}>
               <span className="text-fg">fs</span>
               <span className="bg-gradient-to-r from-cat to-accent bg-clip-text text-transparent">
-                box
+                dev
               </span>
             </span>
           </Link>

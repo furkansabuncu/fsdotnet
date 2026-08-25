@@ -33,7 +33,7 @@ const SCRIPTS: readonly DemoScript[] = [
     toolId: 'base64',
     label: 'base64 · url-safe',
     category: 'converters',
-    input: 'https://fsbox.dev/?q=a+b',
+    input: 'https://fsdev.dev/?q=a+b',
     run: (value) => encodeBase64(value, { urlSafe: true }),
   },
   {
@@ -47,7 +47,9 @@ const SCRIPTS: readonly DemoScript[] = [
     toolId: 'base64',
     label: 'base64 · decode',
     category: 'converters',
-    input: 'ZnNib3ggLS0gLk5FVCB0b29sYm94',
+    // "fsdev -- .NET toolbox" — kodlanmış hâlde olduğu için ad değişince
+    // bunun da yeniden hesaplanması gerekiyor.
+    input: 'ZnNkZXYgLS0gLk5FVCB0b29sYm94',
     run: decodeBase64,
   },
 ];
@@ -73,11 +75,9 @@ export default function HeroDemo() {
    * İki ayrı effect'i aynı state'e bağlamak yarış durumu üretiyordu.
    */
   useEffect(() => {
-    if (reducedMotion) {
-      setTyped(script.input);
-      return;
-    }
-    if (paused) return;
+    // Hareket azaltılmışsa yazılacak bir şey yok; tam metin render sırasında
+    // türetiliyor (aşağıdaki `shown`), effect'ten state yazmak gereksizdi.
+    if (reducedMotion || paused) return;
 
     if (typed.length < script.input.length) {
       const timer = setTimeout(
@@ -97,7 +97,10 @@ export default function HeroDemo() {
   /* Kısmi girdi çoğu zaman geçersizdir (yarım base64 gibi) — o anda çıktı
      yok. Araç sayfasındaki "son geçerli sonucu koru" davranışı burada
      kullanılmıyor: senaryolar arası geçişte önceki aracın çıktısı sızardı. */
-  const result = script.run(typed);
+  /* Hareket azaltılmışsa animasyon yok, tam metin doğrudan gösterilir —
+     bu bir türetme, state değil. */
+  const shown = reducedMotion ? script.input : typed;
+  const result = script.run(shown);
   const output = result.ok ? result.value : '';
 
   return (
@@ -132,7 +135,7 @@ export default function HeroDemo() {
         className="grid min-h-[132px] content-start gap-1 p-3 font-mono text-sm leading-6"
       >
         <div className="min-h-6 break-all text-fg">
-          {typed}
+          {shown}
           <span className="caret text-cat">▍</span>
         </div>
         <div className="min-h-6 break-all text-cat">{output}</div>

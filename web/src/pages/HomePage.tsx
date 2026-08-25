@@ -1,11 +1,10 @@
 import { Keyboard, ShieldCheck, Zap } from 'lucide-react';
 import { useI18n } from '../i18n/I18nProvider';
 import { CATEGORIES, categoryVars } from '../tools/categories';
-import { READY_COUNT, TOOLS, TOTAL_COUNT, toolsByCategory } from '../tools/registry';
+import { CLIENT_COUNT, TOTAL_COUNT, toolsByCategory } from '../tools/registry';
 import HeroDemo from '../shared/HeroDemo';
 import ToolCard from '../shared/ToolCard';
 
-const CLIENT_COUNT = TOOLS.filter((t) => t.runtime === 'client').length;
 
 /**
  * Kart girişi açılışta bir kez oynar, scroll'da DEĞİL — scroll ile beliren
@@ -22,7 +21,7 @@ export default function HomePage() {
   let cardIndex = 0;
 
   const stats = [
-    { icon: Zap, label: t.home.statReady(READY_COUNT, TOTAL_COUNT) },
+    { icon: Zap, label: t.home.statReady(TOTAL_COUNT) },
     { icon: ShieldCheck, label: t.home.statClient(CLIENT_COUNT) },
     { icon: Keyboard, label: t.home.statPrivacy },
   ];

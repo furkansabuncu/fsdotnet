@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 export type Theme = 'dark' | 'light';
 
-const STORAGE_KEY = 'fsbox.theme';
+const STORAGE_KEY = 'fsdev.theme';
 
 function initialTheme(): Theme {
   const stored = localStorage.getItem(STORAGE_KEY);

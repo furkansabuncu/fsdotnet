@@ -19,6 +19,14 @@ export type ToolCategory =
 export type ToolId =
   | 'base64'
   | 'mojibake'
+  | 'rtf'
+  | 'unicode'
+  | 'case'
+  | 'tr-data'
+  | 'in-list'
+  | 'ora-errors'
+  | 'bind-params'
+  | 'sql-diff'
   | 'json-to-csharp'
   | 'sql-to-linq'
   | 'xml-json'
@@ -80,18 +88,58 @@ export type ToolDefinition = ToolBase &
  * Düz metin değil ANAHTAR: mesajın kendisi sözlükte (`errors`), çünkü saf bir
  * dönüşüm fonksiyonu hangi dilde konuşulduğunu bilemez ve bilmemeli.
  */
-export type ToolErrorKey = 'base64Alphabet' | 'base64Length' | 'base64Utf8';
+export type ToolErrorKey =
+  | 'base64Alphabet'
+  | 'base64Length'
+  | 'base64Utf8'
+  | 'rtfNotRtf'
+  | 'sqlInvalid'
+  | 'epochEmpty'
+  | 'epochUnparsable'
+  | 'epochOutOfRange'
+  | 'jwtEmpty'
+  | 'jwtShape'
+  | 'jwtSegment'
+  | 'jwtJson'
+  | 'colorEmpty'
+  | 'colorInvalid'
+  | 'csvEmpty'
+  | 'csvNoRows'
+  | 'inListEmpty'
+  | 'jsonEmpty'
+  | 'jsonInvalid'
+  | 'jsonNotObject'
+  | 'xmlEmpty'
+  | 'xmlInvalid'
+  | 'xmlRootShape'
+  | 'xmlBadName'
+  | 'formatUnknownLanguage'
+  | 'cronEmpty'
+  | 'cronFieldCount'
+  | 'cronField'
+  | 'cronUnreachable'
+  | 'regexEmpty'
+  | 'regexInvalid'
+  | 'regexServerDown'
+  | 'sqlSelectOnly'
+  | 'sqlNoFrom';
 
 /**
  * Her araç fonksiyonunun ortak dönüş tipi. Araçlar exception fırlatmaz —
  * geçersiz girdi beklenen bir durumdur, istisna değil.
+ *
+ * `detail` isteğe bağlı ve ÇEVRİLMEZ: ayrıştırıcıların ürettiği konum
+ * (`4:12`), bozuk alan adı ya da motorun kendi mesajı gibi, kaynağı girdi
+ * olan parçalar. Çevrilebilir kısım her zaman `error` anahtarındadır.
  */
-export type ToolResult<T> = { ok: true; value: T } | { ok: false; error: ToolErrorKey };
+export type ToolResult<T> =
+  | { ok: true; value: T }
+  | { ok: false; error: ToolErrorKey; detail?: string };
 
 export function ok<T>(value: T): ToolResult<T> {
   return { ok: true, value };
 }
 
-export function err<T = never>(error: ToolErrorKey): ToolResult<T> {
-  return { ok: false, error };
+export function err<T = never>(error: ToolErrorKey, detail?: string): ToolResult<T> {
+  return detail === undefined ? { ok: false, error } : { ok: false, error, detail };
 }

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { en, type Dictionary } from './en';
 import { tr } from './tr';
 
@@ -8,7 +8,7 @@ export const LOCALES: readonly Locale[] = ['en', 'tr'];
 
 const DICTIONARIES: Record<Locale, Dictionary> = { en, tr };
 
-const STORAGE_KEY = 'fsbox.locale';
+const STORAGE_KEY = 'fsdev.locale';
 
 function initialLocale(): Locale {
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -38,7 +38,12 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     document.title = t.title;
   }, [locale, t]);
 
-  return <I18nContext.Provider value={{ t, locale, setLocale }}>{children}</I18nContext.Provider>;
+  /* Nesne her render'da yeniden kurulursa context'i tüketen HER component
+     yeniden render olur — bu sağlayıcı ağacın kökünde olduğu için "her
+     component" demek. Yalnızca dil değiştiğinde yeni bir değer üretiyoruz. */
+  const value = useMemo(() => ({ t, locale, setLocale }), [t, locale]);
+
+  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
 export function useI18n(): I18nValue {

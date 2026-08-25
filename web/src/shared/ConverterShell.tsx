@@ -1,4 +1,4 @@
-import { useId, useRef, type ReactNode } from 'react';
+import { useId, useRef, useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
 import { useI18n } from '../i18n/I18nProvider';
 import type { ToolResult } from '../tools/types';
@@ -52,13 +52,20 @@ export default function ConverterShell({
   const errorId = useId();
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // regex101 modeli: hata anında çıktı paneli boşalmaz, son geçerli sonuç
-  // soluk kalır. Ref'e render sırasında yazmak burada güvenli — aynı değer
-  // tekrar yazıldığı için StrictMode'un çift render'ı sonucu değiştirmez.
-  const lastValidRef = useRef('');
-  if (result.ok) lastValidRef.current = result.value;
+  /*
+   * regex101 modeli: hata anında çıktı paneli boşalmaz, son geçerli sonuç
+   * soluk kalır.
+   *
+   * Bunu bir ref'e render sırasında yazarak yapmıyoruz: atılan bir render
+   * (concurrent mod, Suspense yeniden denemesi) ref'i yine de değiştirir ve
+   * ekranda olmayan bir değeri saklamış oluruz. React'in bu iş için
+   * belgelediği yol, render sırasında state'i AYARLAMAK — setter aynı değerle
+   * çağrılırsa React yeni render planlamaz, yani döngü oluşmaz.
+   */
+  const [lastValid, setLastValid] = useState('');
+  if (result.ok && result.value !== lastValid) setLastValid(result.value);
 
-  const output = result.ok ? result.value : lastValidRef.current;
+  const output = result.ok ? result.value : lastValid;
   const inputSize = measure(input);
   const outputSize = measure(output);
   const stale = !result.ok && output !== '';
@@ -161,9 +168,16 @@ export default function ConverterShell({
             {/* Doğrulama satır içi kalır — modal/toast yok. */}
             <span aria-live="polite" className="min-w-0 truncate">
               {!result.ok ? (
-                <span id={errorId} className="text-error" title={t.errors[result.error]}>
+                /* `detail` çevrilmez — ayrıştırıcının verdiği konum ya da
+                   girdiden gelen bir parça. Çevrilebilir kısım anahtarda. */
+                <span
+                  id={errorId}
+                  className="text-error"
+                  title={result.detail ? `${t.errors[result.error]} (${result.detail})` : t.errors[result.error]}
+                >
                   <span aria-hidden="true">✕ </span>
                   {t.errors[result.error]}
+                  {result.detail ? <span className="text-subtle"> · {result.detail}</span> : null}
                 </span>
               ) : output !== '' ? (
                 <span className="text-success">

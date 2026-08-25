@@ -1,5 +1,5 @@
 {
-  "name": "@fsbox/web",
+  "name": "@fsdev/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -10,13 +10,15 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "lint": "oxlint"
   },
   "dependencies": {
     "lucide-react": "^1.33.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router": "^7.18.2"
+    "react-router": "^7.18.2",
+    "sql-formatter": "^15.8.2"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
@@ -28,6 +30,7 @@
     "@vitejs/plugin-react": "^6.0.5",
     "@vitest/coverage-v8": "^4.1.11",
     "jsdom": "^29.1.1",
+    "oxlint": "^1.79.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^7.0.2",
     "vite": "^8.2.1",

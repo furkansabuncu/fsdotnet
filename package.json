@@ -1,0 +1,18 @@
+{
+  "name": "fsdev",
+  "private": true,
+  "description": "Monorepo task runner — the real projects live in web/ and api/",
+  "scripts": {
+    "dev": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
+    "test": "npm --prefix web test",
+    "test:coverage": "npm --prefix web run test:coverage",
+    "typecheck": "npm --prefix web run typecheck",
+    "install:web": "npm --prefix web install",
+    "api": "dotnet run --project api/src/Fsdev.Api",
+    "api:build": "dotnet build api",
+    "api:test": "dotnet test api",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run api:test",
+    "lint": "npm --prefix web run lint"
+  }
+}

@@ -21,6 +21,9 @@ artifacts/
 .env
 .env.*
 !.env.example
+# Yalnızca localhost adresi içeriyor, sır yok: depoyu klonlayan biri
+# ek ayar yapmadan `npm run dev` + `npm run api` ile .NET motorunu görebilsin.
+!.env.development
 *.pfx
 
 # ---- Editor / OS ----

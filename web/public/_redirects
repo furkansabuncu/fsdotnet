@@ -1,0 +1,5 @@
+# İstemci tarafı yönlendirme: /t/base64 bir dosya değil, React route'u.
+# Bu kural olmadan statik barındırma o adrese doğrudan gidildiğinde ya da
+# sayfa yenilendiğinde 404 döner. 200 (rewrite) kullanılıyor, 301 değil —
+# adres çubuğu değişmemeli.
+/*    /index.html   200

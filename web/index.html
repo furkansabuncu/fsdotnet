@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fsbox — Developer toolbox for the .NET ecosystem</title>
+    <title>fsdev — Developer toolbox for the .NET ecosystem</title>
     <meta
       name="description"
       content="Fast, private developer tools for .NET and web developers. Everything runs in your browser unless a real compiler is required."
@@ -11,16 +11,30 @@
     <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!-- Share card metadata. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="fsdev" />
+    <meta property="og:title" content="fsdev — Developer toolbox for the .NET ecosystem" />
+    <meta
+      property="og:description"
+      content="Oracle error lookup, IN (…) chunking past ORA-01795, bind substitution, encoding forensics. Everything runs in your browser."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="fsdev — Developer toolbox for the .NET ecosystem" />
+    <meta
+      name="twitter:description"
+      content="Oracle error lookup, IN (…) chunking past ORA-01795, bind substitution, encoding forensics. Everything runs in your browser."
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
-    <!-- Temayı React yüklenmeden önce uygula. Bu script olmadan koyu tema
-         seçili kullanıcıda ilk boyama beyaz gelir ve göz alıcı bir sıçrama
-         olur (FOUC). useTheme.ts ile aynı anahtarı okur. -->
+    <!-- Apply the stored theme before React mounts, so a dark-mode user
+         never sees a white first paint. Reads the same key as useTheme.ts. -->
     <script>
       (function () {
         try {
-          var stored = localStorage.getItem('fsbox.theme');
+          var stored = localStorage.getItem('fsdev.theme');
           var dark =
             stored === 'dark' ||
             (stored !== 'light' && !window.matchMedia('(prefers-color-scheme: light)').matches);

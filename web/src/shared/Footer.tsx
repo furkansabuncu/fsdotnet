@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { useI18n } from '../i18n/I18nProvider';
 import { CATEGORY_ORDER, categoryVars } from '../tools/categories';
 
-const REPO = 'https://github.com/furkansabuncu/fsbox';
+const REPO = 'https://github.com/furkansabuncu/fsdev';
 
 /**
  * Footer'da yalnızca ilk dört kategori listelenir — dördü de ana sayfadaki
@@ -39,7 +39,7 @@ export default function Footer() {
           {/* Marka — mobilde iki kolonu birden kaplar, yoksa açıklama
               yarım kolonda kelime kelime kırılıyor. */}
           <div className="col-span-2 md:col-span-1">
-            <span className="font-mono text-base font-bold text-fg">fsbox</span>
+            <span className="font-mono text-base font-bold text-fg">fsdev</span>
             <p className="mt-2 max-w-[36ch] text-[13px] leading-5 text-muted">{t.footer.blurb}</p>
           </div>
 

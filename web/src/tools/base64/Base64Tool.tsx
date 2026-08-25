@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import ConverterShell from '../../shared/ConverterShell';
+import SegmentedControl from '../../shared/SegmentedControl';
 import { useI18n } from '../../i18n/I18nProvider';
 import { decodeBase64, encodeBase64 } from './base64';
 
 type Mode = 'encode' | 'decode';
-
-const MODES: readonly Mode[] = ['encode', 'decode'];
 
 export default function Base64Tool() {
   const { t } = useI18n();
@@ -27,27 +26,15 @@ export default function Base64Tool() {
       placeholder={encoding ? t.base64.placeholderEncode : t.base64.placeholderDecode}
       toolbar={
         <>
-          <div
-            role="group"
-            aria-label={t.base64.directionAria}
-            className="inline-flex rounded-md border border-border-subtle bg-surface-2 p-0.5"
-          >
-            {MODES.map((value) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setMode(value)}
-                aria-pressed={mode === value}
-                /* Aktif segment kategori rengini alır; --cat renkleri parlak
-                   olduğu için üstüne sayfa zemini rengi okunaklı düşüyor. */
-                className={`rounded px-2.5 py-1 text-xs font-medium capitalize transition-colors ${
-                  mode === value ? 'bg-cat text-bg' : 'text-muted hover:text-fg'
-                }`}
-              >
-                {value === 'encode' ? t.base64.encode : t.base64.decode}
-              </button>
-            ))}
-          </div>
+          <SegmentedControl
+            ariaLabel={t.base64.directionAria}
+            value={mode}
+            onChange={setMode}
+            options={[
+              { value: 'encode', label: t.base64.encode },
+              { value: 'decode', label: t.base64.decode },
+            ]}
+          />
 
           {encoding ? (
             <label className="flex cursor-pointer items-center gap-2 text-xs text-muted">

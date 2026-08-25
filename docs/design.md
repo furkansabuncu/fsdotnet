@@ -1,6 +1,6 @@
 # Design system
 
-fsbox is a tool you keep open, not a page you visit. Everything below follows from that:
+fsdev is a tool you keep open, not a page you visit. Everything below follows from that:
 density over decoration, keyboard over mouse, and colour used to *classify* rather than to
 sell.
 
@@ -99,7 +99,7 @@ for the same reason.
 | Icon | 16px (18px in cards) |
 
 Cards are ~76px, not it-tools' 167px. The difference is entirely the two-line clamped paragraph
-that site puts in every card; fsbox descriptions are written to fit one line, so the whole
+that site puts in every card; fsdev descriptions are written to fit one line, so the whole
 catalogue fits on one screen.
 
 ## Behaviour
