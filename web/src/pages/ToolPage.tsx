@@ -5,6 +5,8 @@ import { useI18n, useLocalePath } from '../i18n/I18nProvider';
 import { categoryVars } from '../tools/categories';
 import { getTool } from '../tools/registry';
 import Seo from '../shared/Seo';
+import ToolGuide, { type ToolGuideContent } from '../shared/ToolGuide';
+import type { ToolId } from '../tools/types';
 import NotFoundPage from './NotFoundPage';
 
 /** Lazy chunk inerken panelin yüksekliğini koru — layout zıplamasın. */
@@ -26,6 +28,12 @@ export default function ToolPage() {
   if (!tool || tool.status !== 'ready') return <NotFoundPage />;
 
   const Icon = tool.icon;
+
+  /* Açıklama bölümü sekiz araçta var, hepsinde değil — genişletilmiş bir
+     kayıt yerine sözlükteki nesneyi genişleterek okuyoruz: `en.ts` şeklini
+     dar tutuyor ki `tr.ts` aynı sekiz anahtarı taşımak zorunda kalsın. */
+  const guides: Partial<Record<ToolId, ToolGuideContent>> = t.toolGuides;
+  const guide = guides[tool.id];
 
   return (
     <div style={categoryVars(tool.category)} className="flex flex-col gap-4 py-6">
@@ -67,6 +75,8 @@ export default function ToolPage() {
       <Suspense fallback={<ToolSkeleton />}>
         <tool.component />
       </Suspense>
+
+      {guide && <ToolGuide guide={guide} />}
     </div>
   );
 }

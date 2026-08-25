@@ -87,6 +87,166 @@ export const en = {
     'http-status': 'Codes, headers and .NET constants.',
   } satisfies Record<ToolId, string>,
 
+/**
+   * Aracın altındaki açıklama bölümü — arama sonucundan gelen ziyaretçi için.
+   *
+   * Sekiz araçta var, hepsinde değil: bunlar katalogda başka yerde karşılığı
+   * olmayanlar, yani metnin gerçekten bir şey anlattığı yerler. Genel bir
+   * dönüştürücüye "Base64 nedir" yazmak kimseye bir şey katmaz.
+   */
+  toolGuides: {
+    mojibake: {
+      heading: 'Why Turkish text turns into Ã¼ and ÅŸ',
+      body: [
+        'Mojibake is what you get when text encoded in UTF-8 is read back as if it were something else — usually Windows-1252 or Windows-1254. UTF-8 stores "ü" as two bytes, 0xC3 0xBC. Read one byte at a time as Windows-1252, those two bytes are the characters Ã and ¼, so a single letter becomes a pair. Every Turkish character with a diacritic breaks the same way: ç becomes Ã§, ş becomes ÅŸ, ğ becomes ÄŸ.',
+        'The damage almost always happens at a boundary: a database column declared with the wrong character set, an HTTP response missing charset=utf-8, an Excel export, or a legacy client that predates UTF-8. Because the bytes are still there — just reinterpreted — the text can usually be recovered exactly, by encoding it back to bytes with the wrong code page and decoding those bytes as UTF-8.',
+        'This tool does that, and it handles the harder second case too: text that was mangled twice, where the correct character survived with an orphan lead byte glued to it (Tüürkçe rather than TÃ¼rkÃ§e). It repairs the input in place and reports how many passes were needed, so you can tell a single corruption from a repeated one.',
+      ],
+      faq: [
+        {
+          q: 'Is any information lost?',
+          a: 'Usually not. The bytes are intact and only misread, so the repair is exact. Information is lost only when the wrong code page had no character for a byte and replaced it with a question mark or U+FFFD — at that point the original is gone and no tool can recover it.',
+        },
+        {
+          q: 'How do I stop it happening again?',
+          a: 'Fix the boundary, not the data. Declare charset=utf-8 on responses, use NVARCHAR2 or an AL32UTF8 database character set on Oracle, and set the client encoding explicitly rather than relying on the operating system default — which on a Turkish Windows install is Windows-1254, not UTF-8.',
+        },
+      ],
+    },
+
+    'ora-errors': {
+      heading: 'ORA codes, and what actually causes them',
+      body: [
+        'Oracle error messages name the symptom, not the cause. ORA-01722 says "invalid number", which is true and unhelpful: the real question is which column, and why a string reached it. This list pairs each code with the situation that produces it in practice, so you can start from the likely cause instead of the message.',
+        'It searches on the code, the message text and the cause, so a half-remembered fragment is enough — type "table or view" and you get ORA-00942, type 1795 and you get the expression limit. Codes are grouped by area (data, object, constraint, resource) because errors that look unrelated often come from the same place.',
+      ],
+      faq: [
+        {
+          q: 'Why do I get ORA-01722 on a column that only holds numbers?',
+          a: 'Almost always an implicit conversion: comparing a VARCHAR2 column to a number literal makes Oracle convert every row, and one row is not numeric. Compare against a string, or fix the column type.',
+        },
+        {
+          q: 'What is the difference between ORA-00942 and ORA-01031?',
+          a: 'Oracle reports "table or view does not exist" for objects you cannot see, whether or not they exist — hiding existence from unprivileged users. ORA-01031 means you can see the object but lack the specific privilege for the operation.',
+        },
+      ],
+    },
+
+    'in-list': {
+      heading: 'ORA-01795: the 1000-expression limit on IN lists',
+      body: [
+        'Oracle allows at most 1000 expressions in a literal IN list. Paste 1200 ids from a spreadsheet and the query fails with ORA-01795 — not slowly, not partially, but immediately at parse time. The limit applies only to literal lists; IN (SELECT …) against a table or a collection has no such ceiling.',
+        'When you cannot use a subquery — a one-off investigation, a support ticket, ids that exist only in an email — the fix is to split the list and OR the parts together. This tool does the split, deduplicates, drops the trailing blank line every spreadsheet paste ends with, and quotes each value only when it needs quoting.',
+        'That last part matters more than it looks. A code like 007 is not the number 7: leave it unquoted and Oracle drops the leading zeros, the comparison silently fails, and the row you were looking for is simply absent from the result. Values that look numeric but start with a zero stay quoted.',
+      ],
+      faq: [
+        {
+          q: 'Is splitting the list slower than one IN?',
+          a: 'Slightly, but the alternative is a query that does not run at all. If the list is large and recurring, load the ids into a global temporary table and join instead — that scales past any list length and lets the optimiser see a cardinality.',
+        },
+        {
+          q: 'Does SQL Server have the same limit?',
+          a: 'No fixed limit of 1000, but very long IN lists hurt there too: each one produces a distinct query plan, filling the plan cache. Chunking is still worth doing above a few thousand values.',
+        },
+      ],
+    },
+
+    'bind-params': {
+      heading: 'Turning a logged query and its bind values into something runnable',
+      body: [
+        'Application logs give you the query with :placeholders on one line and the parameter values on another. To reproduce the problem in a SQL client you have to put them back together by hand, which is tedious and easy to get wrong on the sixth parameter. This tool does the substitution and formats each value for the target dialect.',
+        'It only recognises real bind variables. A colon inside a string literal or a comment is not a bind, and neither is the :mi in a format mask — TO_CHAR(tarih, \'HH24:MI\') contains no parameter, though a naive parser sees one. Oracle itself makes the opposite mistake and raises ORA-01745 when a genuine bind is named like a reserved word.',
+        'The output is for debugging only. Keep the binds in production code: substituting values into SQL text is how injection happens, and it also throws away the shared cursor, so every call reparses.',
+      ],
+      faq: [
+        {
+          q: 'How are dates handled?',
+          a: 'A date-only value becomes DATE \'2026-08-24\' and a value with a time becomes TO_DATE with an explicit format mask, so the result does not depend on the session NLS_DATE_FORMAT.',
+        },
+        {
+          q: 'What is ORA-01745?',
+          a: '"Invalid host/bind variable name". Usually a bind named after a reserved word, or a colon that Oracle read as a bind when you meant a literal — the :mi case above is the classic one.',
+        },
+      ],
+    },
+
+    case: {
+      heading: 'Turkish casing, and why "file".ToUpper() can return FİLE',
+      body: [
+        'Turkish has two i letters. Dotless ı uppercases to I, and dotted i uppercases to İ. A culture-aware uppercase under tr-TR therefore turns "file" into "FİLE" and "HASTA_ID" into "hasta_ıd" on the way back down. That is correct for Turkish prose and wrong for everything else.',
+        'It becomes a bug the moment an identifier passes through it: a column name, a file extension, an HTTP header, a culture code. In .NET, ToUpper() and ToLower() use the current culture by default, so the same code produces different results depending on the machine it runs on — which is why the failure usually appears in production and not on the developer laptop.',
+        'This converter shows both results side by side. Anything that is an identifier wants invariant casing; only text shown to a human wants the Turkish rules.',
+      ],
+      faq: [
+        {
+          q: 'What should I use in C#?',
+          a: 'ToUpperInvariant() and ToLowerInvariant() for identifiers, and string.Equals(a, b, StringComparison.OrdinalIgnoreCase) for comparisons. Reach for the culture-aware overloads only when the result is displayed to a person.',
+        },
+        {
+          q: 'Does JavaScript have the same problem?',
+          a: 'Not by default: toUpperCase() is locale-independent, so it never produces İ. Only toLocaleUpperCase(\'tr\') does — which means the bug is opt-in in the browser and opt-out in .NET.',
+        },
+      ],
+    },
+
+    rtf: {
+      heading: 'Extracting plain text from RTF without breaking Turkish',
+      body: [
+        'RTF does not store text as UTF-8. Non-ASCII characters are written as \\\'hh escapes — a single byte in whatever code page the document declares with \\ansicpg. Strip the markup with a regular expression and you keep those bytes but lose the code page, so Turkish characters decode against the wrong table and "Tanı" comes out as "Taný".',
+        'This converter reads the declared code page and decodes the byte runs against it, which is why Turkish survives. It also accumulates consecutive escapes before decoding, so a multi-byte character in a legacy code page is not split into two wrong ones.',
+        'Where the document declares no code page at all, the tool says so and states which one it assumed, rather than guessing silently. You can override the choice if you know the source.',
+      ],
+      faq: [
+        {
+          q: 'Which code page do Turkish RTF files use?',
+          a: 'Usually cp1254 (Windows Turkish). Files produced by older Delphi or Office versions on a Turkish Windows install often declare it; some declare cp1252 by mistake, which is exactly the case where overriding helps.',
+        },
+        {
+          q: 'Does it keep formatting?',
+          a: 'No — the output is plain text by design. Bold, tables and colours are dropped; line breaks and paragraph boundaries are preserved.',
+        },
+      ],
+    },
+
+    unicode: {
+      heading: 'Finding the character you cannot see',
+      body: [
+        'Two strings that look identical on screen can be different bytes, and the difference is invisible: a non-breaking space instead of a space, a zero-width joiner left behind by a copy from Word, a right-to-left override, or the same accented letter written as one code point in one string and two in the other. Comparisons fail, keys do not match, and nothing in the text looks wrong.',
+        'This inspector lists every code point with its category and flags the ones that matter: invisible characters, bidirectional overrides — which can make the displayed order differ from the real order — and text that is not in NFC form. Combining marks are the quiet one: "ğ" can be a single code point or "g" plus a combining breve, and only one of those equals what is in your database.',
+        'It can also normalise to NFC or strip the invisible characters, replacing space-class ones with a plain space rather than deleting them, so word boundaries survive.',
+      ],
+      faq: [
+        {
+          q: 'Why does my string comparison fail when the text looks the same?',
+          a: 'Most often NFC versus NFD. Text copied from macOS is frequently decomposed; text from Windows is usually composed. Normalise both sides before comparing, and store one form consistently.',
+        },
+        {
+          q: 'Are bidirectional overrides dangerous?',
+          a: 'They can be. In source code they let the displayed order of a line differ from the order the compiler reads — the Trojan Source class of attack. Seeing them flagged in a code review is the point.',
+        },
+      ],
+    },
+
+    'tr-data': {
+      heading: 'Turkish test data that passes real validation',
+      body: [
+        'Test data made of random digits fails the first validator it meets. A Turkish national identity number has two check digits computed from the first nine, and an IBAN carries a MOD-97-10 checksum over the whole rearranged string. Any generator that ignores those produces values your own form rejects.',
+        'Every TCKN and IBAN this tool emits passes its real checksum, so you can paste them into a form, a seed script or a test fixture and get past validation. They are still fictional — the algorithm being correct does not make the number belong to anyone.',
+        'Output comes as a table, JSON or CSV, so the same records can go into a fixture file, a request body or a spreadsheet without reformatting.',
+      ],
+      faq: [
+        {
+          q: 'How is the TCKN check digit calculated?',
+          a: 'The tenth digit comes from the odd-position digits times seven minus the even-position digits, modulo ten; the eleventh is the sum of the first ten, modulo ten. Both are computed here, so the results validate.',
+        },
+        {
+          q: 'Could a generated number belong to a real person?',
+          a: 'A checksum-valid number is only structurally valid — it says nothing about whether it was ever issued. Treat the output as test data and never as a real identity.',
+        },
+      ],
+    },
+  },
+
   nav: {
     aria: 'Tool navigation',
     home: 'Home',

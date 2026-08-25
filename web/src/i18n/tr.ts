@@ -75,6 +75,159 @@ export const tr: Dictionary = {
     'http-status': "Kodlar, header'lar ve .NET sabitleri.",
   },
 
+toolGuides: {
+    mojibake: {
+      heading: 'Türkçe karakterler neden Ã¼ ve ÅŸ oluyor?',
+      body: [
+        'Mojibake, UTF-8 ile kodlanmış bir metnin başka bir kodlamaymış gibi — genellikle Windows-1252 ya da Windows-1254 — okunmasıyla ortaya çıkar. UTF-8, "ü" harfini iki bayt olarak saklar: 0xC3 0xBC. Bu iki bayt teker teker Windows-1252 sanılarak okununca Ã ve ¼ karakterlerine dönüşür, yani tek bir harf ikiye çıkar. Şapkalı ya da noktalı her Türkçe harf aynı şekilde bozulur: ç → Ã§, ş → ÅŸ, ğ → ÄŸ.',
+        'Bozulma neredeyse her zaman bir sınırda olur: karakter kümesi yanlış tanımlanmış bir veritabanı kolonu, charset=utf-8 taşımayan bir HTTP cevabı, Excel dışa aktarımı ya da UTF-8 öncesinden kalma bir istemci. Baytlar hâlâ orada durduğu — sadece yanlış yorumlandığı — için metin genellikle birebir geri getirilebilir: yanlış kod sayfasıyla tekrar bayta çevirip o baytları UTF-8 olarak çözmek yeterli.',
+        'Bu araç bunu yapıyor ve zor olan ikinci durumu da kaldırıyor: iki kez bozulmuş, doğru karakterin yanına artık bir öncü baytın yapıştığı metinler (TÃ¼rkÃ§e yerine Tüürkçe gibi). Girdiyi yerinde onarıyor ve kaç tur gerektiğini bildiriyor, böylece tek katlı bozulmayla tekrarlananı ayırt edebiliyorsunuz.',
+      ],
+      faq: [
+        {
+          q: 'Bilgi kaybı oluyor mu?',
+          a: 'Genellikle hayır. Baytlar bozulmadan duruyor, sadece yanlış okunuyor; onarım birebir. Kayıp yalnızca yanlış kod sayfasında o bayta karşılık gelen bir karakter olmadığında ve yerine soru işareti ya da U+FFFD konduğunda olur — o noktada orijinal gitmiştir, hiçbir araç geri getiremez.',
+        },
+        {
+          q: 'Tekrar olmasını nasıl engellerim?',
+          a: 'Veriyi değil sınırı düzeltin. Cevaplarda charset=utf-8 bildirin, Oracle tarafında NVARCHAR2 ya da AL32UTF8 veritabanı karakter kümesi kullanın, ve istemci kodlamasını işletim sistemi varsayılanına bırakmayın — Türkçe bir Windows kurulumunda o varsayılan UTF-8 değil, Windows-1254.',
+        },
+      ],
+    },
+
+    'ora-errors': {
+      heading: 'ORA kodları ve arkalarındaki gerçek sebepler',
+      body: [
+        'Oracle hata mesajları belirtiyi söyler, sebebi değil. ORA-01722 "geçersiz sayı" der; doğrudur ama işe yaramaz, çünkü asıl soru hangi kolon olduğu ve oraya neden bir metin geldiğidir. Bu liste her kodu sahada onu üreten duruma bağlıyor, böylece mesajdan değil olası sebepten başlayabiliyorsunuz.',
+        'Arama kodda, mesajda ve sebepte birden çalışıyor; yarım hatırlanan bir parça yetiyor: "table or view" yazın ORA-00942 gelsin, 1795 yazın ifade sınırı gelsin. Kodlar alana göre gruplanmış (veri, nesne, kısıt, kaynak), çünkü birbiriyle ilgisiz görünen hatalar çoğu zaman aynı yerden çıkıyor.',
+      ],
+      faq: [
+        {
+          q: 'Yalnızca sayı tutan bir kolonda neden ORA-01722 alıyorum?',
+          a: 'Neredeyse her zaman örtük dönüşüm: VARCHAR2 bir kolonu sayı sabitiyle karşılaştırmak Oracle\'ı her satırı çevirmeye zorlar ve satırlardan biri sayısal değildir. Metinle karşılaştırın ya da kolon tipini düzeltin.',
+        },
+        {
+          q: 'ORA-00942 ile ORA-01031 arasındaki fark ne?',
+          a: 'Oracle göremediğiniz nesneler için — var olsun ya da olmasın — "tablo veya görünüm mevcut değil" der; yetkisiz kullanıcıdan varlığı gizler. ORA-01031 ise nesneyi gördüğünüz ama o işlem için gereken yetkiye sahip olmadığınız anlamına gelir.',
+        },
+      ],
+    },
+
+    'in-list': {
+      heading: 'ORA-01795: IN listesindeki 1000 ifade sınırı',
+      body: [
+        'Oracle bir literal IN listesinde en fazla 1000 ifadeye izin verir. Bir tablodan 1200 kimlik yapıştırdığınızda sorgu ORA-01795 ile başarısız olur — yavaşlayarak ya da kısmen değil, doğrudan ayrıştırma anında. Sınır yalnızca literal listelere aittir; bir tabloya ya da koleksiyona karşı yazılan IN (SELECT …) böyle bir tavan taşımaz.',
+        'Alt sorgu kullanamadığınız durumlarda — tek seferlik bir inceleme, bir destek kaydı, yalnızca bir e-postada duran kimlikler — çözüm listeyi bölüp parçaları OR ile birleştirmektir. Bu araç bölmeyi yapıyor, tekrarları atıyor, her tablo yapıştırmasının sonunda kalan boş satırı temizliyor ve her değeri yalnızca gerekiyorsa tırnaklıyor.',
+        'Son madde göründüğünden önemli. 007 gibi bir kod, 7 sayısı değildir: tırnaksız bırakırsanız Oracle baştaki sıfırları düşürür, karşılaştırma sessizce tutmaz ve aradığınız satır sonuçta hiç görünmez. Sayı gibi görünen ama sıfırla başlayan değerler tırnaklı kalıyor.',
+      ],
+      faq: [
+        {
+          q: 'Listeyi bölmek tek IN\'den yavaş mı?',
+          a: 'Biraz, ama alternatif hiç çalışmayan bir sorgu. Liste büyük ve tekrar eden bir işse kimlikleri geçici bir tabloya yükleyip join yapın — bu her uzunlukta ölçeklenir ve optimize ediciye gerçek bir kardinalite verir.',
+        },
+        {
+          q: 'SQL Server\'da da aynı sınır var mı?',
+          a: 'Sabit bir 1000 sınırı yok, ama çok uzun IN listeleri orada da zarar veriyor: her biri ayrı bir sorgu planı üretip plan önbelleğini dolduruyor. Birkaç bin değerin üstünde parçalamak yine mantıklı.',
+        },
+      ],
+    },
+
+    'bind-params': {
+      heading: 'Loglanmış sorguyu ve bind değerlerini çalışabilir hâle getirmek',
+      body: [
+        'Uygulama logları sorguyu :yer tutucularla bir satırda, parametre değerlerini başka bir satırda verir. Sorunu bir SQL istemcisinde yeniden üretmek için ikisini elle birleştirmek gerekir; bu hem sıkıcıdır hem de altıncı parametrede hata yapmak kolaydır. Bu araç yerleştirmeyi yapıyor ve her değeri hedef lehçeye göre biçimlendiriyor.',
+        'Yalnızca gerçek bind değişkenlerini tanıyor. Bir dize sabitinin ya da yorumun içindeki iki nokta bind değildir; biçim maskesindeki :mi de öyle — TO_CHAR(tarih, \'HH24:MI\') hiçbir parametre içermez ama saf bir ayrıştırıcı orada bir tane görür. Oracle\'ın kendisi ters yönde aynı hatayı yapar ve ayrılmış bir sözcük gibi adlandırılmış gerçek bir bind gördüğünde ORA-01745 verir.',
+        'Çıktı yalnızca hata ayıklama içindir. Üretim kodunda bind\'leri bırakın: değerleri SQL metnine gömmek enjeksiyonun tam olarak nasıl olduğudur, ayrıca paylaşılan imleci de çöpe atar ve her çağrı yeniden ayrıştırılır.',
+      ],
+      faq: [
+        {
+          q: 'Tarihler nasıl ele alınıyor?',
+          a: 'Yalnızca tarih içeren bir değer DATE \'2026-08-24\' olur; saat de içeriyorsa açık biçim maskesiyle TO_DATE üretilir. Böylece sonuç oturumun NLS_DATE_FORMAT ayarına bağlı kalmaz.',
+        },
+        {
+          q: 'ORA-01745 ne demek?',
+          a: '"Geçersiz ana bilgisayar/bind değişkeni adı". Genelde ayrılmış bir sözcükle adlandırılmış bir bind, ya da sabit sanırken Oracle\'ın bind okuduğu bir iki nokta — yukarıdaki :mi durumu klasik örneği.',
+        },
+      ],
+    },
+
+    case: {
+      heading: 'Türkçe kasa dönüşümü ve "file".ToUpper() neden FİLE döndürür',
+      body: [
+        'Türkçede iki tane i harfi var. Noktasız ı büyük harfte I olur, noktalı i ise İ. Dolayısıyla tr-TR kültürüne duyarlı bir büyük harf dönüşümü "file" kelimesini "FİLE", geri dönerken de "HASTA_ID" kelimesini "hasta_ıd" yapar. Bu Türkçe düz metin için doğru, geri kalan her şey için yanlıştır.',
+        'Bir tanımlayıcı bu dönüşümden geçtiği anda hataya dönüşüyor: kolon adı, dosya uzantısı, HTTP başlığı, kültür kodu. .NET\'te ToUpper() ve ToLower() varsayılan olarak geçerli kültürü kullanır, yani aynı kod çalıştığı makineye göre farklı sonuç üretir — hatanın genellikle geliştirici bilgisayarında değil üretimde ortaya çıkmasının sebebi de bu.',
+        'Bu dönüştürücü iki sonucu yan yana gösteriyor. Tanımlayıcı olan her şey invariant kasa ister; yalnızca insana gösterilen metin Türkçe kurallarını ister.',
+      ],
+      faq: [
+        {
+          q: 'C#\'ta hangisini kullanmalıyım?',
+          a: 'Tanımlayıcılar için ToUpperInvariant() ve ToLowerInvariant(), karşılaştırmalar için string.Equals(a, b, StringComparison.OrdinalIgnoreCase). Kültüre duyarlı aşırı yüklemelere yalnızca sonuç bir insana gösteriliyorsa uzanın.',
+        },
+        {
+          q: 'JavaScript\'te de aynı sorun var mı?',
+          a: 'Varsayılan olarak yok: toUpperCase() yerel ayardan bağımsızdır, hiçbir zaman İ üretmez. Yalnızca toLocaleUpperCase(\'tr\') üretir — yani hata tarayıcıda isteğe bağlı, .NET\'te ise varsayılan.',
+        },
+      ],
+    },
+
+    rtf: {
+      heading: 'RTF\'ten düz metin çıkarırken Türkçeyi bozmamak',
+      body: [
+        'RTF metni UTF-8 olarak saklamaz. ASCII dışı karakterler \\\'hh kaçışlarıyla yazılır — belgenin \\ansicpg ile bildirdiği kod sayfasında tek bir bayt. Etiketleri bir düzenli ifadeyle ayıklarsanız o baytlar elinizde kalır ama kod sayfası kaybolur; Türkçe karakterler yanlış tabloya göre çözülür ve "Tanı" kelimesi "Taný" olarak çıkar.',
+        'Bu dönüştürücü bildirilen kod sayfasını okuyup bayt dizilerini ona göre çözüyor, Türkçenin bozulmamasının sebebi bu. Ardışık kaçışları çözmeden önce biriktiriyor da, böylece eski bir kod sayfasındaki çok baytlı bir karakter iki yanlış karaktere bölünmüyor.',
+        'Belge hiç kod sayfası bildirmiyorsa araç bunu söylüyor ve hangisini varsaydığını yazıyor, sessizce tahmin etmiyor. Kaynağı biliyorsanız seçimi elle değiştirebiliyorsunuz.',
+      ],
+      faq: [
+        {
+          q: 'Türkçe RTF dosyaları hangi kod sayfasını kullanır?',
+          a: 'Genellikle cp1254 (Windows Türkçe). Türkçe bir Windows kurulumunda eski Delphi ya da Office sürümleriyle üretilen dosyalar çoğunlukla bunu bildirir; bazıları yanlışlıkla cp1252 bildirir ki elle değiştirmenin işe yaradığı durum tam olarak budur.',
+        },
+        {
+          q: 'Biçimlendirme korunuyor mu?',
+          a: 'Hayır — çıktı tasarım gereği düz metin. Kalın, tablo ve renkler düşüyor; satır sonları ve paragraf sınırları korunuyor.',
+        },
+      ],
+    },
+
+    unicode: {
+      heading: 'Göremediğiniz karakteri bulmak',
+      body: [
+        'Ekranda birebir aynı görünen iki metin farklı baytlar olabilir ve fark görünmez: boşluk yerine kırılmasız boşluk, Word\'den kopyalarken gelen sıfır genişlikli birleştirici, sağdan sola geçersiz kılma, ya da aynı şapkalı harfin bir metinde tek kod noktası diğerinde iki kod noktası olarak yazılmış olması. Karşılaştırmalar tutmuyor, anahtarlar eşleşmiyor ve metinde gözle görülür hiçbir sorun yok.',
+        'Bu inceleyici her kod noktasını kategorisiyle listeliyor ve önemli olanları işaretliyor: görünmez karakterler, iki yönlü geçersiz kılmalar — görüntülenen sırayı gerçek sıradan ayırabilirler — ve NFC biçiminde olmayan metin. Birleşen işaretler sessiz olanı: "ğ" tek bir kod noktası da olabilir, "g" artı birleşen kısa çizgi de; veritabanınızdakine eşit olan bunlardan yalnızca biri.',
+        'Ayrıca NFC\'ye normalleştirebiliyor ya da görünmez karakterleri ayıklayabiliyor; boşluk sınıfındakileri silmek yerine düz boşluğa çeviriyor, böylece kelime sınırları korunuyor.',
+      ],
+      faq: [
+        {
+          q: 'Metin aynı görünürken karşılaştırma neden tutmuyor?',
+          a: 'Çoğunlukla NFC\'ye karşı NFD. macOS\'tan kopyalanan metin sıklıkla ayrışık, Windows\'tan gelen genellikle birleşik olur. Karşılaştırmadan önce iki tarafı da normalleştirin ve tek bir biçimi tutarlı biçimde saklayın.',
+        },
+        {
+          q: 'İki yönlü geçersiz kılmalar tehlikeli mi?',
+          a: 'Olabilir. Kaynak kodda bir satırın görünen sırasının derleyicinin okuduğu sıradan farklı olmasına izin verirler — Trojan Source diye bilinen saldırı sınıfı. Bunları bir kod incelemesinde işaretlenmiş görmek de zaten amaç.',
+        },
+      ],
+    },
+
+    'tr-data': {
+      heading: 'Gerçek doğrulamadan geçen Türkçe test verisi',
+      body: [
+        'Rastgele rakamlardan oluşan test verisi karşılaştığı ilk doğrulayıcıda takılır. T.C. kimlik numarasının ilk dokuz hanesinden hesaplanan iki kontrol hanesi vardır; IBAN ise yeniden düzenlenmiş dizenin tamamı üzerinde MOD-97-10 sağlaması taşır. Bunları yok sayan bir üreteç, kendi formunuzun reddettiği değerler üretir.',
+        'Bu aracın ürettiği her TCKN ve IBAN kendi gerçek sağlamasından geçiyor, yani bir forma, bir seed betiğine ya da bir test verisine yapıştırıp doğrulamayı aşabiliyorsunuz. Yine de kurgusallar — algoritmanın doğru olması numaranın birine ait olduğu anlamına gelmiyor.',
+        'Çıktı tablo, JSON ya da CSV olarak alınabiliyor; aynı kayıtlar yeniden biçimlendirmeye gerek kalmadan bir fixture dosyasına, bir istek gövdesine ya da bir tabloya gidebiliyor.',
+      ],
+      faq: [
+        {
+          q: 'TCKN kontrol hanesi nasıl hesaplanıyor?',
+          a: 'Onuncu hane, tek konumdaki hanelerin yedi katından çift konumdakilerin çıkarılıp ona bölümünden kalan; on birinci hane ise ilk on hanenin toplamının ona bölümünden kalan. İkisi de burada hesaplanıyor, bu yüzden sonuçlar doğrulamadan geçiyor.',
+        },
+        {
+          q: 'Üretilen bir numara gerçek bir kişiye ait olabilir mi?',
+          a: 'Sağlaması geçerli bir numara yalnızca yapısal olarak geçerlidir — hiç verilip verilmediği hakkında bir şey söylemez. Çıktıyı test verisi sayın, asla gerçek bir kimlik olarak kullanmayın.',
+        },
+      ],
+    },
+  },
+
   nav: {
     aria: 'Araç gezinmesi',
     home: 'Ana sayfa',
