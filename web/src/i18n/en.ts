@@ -12,7 +12,20 @@ import type { ToolCategory, ToolErrorKey, ToolId } from '../tools/types';
  */
 export const en = {
   htmlLang: 'en',
-  title: 'fsdev — Developer toolbox for the .NET ecosystem',
+
+  /**
+   * Search-result copy. Kept apart from the interface strings because the
+   * audience is different: these are read in a result list by someone who has
+   * not seen the site yet, so they name the problem rather than the feature.
+   */
+  seo: {
+    homeTitle: 'Developer tools for the .NET ecosystem',
+    homeDescription:
+      'Oracle error lookup, IN (…) lists chunked past ORA-01795, bind substitution, mojibake repair, .NET regex. Free, no account, and everything runs in your browser.',
+    /** Card blurbs are short by design; the meta description gets the promise. */
+    toolDescription: (blurb: string) =>
+      `${blurb} Free and instant — it runs in your browser, so nothing is uploaded.`,
+  },
 
   header: {
     searchAria: 'Search tools',
@@ -114,12 +127,14 @@ export const en = {
   toolPage: {
     backAria: 'Back to all tools',
     backLink: 'Back to all tools',
-    notFound: 'Tool not found',
-    notFoundBody: 'That URL does not match any tool in the catalogue.',
     viaApi: 'via API',
     runsLocally: 'runs locally',
-    notBuilt: 'Not built yet',
-    browseReady: 'Browse the tools that are ready',
+  },
+
+  notFound: {
+    title: 'Page not found',
+    body: 'That address does not match any tool or page here.',
+    back: 'Back to all tools',
   },
 
   demo: {

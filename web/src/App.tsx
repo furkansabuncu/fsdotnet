@@ -1,33 +1,28 @@
 import { Route, Routes } from 'react-router';
-import CommandPalette from './shared/CommandPalette';
-import Footer from './shared/Footer';
-import Header from './shared/Header';
-import Sidebar from './shared/Sidebar';
+import LocaleLayout, { LocaleRedirect } from './pages/LocaleLayout';
 import HomePage from './pages/HomePage';
+import NotFoundPage from './pages/NotFoundPage';
 import ToolPage from './pages/ToolPage';
 
+/**
+ * Her sayfanın adresi diliyle birlikte: `/tr/t/base64`, `/en/t/base64`.
+ *
+ * Dilsiz adresler kaybolmuyor — `/` ve eski `/t/...` bağlantıları tarayıcı
+ * tercihine göre dilli karşılığına yönlendiriliyor. Site bir süre dilsiz
+ * adreslerle yayında olduğu için bu yönlendirme kalıcı; kaldırmak paylaşılmış
+ * bağlantıları kırar.
+ */
 export default function App() {
   return (
-    /* aurora: index.css'teki sabit konumlu renk lekesi katmanı. */
-    <div className="aurora flex min-h-full flex-col">
-      <Header />
+    <Routes>
+      <Route path="/" element={<LocaleRedirect />} />
+      <Route path="/t/:toolId" element={<LocaleRedirect />} />
 
-      <div className="mx-auto flex w-full max-w-[1400px] flex-1 gap-6 px-4">
-        <Sidebar />
-
-        {/* min-w-0: olmadan flex öğesi içeriğinin altına inemez ve geniş
-            ızgara/kod blokları sayfayı yatay kaydırtır. */}
-        <main className="min-w-0 flex-1">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/t/:toolId" element={<ToolPage />} />
-            <Route path="*" element={<ToolPage />} />
-          </Routes>
-        </main>
-      </div>
-
-      <Footer />
-      <CommandPalette />
-    </div>
+      <Route path="/:locale" element={<LocaleLayout />}>
+        <Route index element={<HomePage />} />
+        <Route path="t/:toolId" element={<ToolPage />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Route>
+    </Routes>
   );
 }

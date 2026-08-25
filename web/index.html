@@ -3,29 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fsdev — Developer toolbox for the .NET ecosystem</title>
-    <meta
-      name="description"
-      content="Fast, private developer tools for .NET and web developers. Everything runs in your browser unless a real compiler is required."
-    />
+
+    <!--
+      Page metadata lives in src/shared/Seo.tsx, not here.
+
+      React 19 hoists <title>, <meta> and <link> rendered inside components
+      into the head. Declaring them here as well would produce two of each,
+      and browsers keep the first — every route would then advertise the same
+      title and description, which is the problem this file used to have.
+    -->
+
     <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
-    <!-- Share card metadata. -->
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="fsdev" />
-    <meta property="og:title" content="fsdev — Developer toolbox for the .NET ecosystem" />
-    <meta
-      property="og:description"
-      content="Oracle error lookup, IN (…) chunking past ORA-01795, bind substitution, encoding forensics. Everything runs in your browser."
-    />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="fsdev — Developer toolbox for the .NET ecosystem" />
-    <meta
-      name="twitter:description"
-      content="Oracle error lookup, IN (…) chunking past ORA-01795, bind substitution, encoding forensics. Everything runs in your browser."
-    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 

@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router';
 import { Home } from 'lucide-react';
-import { useI18n } from '../i18n/I18nProvider';
+import { useI18n, useLocalePath } from '../i18n/I18nProvider';
 import { CATEGORIES, categoryVars } from '../tools/categories';
 import { toolsByCategory } from '../tools/registry';
 
@@ -15,6 +15,7 @@ import { toolsByCategory } from '../tools/registry';
  */
 export default function Sidebar() {
   const { t } = useI18n();
+  const path = useLocalePath();
   const { pathname } = useLocation();
 
   const groups = toolsByCategory();
@@ -30,7 +31,7 @@ export default function Sidebar() {
       className="sticky top-12 hidden h-[calc(100vh-3rem)] w-56 shrink-0 overflow-y-auto border-r border-border-subtle py-6 pr-4 lg:block"
     >
       <Link
-        to="/"
+        to={path('/')}
         aria-current={onHome ? 'page' : undefined}
         className={`mb-4 flex h-8 items-center gap-2 rounded-md px-2 text-sm transition-colors ${
           onHome ? 'bg-surface-2 font-medium text-fg' : 'text-muted hover:bg-surface-2 hover:text-fg'
@@ -49,7 +50,7 @@ export default function Sidebar() {
               {/* Kategori başlığı ana sayfadaki bölüme atlar; ızgarayı da
                   gezinme hedefi olarak kullanabilmek için /#<id>. */}
               <Link
-                to={`/#${category}`}
+                to={path(`/#${category}`)}
                 className="group flex h-7 items-center gap-2 rounded px-2 text-[11px] font-medium tracking-wider text-subtle uppercase transition-colors hover:text-fg"
               >
                 <Icon size={12} className="text-cat" aria-hidden="true" />
@@ -78,7 +79,7 @@ export default function Sidebar() {
                   return (
                     <li key={tool.id}>
                       <Link
-                        to={`/t/${tool.id}`}
+                        to={path(`/t/${tool.id}`)}
                         aria-current={active ? 'page' : undefined}
                         className={`relative flex h-7 items-center gap-2 rounded px-2 pl-6 text-[13px] transition-colors ${
                           active

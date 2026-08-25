@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router';
 import { ArrowRight } from 'lucide-react';
-import { useI18n } from '../i18n/I18nProvider';
+import { useI18n, useLocalePath } from '../i18n/I18nProvider';
 import { categoryVars } from '../tools/categories';
 import { ok, type ToolCategory, type ToolResult } from '../tools/types';
 import { decodeBase64, encodeBase64 } from '../tools/base64/base64';
@@ -63,6 +63,7 @@ const prefersReducedMotion = () =>
 
 export default function HeroDemo() {
   const { t } = useI18n();
+  const path = useLocalePath();
   const [scriptIndex, setScriptIndex] = useState(0);
   const [typed, setTyped] = useState('');
   const [paused, setPaused] = useState(false);
@@ -118,7 +119,7 @@ export default function HeroDemo() {
         </span>
         <span className="font-mono text-[11px] text-subtle">{script.label}</span>
         <Link
-          to={`/t/${script.toolId}`}
+          to={path(`/t/${script.toolId}`)}
           className="ml-auto flex items-center gap-1 font-mono text-[11px] text-subtle transition-colors hover:text-cat"
         >
           {t.demo.open}

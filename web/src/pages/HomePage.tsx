@@ -3,6 +3,7 @@ import { useI18n } from '../i18n/I18nProvider';
 import { CATEGORIES, categoryVars } from '../tools/categories';
 import { CLIENT_COUNT, TOTAL_COUNT, toolsByCategory } from '../tools/registry';
 import HeroDemo from '../shared/HeroDemo';
+import Seo from '../shared/Seo';
 import ToolCard from '../shared/ToolCard';
 
 
@@ -16,7 +17,7 @@ const staggerDelay = (index: number) => ({
 });
 
 export default function HomePage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
   const groups = toolsByCategory();
   let cardIndex = 0;
 
@@ -28,6 +29,8 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col gap-10 py-8">
+      <Seo title={t.seo.homeTitle} description={t.seo.homeDescription} path="/" locale={locale} />
+
       <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)]">
         <div className="flex flex-col gap-4">
           <h1 className="max-w-2xl text-[28px] leading-9 font-semibold tracking-tight text-fg">

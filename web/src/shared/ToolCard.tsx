@@ -1,6 +1,6 @@
 import type { MouseEvent } from 'react';
 import { Link } from 'react-router';
-import { useI18n } from '../i18n/I18nProvider';
+import { useI18n, useLocalePath } from '../i18n/I18nProvider';
 import { categoryVars } from '../tools/categories';
 import type { ToolDefinition } from '../tools/types';
 
@@ -30,6 +30,7 @@ function trackPointer(event: MouseEvent<HTMLElement>) {
  */
 export default function ToolCard({ tool }: { tool: ToolDefinition }) {
   const { t } = useI18n();
+  const path = useLocalePath();
   const Icon = tool.icon;
   const ready = tool.status === 'ready';
   const hasBadge = tool.runtime === 'server' || !ready;
@@ -103,7 +104,7 @@ export default function ToolCard({ tool }: { tool: ToolDefinition }) {
 
   return (
     <Link
-      to={`/t/${tool.id}`}
+      to={path(`/t/${tool.id}`)}
       style={categoryVars(tool.category)}
       className={rootClass}
       onMouseMove={trackPointer}

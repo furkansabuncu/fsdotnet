@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Search } from 'lucide-react';
 import type { ToolDefinition } from '../tools/types';
-import { useI18n } from '../i18n/I18nProvider';
+import { useI18n, useLocalePath } from '../i18n/I18nProvider';
 import { categoryVars } from '../tools/categories';
 import { searchTools, toolsByCategory } from '../tools/registry';
 import { commandPalette, useCommandPaletteOpen } from './useCommandPalette';
@@ -42,6 +42,7 @@ export default function CommandPalette() {
 
 function PaletteDialog() {
   const { t } = useI18n();
+  const path = useLocalePath();
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -90,7 +91,7 @@ function PaletteDialog() {
   function openTool(tool: ToolDefinition) {
     if (tool.status === 'soon') return;
     commandPalette.close();
-    navigate(`/t/${tool.id}`);
+    navigate(path(`/t/${tool.id}`));
   }
 
   function onKeyDown(event: React.KeyboardEvent<HTMLDivElement>) {

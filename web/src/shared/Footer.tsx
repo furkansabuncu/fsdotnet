@@ -1,6 +1,6 @@
 import { ArrowUpRight } from 'lucide-react';
 import { Link } from 'react-router';
-import { useI18n } from '../i18n/I18nProvider';
+import { useI18n, useLocalePath } from '../i18n/I18nProvider';
 import { CATEGORY_ORDER, categoryVars } from '../tools/categories';
 
 const REPO = 'https://github.com/furkansabuncu/fsdev';
@@ -25,6 +25,7 @@ function ColumnTitle({ children }: { children: string }) {
  */
 export default function Footer() {
   const { t } = useI18n();
+  const path = useLocalePath();
 
   const projectLinks = [
     { label: t.footer.repo, href: REPO },
@@ -49,7 +50,7 @@ export default function Footer() {
               {FOOTER_CATEGORIES.map((category) => (
                 <li key={category}>
                   <Link
-                    to={`/#${category}`}
+                    to={path(`/#${category}`)}
                     className="text-[13px] text-muted transition-colors hover:text-fg"
                   >
                     {t.categories[category].label}

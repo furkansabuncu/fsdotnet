@@ -1,22 +1,11 @@
 import { Suspense } from 'react';
 import { Link, useParams } from 'react-router';
-import { ArrowLeft, Construction } from 'lucide-react';
-import { useI18n } from '../i18n/I18nProvider';
+import { ArrowLeft } from 'lucide-react';
+import { useI18n, useLocalePath } from '../i18n/I18nProvider';
 import { categoryVars } from '../tools/categories';
 import { getTool } from '../tools/registry';
-
-function NotFound() {
-  const { t } = useI18n();
-  return (
-    <div className="flex flex-col items-start gap-3 py-16">
-      <h1 className="text-xl font-semibold text-fg">{t.toolPage.notFound}</h1>
-      <p className="text-sm text-muted">{t.toolPage.notFoundBody}</p>
-      <Link to="/" className="text-sm text-accent hover:underline">
-        {t.toolPage.backLink}
-      </Link>
-    </div>
-  );
-}
+import Seo from '../shared/Seo';
+import NotFoundPage from './NotFoundPage';
 
 /** Lazy chunk inerken panelin yüksekliğini koru — layout zıplamasın. */
 function ToolSkeleton() {
@@ -26,21 +15,35 @@ function ToolSkeleton() {
 }
 
 export default function ToolPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const path = useLocalePath();
   const { toolId } = useParams();
   const tool = getTool(toolId);
 
-  if (!tool) return <NotFound />;
+  /* Katalogda yazılmamış araç kalmadı, ama tip birleşimi hâlâ `soon`
+     durumunu taşıyor — bir sonraki araç eklenirken sahnelenecek yer orası.
+     Böyle bir araç route'lanırsa component'i yok, o yüzden daraltma şart. */
+  if (!tool || tool.status !== 'ready') return <NotFoundPage />;
 
   const Icon = tool.icon;
 
   return (
     <div style={categoryVars(tool.category)} className="flex flex-col gap-4 py-6">
+      {/* Araç ADI çevrilmiyor (teknik terim), açıklama çevriliyor. Başlığa
+          kategori de giriyor: "Base64" tek başına arama sonucunda hangi siteye
+          ait olduğunu söylemiyor. */}
+      <Seo
+        title={tool.name}
+        description={t.seo.toolDescription(t.toolDescriptions[tool.id])}
+        path={`/t/${tool.id}`}
+        locale={locale}
+      />
+
       {/* 44px başlık şeridi: ortalanmış dev başlık yok — araç adı, rozetler ve
           geri dönüş tek satırda. */}
       <header className="flex h-11 items-center gap-3">
         <Link
-          to="/"
+          to={path('/')}
           aria-label={t.toolPage.backAria}
           className="flex size-8 shrink-0 items-center justify-center rounded-md text-subtle transition-colors hover:bg-surface-2 hover:text-fg"
         >
@@ -61,20 +64,9 @@ export default function ToolPage() {
         </span>
       </header>
 
-      {tool.status === 'soon' ? (
-        <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed border-border-strong bg-surface p-8">
-          <Construction size={20} className="text-cat" aria-hidden="true" />
-          <h2 className="text-sm font-medium text-fg">{t.toolPage.notBuilt}</h2>
-          <p className="max-w-md text-sm text-muted">{t.toolDescriptions[tool.id]}</p>
-          <Link to="/" className="text-sm text-accent hover:underline">
-            {t.toolPage.browseReady}
-          </Link>
-        </div>
-      ) : (
-        <Suspense fallback={<ToolSkeleton />}>
-          <tool.component />
-        </Suspense>
-      )}
+      <Suspense fallback={<ToolSkeleton />}>
+        <tool.component />
+      </Suspense>
     </div>
   );
 }

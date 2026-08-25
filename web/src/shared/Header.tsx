@@ -2,7 +2,8 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { Moon, Search, Sun } from 'lucide-react';
 import { categoryVars } from '../tools/categories';
-import { LOCALES, useI18n } from '../i18n/I18nProvider';
+import { useI18n, useLocalePath } from '../i18n/I18nProvider';
+import { LOCALES } from '../i18n/locale';
 import { commandPalette } from './useCommandPalette';
 import { useTheme } from './useTheme';
 
@@ -57,13 +58,14 @@ function GithubMark() {
  */
 export default function Header() {
   const { t, locale, setLocale } = useI18n();
+  const path = useLocalePath();
   const { theme, toggle } = useTheme();
   const isDark = theme === 'dark';
 
   return (
     <header className="sticky top-0 z-40 border-b border-border-subtle bg-bg/80 backdrop-blur-md">
       <div className="mx-auto flex h-12 max-w-[1400px] items-center gap-3 px-4">
-        <Link to="/" className="shrink-0 font-mono text-base leading-6 font-bold tracking-tight">
+        <Link to={path('/')} className="shrink-0 font-mono text-base leading-6 font-bold tracking-tight">
           {/* categoryVars --cat tanımlar; gradyan onu from-cat ile okur. */}
           <span style={categoryVars('dotnet')}>
             <span className="text-fg">fs</span>

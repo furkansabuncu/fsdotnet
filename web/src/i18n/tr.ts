@@ -12,7 +12,14 @@ import type { Dictionary } from './en';
  */
 export const tr: Dictionary = {
   htmlLang: 'tr',
-  title: 'fsdev — .NET ekosistemi için geliştirici araç kutusu',
+
+  seo: {
+    homeTitle: '.NET ekosistemi için geliştirici araçları',
+    homeDescription:
+      'Oracle hata kodları, ORA-01795 sınırını aşan IN (…) listeleri, bind değeri yerleştirme, bozuk Türkçe karakter onarımı, .NET regex. Ücretsiz, üyeliksiz ve tamamı tarayıcınızda çalışıyor.',
+    toolDescription: (blurb: string) =>
+      `${blurb} Ücretsiz ve anında — tarayıcınızda çalışır, hiçbir veri sunucuya gitmez.`,
+  },
 
   header: {
     searchAria: 'Araç ara',
@@ -106,12 +113,14 @@ export const tr: Dictionary = {
   toolPage: {
     backAria: 'Tüm araçlara dön',
     backLink: 'Tüm araçlara dön',
-    notFound: 'Araç bulunamadı',
-    notFoundBody: 'Bu adres katalogdaki hiçbir araca karşılık gelmiyor.',
     viaApi: "API üzerinden",
     runsLocally: 'yerelde çalışır',
-    notBuilt: 'Henüz yazılmadı',
-    browseReady: 'Hazır olan araçlara göz atın',
+  },
+
+  notFound: {
+    title: 'Sayfa bulunamadı',
+    body: 'Bu adres burada bir araca ya da sayfaya karşılık gelmiyor.',
+    back: 'Tüm araçlara dön',
   },
 
   demo: {
