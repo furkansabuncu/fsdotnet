@@ -170,13 +170,6 @@
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://fsdev.pages.dev/en/t/color</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fsdev.pages.dev/en/t/color" />
-    <xhtml:link rel="alternate" hreflang="tr" href="https://fsdev.pages.dev/tr/t/color" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fsdev.pages.dev/en/t/color" />
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://fsdev.pages.dev/tr</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://fsdev.pages.dev/en" />
     <xhtml:link rel="alternate" hreflang="tr" href="https://fsdev.pages.dev/tr" />
@@ -342,13 +335,6 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://fsdev.pages.dev/en/t/http-status" />
     <xhtml:link rel="alternate" hreflang="tr" href="https://fsdev.pages.dev/tr/t/http-status" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://fsdev.pages.dev/en/t/http-status" />
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://fsdev.pages.dev/tr/t/color</loc>
-    <xhtml:link rel="alternate" hreflang="en" href="https://fsdev.pages.dev/en/t/color" />
-    <xhtml:link rel="alternate" hreflang="tr" href="https://fsdev.pages.dev/tr/t/color" />
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://fsdev.pages.dev/en/t/color" />
     <priority>0.8</priority>
   </url>
 </urlset>

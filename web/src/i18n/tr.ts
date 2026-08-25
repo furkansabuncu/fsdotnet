@@ -47,7 +47,6 @@ export const tr: Dictionary = {
     formatters: { label: 'Biçimlendiriciler', blurb: 'Okunmaz girdiyi yeniden okunur hâle getirin.' },
     security: { label: 'Güvenlik ve Token', blurb: 'Buradaki hiçbir şey tarayıcınızdan çıkmaz.' },
     testing: { label: 'Test ve Zaman', blurb: 'Desenler, zamanlamalar ve zaman damgaları.' },
-    web: { label: 'Web ve Tasarım', blurb: 'Arayüz geliştirirken her gün bakılanlar.' },
   },
 
   toolDescriptions: {
@@ -74,7 +73,6 @@ export const tr: Dictionary = {
     regex: 'Gerçek .NET motoru, JavaScript ile yan yana.',
     cron: 'Unix ve Quartz, sonraki çalışmalarla.',
     'http-status': "Kodlar, header'lar ve .NET sabitleri.",
-    color: 'HEX, RGB, HSL, OKLCH ve WCAG kontrast.',
   },
 
   nav: {
@@ -540,8 +538,6 @@ export const tr: Dictionary = {
     jwtShape: 'Bir JWT tam olarak nokta ile ayrılmış üç parçadan oluşur.',
     jwtSegment: 'Bir parça geçerli base64url ya da geçerli UTF-8 değil.',
     jwtJson: 'Parça çözüldü ama geçerli JSON değil.',
-    colorEmpty: 'Bir renk girin.',
-    colorInvalid: 'Bu aracın okuyabileceği bir renk değil — #0080ff ya da rgb(0 128 255) deneyin.',
     csvEmpty: 'Dönüştürmek için CSV yapıştırın.',
     csvNoRows: 'Yalnızca başlık satırı var — dönüştürülecek veri yok.',
     inListEmpty: 'En az bir değer yapıştırın.',

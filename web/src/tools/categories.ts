@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { Braces, Clock, Palette, Shield, Sparkles, Wand2 } from 'lucide-react';
+import { Braces, Clock, Shield, Sparkles, Wand2 } from 'lucide-react';
 import type { ToolCategory } from './types';
 
 /**
@@ -22,7 +22,6 @@ export const CATEGORY_ORDER: ToolCategory[] = [
   'formatters',
   'security',
   'testing',
-  'web',
 ];
 
 export const CATEGORIES: Record<ToolCategory, CategoryMeta> = {
@@ -31,7 +30,6 @@ export const CATEGORIES: Record<ToolCategory, CategoryMeta> = {
   formatters: { icon: Braces, varName: 'formatters' },
   security: { icon: Shield, varName: 'security' },
   testing: { icon: Clock, varName: 'testing' },
-  web: { icon: Palette, varName: 'web' },
 };
 
 /** Kategori rengini component'e geçiren inline style nesnesi. */

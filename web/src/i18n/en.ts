@@ -55,7 +55,6 @@ export const en = {
     formatters: { label: 'Formatters', blurb: 'Make unreadable input readable again.' },
     security: { label: 'Security & Tokens', blurb: 'Nothing here ever leaves your browser.' },
     testing: { label: 'Testing & Time', blurb: 'Patterns, schedules and timestamps.' },
-    web: { label: 'Web & Design', blurb: 'Everyday lookups for building interfaces.' },
   } satisfies Record<ToolCategory, { label: string; blurb: string }>,
 
   /** Araç ADLARI çevrilmez — teknik terimler ("Base64", "JWT Decoder") her iki
@@ -86,7 +85,6 @@ export const en = {
     regex: 'The real .NET engine, next to JavaScript.',
     cron: 'Unix and Quartz, with the next runs.',
     'http-status': 'Codes, headers and .NET constants.',
-    color: 'HEX, RGB, HSL, OKLCH and WCAG contrast.',
   } satisfies Record<ToolId, string>,
 
   nav: {
@@ -554,8 +552,6 @@ export const en = {
     jwtShape: 'A JWT has exactly three dot-separated parts.',
     jwtSegment: 'A segment is not valid base64url, or not valid UTF-8.',
     jwtJson: 'A segment decoded, but it is not valid JSON.',
-    colorEmpty: 'Enter a color.',
-    colorInvalid: 'Not a color this tool can read — try #0080ff or rgb(0 128 255).',
     csvEmpty: 'Paste some CSV to convert.',
     csvNoRows: 'Only a header row — there is no data to convert.',
     inListEmpty: 'Paste at least one value.',

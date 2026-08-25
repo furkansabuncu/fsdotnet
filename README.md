@@ -52,7 +52,7 @@ compiler that only exists on .NET.
 
 | Runs entirely in your browser | Needs the API | Why the API |
 | --- | --- | --- |
-| 23 of the 24 tools | **Regex Tester** | `System.Text.RegularExpressions` genuinely cannot run in a browser |
+| 22 of the 23 tools | **Regex Tester** | `System.Text.RegularExpressions` genuinely cannot run in a browser |
 
 That table used to be longer. Three tools left it — SQL formatting, JSON → C# and SQL → LINQ. Two of
 them were justified by a T-SQL parser this project has no use for (the queries are Oracle); the third
@@ -78,7 +78,7 @@ when the API is cold or down — tools that need it are marked with an `API` bad
 
 ### 2. One tool, one folder — on both sides
 
-Twenty-four tools written as twenty-four hand-rolled pages is not an architecture. Every tool is a
+Twenty-three tools written as twenty-three hand-rolled pages is not an architecture. Every tool is a
 self-describing module that registers itself; **routing, search, the home grid and the command palette
 are all derived from one registry.**
 
@@ -154,7 +154,7 @@ happens on static hosting.
 
 ## Roadmap
 
-**Shipped — 24 tools, nothing left in a "soon" state.** The ones worth naming, because they do not
+**Shipped — 23 tools, nothing left in a "soon" state.** The ones worth naming, because they do not
 exist elsewhere:
 
 | | |
@@ -173,7 +173,7 @@ exist elsewhere:
 | **Hash & HMAC** | SHA from WebCrypto; CRC32 and MD5 hand-written because WebCrypto refuses MD5, verified against the RFC 1321 and RFC 2202 vectors |
 
 The rest are the everyday set: Base64, Case Converter, CSV → JSON/SQL, XML ⇄ JSON, SQL Formatter,
-JSON/XML/HTML/CSS formatter, SQL → LINQ, Epoch, JWT, UUID, HTTP status, Colour & WCAG.
+JSON/XML/HTML/CSS formatter, SQL → LINQ, Epoch, JWT, UUID and HTTP status.
 
 **Next** — nothing is half-built. The next additions would be Oracle-specific rather than generic:
 DDL → EF Core entity, and a DFM inspector for the Delphi side.

@@ -5,7 +5,6 @@ import base64 from './base64';
 import bindParams from './bind-params';
 import caseConvert from './case';
 import codeFormat from './code-format';
-import color from './color';
 import cron from './cron';
 import csvJson from './csv-json';
 import epoch from './epoch';
@@ -52,7 +51,7 @@ const TOOL_LIST: readonly ToolDefinition[] = [
   // Test ve zaman
   regex, cron, epoch, trData,
   // Web
-  httpStatus, color,
+  httpStatus,
 ];
 
 export const TOOLS: readonly ToolDefinition[] = TOOL_LIST;

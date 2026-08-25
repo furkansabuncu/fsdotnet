@@ -6,8 +6,7 @@ export type ToolCategory =
   | 'converters'
   | 'formatters'
   | 'security'
-  | 'testing'
-  | 'web';
+  | 'testing';
 
 /**
  * Katalogdaki her aracın kimliği.
@@ -47,7 +46,6 @@ export const TOOL_IDS = [
   'regex',
   'cron',
   'http-status',
-  'color',
 ] as const;
 
 export type ToolId = (typeof TOOL_IDS)[number];
@@ -111,8 +109,6 @@ export type ToolErrorKey =
   | 'jwtShape'
   | 'jwtSegment'
   | 'jwtJson'
-  | 'colorEmpty'
-  | 'colorInvalid'
   | 'csvEmpty'
   | 'csvNoRows'
   | 'inListEmpty'

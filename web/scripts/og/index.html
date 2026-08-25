@@ -52,7 +52,9 @@
         muted: '#a1a1aa',
         dotnet: '#b18cff',
         accent: '#4d9fff',
-        categories: ['#b18cff', '#4d9fff', '#59d499', '#ffc533', '#ff8ac5', '#4fd1c5'],
+        // src/tools/categories.ts ile aynı sıra: dotnet, converters,
+        // formatters, security, testing.
+        categories: ['#b18cff', '#4d9fff', '#59d499', '#ffc533', '#ff8ac5'],
       };
 
       function roundRect(ctx, x, y, w, h, r) {
@@ -75,7 +77,7 @@
             'Oracle errors · IN (…) past ORA-01795 · bind values · mojibake',
             'repair · .NET regex — free, and it all runs in your browser.',
           ],
-          chip: '24 tools · no account · no upload',
+          chip: '23 tools · no account · no upload',
         },
         tr: {
           headline: '.NET ekosistemi için geliştirici araçları',
@@ -83,7 +85,7 @@
             'Oracle hataları · ORA-01795 sınırını aşan IN (…) · bind değerleri',
             'bozuk Türkçe onarımı · .NET regex — ücretsiz, tarayıcınızda çalışır.',
           ],
-          chip: '24 araç · üyelik yok · yükleme yok',
+          chip: '23 araç · üyelik yok · yükleme yok',
         },
       };
 
@@ -144,7 +146,7 @@
         ctx.fillText(copy.lines[0], PAD, 352);
         ctx.fillText(copy.lines[1], PAD, 392);
 
-        // Category swatches: six dots, one per section of the catalogue.
+        // Category swatches: one dot per section of the catalogue.
         let dotX = PAD;
         for (const colour of COLORS.categories) {
           ctx.beginPath();

@@ -9,7 +9,7 @@ const httpStatus: ToolDefinition = {
     '404', '500', '422', 'rfc', 'aspnetcore', 'statuscodes', 'reference', 'teapot',
     'durum kodu', 'hata kodu', 'sabit', 'referans',
   ],
-  category: 'web',
+  category: 'dotnet',
   runtime: 'client',
   icon: Globe,
   status: 'ready',

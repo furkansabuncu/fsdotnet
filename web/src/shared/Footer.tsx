@@ -81,7 +81,7 @@ export default function Footer() {
 
           {/* Kategori rengini kolona veriyoruz; içerideki noktalar bg-cat ile
               onu okur, ayrı bir renk sınıfı seçmeye gerek kalmaz. */}
-          <div style={categoryVars('web')}>
+          <div style={categoryVars('dotnet')}>
             <ColumnTitle>{t.footer.builtWith}</ColumnTitle>
             <ul className="space-y-2">
               {BUILT_WITH.map((item) => (
