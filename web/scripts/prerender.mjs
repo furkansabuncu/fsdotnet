@@ -64,9 +64,8 @@ for (const route of routes) {
     .replace('</head>', `  ${head}\n  </head>`);
 
   /* Cloudflare Pages ve Netlify `/en/t/base64` isteğini
-     `/en/t/base64/index.html` dosyasına eşliyor. `_redirects` kuralı yalnızca
-     gerçek dosya bulunamayınca çalıştığı için bu dosyalar SPA yeniden
-     yazımının önüne geçiyor — istenen de bu. */
+     `/en/t/base64/index.html` dosyasına eşliyor, yani her rota gerçek bir
+     dosya — hiçbir yeniden yazma kuralına ihtiyaç duymuyor. */
   const dir = join(dist, route);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, 'index.html'), html);
@@ -93,7 +92,29 @@ writeFileSync(
     .replace('</head>', `  ${root.head}\n  </head>`),
 );
 
+/*
+ * Bulunamayan adresler.
+ *
+ * Eskiden bu iş `_redirects` içindeki `/*  /index.html  200` kuralına aitti.
+ * Cloudflare artık o kuralı SONSUZ DÖNGÜ sayıp yok sayıyor — derleme
+ * günlüğünde "Parsed 0 valid redirect rules" satırı tam olarak buydu, yani
+ * kural aylarca orada durup hiçbir şey yapmayabilirdi.
+ *
+ * `404.html` hem Cloudflare Pages'te hem Netlify'da desteklenen yol ve
+ * aslında daha doğrusu: ön-render sonrası GERÇEK sayfaların hepsi birer
+ * dosya, dolayısıyla 200 dönüyorlar. Geriye kalan yalnızca gerçekten var
+ * olmayan adresler ve onların 404 dönmesi gerekiyor — yeniden yazma kuralı
+ * onlara da 200 verirdi, ki bu arama motoruna yalan söylemek olurdu.
+ */
+const notFound = hoistHeadTags(render(localePath('en', '/__not-found__')));
+writeFileSync(
+  join(dist, '404.html'),
+  template
+    .replace('<div id="root"></div>', `<div id="root">${notFound.body}</div>`)
+    .replace('</head>', `  ${notFound.head}\n  </head>`),
+);
+
 // SSR paketi yalnızca bu adım için vardı; yayınlanacak çıktıya girmiyor.
 rmSync(ssrDir, { recursive: true, force: true });
 
-console.log(`ön-render: ${written} sayfa + kök`);
+console.log(`ön-render: ${written} sayfa + kök + 404`);
