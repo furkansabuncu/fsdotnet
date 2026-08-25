@@ -14,7 +14,7 @@ describe('detectLanguage', () => {
     ['{"a":1}', 'json'],
     ['[1,2]', 'json'],
     ['<?xml version="1.0"?><a/>', 'xml'],
-    ['<istem><t/></istem>', 'xml'],
+    ['<siparis><t/></siparis>', 'xml'],
     ['<!doctype html><html></html>', 'html'],
     ['<div class="x">y</div>', 'html'],
     ['a { color: red; }', 'css'],
@@ -56,21 +56,21 @@ describe('JSON', () => {
 
 describe('XML', () => {
   it('girintiler ve bildirimi korur', () => {
-    const out = run('<?xml version="1.0"?><istem><t>x</t></istem>').text;
+    const out = run('<?xml version="1.0"?><siparis><t>x</t></siparis>').text;
     expect(out.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
     expect(out).toContain('  <t>x</t>');
   });
 
   it('bildirim yoksa eklemez', () => {
-    expect(run('<istem><t>x</t></istem>').text.startsWith('<istem>')).toBe(true);
+    expect(run('<siparis><t>x</t></siparis>').text.startsWith('<siparis>')).toBe(true);
   });
 
   it('küçültür', () => {
-    expect(run('<istem>\n  <t>x</t>\n</istem>', { mode: 'minify' }).text).toBe('<istem><t>x</t></istem>');
+    expect(run('<siparis>\n  <t>x</t>\n</siparis>', { mode: 'minify' }).text).toBe('<siparis><t>x</t></siparis>');
   });
 
   it('küçültmede boş elemanı kendinden kapanan yapar', () => {
-    expect(run('<istem><t></t></istem>', { mode: 'minify' }).text).toBe('<istem><t/></istem>');
+    expect(run('<siparis><t></t></siparis>', { mode: 'minify' }).text).toBe('<siparis><t/></siparis>');
   });
 
   /* Sezgi belirsiz etiketlerde HTML'den yana: `<a>` bir bağlantı etiketi

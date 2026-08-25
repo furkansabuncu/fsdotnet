@@ -14,7 +14,7 @@ import { LOCALES, absoluteUrl, type Locale } from '../i18n/locale';
  * ilkini alırdı, yani her sayfa aynı açıklamayı gösterirdi.
  */
 
-const SITE_NAME = 'fsdev';
+const SITE_NAME = 'fsdotnet';
 
 /**
  * Mutlak adresler canonical, hreflang ve og:url için şart — göreli adres
@@ -23,7 +23,7 @@ const SITE_NAME = 'fsdev';
  */
 export const SITE_URL =
   (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/+$/, '') ??
-  'https://fsdev.pages.dev';
+  'https://fsdotnet.pages.dev';
 
 interface SeoProps {
   /** Site adı eklenmemiş hâli — "Base64" gibi. */

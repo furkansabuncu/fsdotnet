@@ -7,7 +7,7 @@
       "command": "npm run dev",
       "options": { "cwd": "${workspaceFolder}/web" },
       "isBackground": true,
-      "presentation": { "group": "fsdev", "panel": "dedicated" },
+      "presentation": { "group": "fsdotnet", "panel": "dedicated" },
       // Vite'ın yerleşik bir problemMatcher'ı yok; "ready in" satırı görülünce
       // görev başlamış sayılır, yoksa launch.json sonsuza kadar bekler.
       "problemMatcher": {

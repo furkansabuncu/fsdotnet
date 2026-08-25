@@ -8,7 +8,7 @@ export interface GenerateOptions {
   /** Kök tipin adı. Boşsa 'Root'. */
   rootName: string;
   /**
-   * `hasta_id` → `HastaId` + `[JsonPropertyName("hasta_id")]`.
+   * `kitap_id` → `KitapId` + `[JsonPropertyName("kitap_id")]`.
    * Kapalıyken JSON anahtarı olduğu gibi property adı olur.
    */
   pascalCase: boolean;
@@ -138,7 +138,7 @@ function merge(a: Node, b: Node): Node {
 /* ------------------------------------------------------------- adlandırma */
 
 /**
- * `hasta_id` → `HastaId`, `XMLHttpRequest` → `XMLHttpRequest`.
+ * `kitap_id` → `KitapId`, `XMLHttpRequest` → `XMLHttpRequest`.
  *
  * JS'in `toUpperCase()`'i yerel ayardan BAĞIMSIZDIR (`toLocaleUpperCase('tr')`
  * değil) — yani Türkçe bir tarayıcıda bile `id` → `Id`, `İd` değil. Bu araç
@@ -176,7 +176,7 @@ function safeIdentifier(name: string): string {
   return CSHARP_KEYWORDS.has(cleaned) ? `@${cleaned}` : cleaned;
 }
 
-/** Tekil ad: `hastalar` → `Hastalar` kalır ama `Items` → `Item` olur. */
+/** Tekil ad: `kitaplar` → `Kitaplar` kalır ama `Items` → `Item` olur. */
 function singularize(name: string): string {
   if (/ies$/i.test(name)) return `${name.slice(0, -3)}y`;
   if (/(s|x|z|ch|sh)es$/i.test(name)) return name.slice(0, -2);
@@ -372,7 +372,7 @@ function generateTypescript(root: Node, options: GenerateOptions): string {
 
   const rootName = options.rootName || 'Root';
 
-  /* Kök bir diziyse İKİ ada ihtiyaç var: takma ad (`HastaListesi`) ve eleman
+  /* Kök bir diziyse İKİ ada ihtiyaç var: takma ad (`KitapListesi`) ve eleman
      arayüzü. `singularize` bir şey değiştirmiyorsa ikisi çakışırdı — o yüzden
      takma ad önce rezerve edilir, elemana `…Item` verilir. */
   if (root.shape.kind === 'array') {

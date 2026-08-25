@@ -5,23 +5,23 @@ import { formatSql } from '../sql-format/sqlFormat';
 import { MAX_LINES, diffLines, type DiffRow } from './diff';
 
 const SAMPLE_BEFORE = [
-  'create or replace view vw_rapor as',
-  'select r.rapor_id,',
-  '       r.hasta_id,',
-  '       r.rapor_tarihi',
-  '  from txhastarapor r',
-  ' where r.grup_id = 5029',
+  'create or replace view vw_siparis as',
+  'select s.siparis_id,',
+  '       s.kitap_id,',
+  '       s.siparis_tarihi',
+  '  from siparis s',
+  ' where s.kanal_id = 12',
 ].join('\n');
 
 const SAMPLE_AFTER = [
-  'create or replace view vw_rapor as',
-  'select r.rapor_id,',
-  '       r.hasta_id,',
-  '       r.rapor_tarihi,',
-  '       r.aciklama',
-  '  from txhastarapor r',
-  ' where r.grup_id = 6000',
-  '   and nvl(r.iptal, 0) = 0',
+  'create or replace view vw_siparis as',
+  'select s.siparis_id,',
+  '       s.kitap_id,',
+  '       s.siparis_tarihi,',
+  '       s.aciklama',
+  '  from siparis s',
+  ' where s.kanal_id = 20',
+  '   and nvl(s.iptal, 0) = 0',
 ].join('\n');
 
 const ROW_TONE: Record<DiffRow['op'], string> = {

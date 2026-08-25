@@ -24,8 +24,8 @@ interface EngineOutput {
 }
 
 const SAMPLE_PATTERN = String.raw`(?<kod>[A-Z]{3})-(?<yil>\d{4})/(?<sira>\d+)`;
-const SAMPLE_INPUT = `RAD-2026/91 kabul edildi
-PAT-2026/104 beklemede
+const SAMPLE_INPUT = `KTP-2026/91 kabul edildi
+DRG-2026/104 beklemede
 xx-2026/7 hatalı satır`;
 
 const FLAG_KEYS = ['ignoreCase', 'multiline', 'dotAll', 'unicode', 'cultureInvariant'] as const;

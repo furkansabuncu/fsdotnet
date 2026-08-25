@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Fsdev.Api\Fsdev.Api.csproj" />
+    <ProjectReference Include="..\..\src\Fsdotnet.Api\Fsdotnet.Api.csproj" />
   </ItemGroup>
 
 </Project>

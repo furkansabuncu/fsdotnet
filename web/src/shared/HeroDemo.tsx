@@ -33,7 +33,7 @@ const SCRIPTS: readonly DemoScript[] = [
     toolId: 'base64',
     label: 'base64 · url-safe',
     category: 'converters',
-    input: 'https://fsdev.dev/?q=a+b',
+    input: 'https://fsdotnet.dev/?q=a+b',
     run: (value) => encodeBase64(value, { urlSafe: true }),
   },
   {
@@ -47,9 +47,9 @@ const SCRIPTS: readonly DemoScript[] = [
     toolId: 'base64',
     label: 'base64 · decode',
     category: 'converters',
-    // "fsdev -- .NET toolbox" — kodlanmış hâlde olduğu için ad değişince
+    // "fsdotnet -- .NET toolbox" — kodlanmış hâlde olduğu için ad değişince
     // bunun da yeniden hesaplanması gerekiyor.
-    input: 'ZnNkZXYgLS0gLk5FVCB0b29sYm94',
+    input: 'ZnNkb3RuZXQgLS0gLk5FVCB0b29sYm94',
     run: decodeBase64,
   },
 ];

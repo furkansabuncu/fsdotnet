@@ -7,10 +7,11 @@ import { DIALECTS, formatSql, minifySql, type KeywordCase, type SqlDialect } fro
 
 /** Oracle tarzı, gerçek bir sorguya benzeyen örnek — boş kutu bırakma ilkesi. */
 const SAMPLE =
-  "select h.hasta_id, h.ad || ' ' || h.soyad as adsoyad, r.rapor_tarihi " +
-  'from txhastarapor r inner join hasta h on h.hasta_id = r.hasta_id ' +
-  'where r.grup_id = 5029 and r.ekleme_tarihi >= trunc(sysdate) - 7 ' +
-  'and nvl(r.iptal, 0) = 0 order by r.rapor_tarihi desc';
+  "select k.kitap_id, k.baslik || ' — ' || y.ad as etiket, s.siparis_tarihi " +
+  'from siparis s inner join kitap k on k.kitap_id = s.kitap_id ' +
+  'inner join yazar y on y.yazar_id = k.yazar_id ' +
+  'where s.kanal_id = 12 and s.ekleme_tarihi >= trunc(sysdate) - 7 ' +
+  'and nvl(s.iptal, 0) = 0 order by s.siparis_tarihi desc';
 
 type Mode = 'format' | 'minify';
 

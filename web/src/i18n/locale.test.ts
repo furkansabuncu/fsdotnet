@@ -98,12 +98,12 @@ describe('swapLocale', () => {
 
 describe('absoluteUrl', () => {
   it('mutlak adres kurar', () => {
-    expect(absoluteUrl('https://fsdev.dev', 'tr', '/t/base64')).toBe('https://fsdev.dev/tr/t/base64');
+    expect(absoluteUrl('https://fsdotnet.dev', 'tr', '/t/base64')).toBe('https://fsdotnet.dev/tr/t/base64');
   });
 
   it('tabandaki fazla bölü çizgisini kırpar', () => {
     // Yanlış taban canonical etiketini bozar, o yüzden normalleştiriliyor.
-    expect(absoluteUrl('https://fsdev.dev/', 'en')).toBe('https://fsdev.dev/en');
-    expect(absoluteUrl('https://fsdev.dev///', 'en')).toBe('https://fsdev.dev/en');
+    expect(absoluteUrl('https://fsdotnet.dev/', 'en')).toBe('https://fsdotnet.dev/en');
+    expect(absoluteUrl('https://fsdotnet.dev///', 'en')).toBe('https://fsdotnet.dev/en');
   });
 });

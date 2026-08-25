@@ -1,6 +1,6 @@
-using Fsdev.Api.Infrastructure;
+using Fsdotnet.Api.Infrastructure;
 
-namespace Fsdev.Api.Features.Health;
+namespace Fsdotnet.Api.Features.Health;
 
 public sealed record HealthResponse(string Status, string Version);
 

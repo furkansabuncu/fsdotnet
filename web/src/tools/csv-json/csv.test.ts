@@ -93,8 +93,8 @@ describe('csvToJson', () => {
 
 describe('csvToInsert', () => {
   it('INSERT üretir', () => {
-    expect(value(csvToInsert('ad,yas\nÖmer,34', options, 'hasta'))).toBe(
-      "INSERT INTO hasta (ad, yas) VALUES ('Ömer', 34);",
+    expect(value(csvToInsert('ad,yas\nÖmer,34', options, 'kitap'))).toBe(
+      "INSERT INTO kitap (ad, yas) VALUES ('Ömer', 34);",
     );
   });
 
@@ -109,8 +109,8 @@ describe('csvToInsert', () => {
     });
 
     it('enjeksiyon denemesi literal olarak kalır', () => {
-      const sql = value(csvToInsert("ad\n'); DROP TABLE hasta; --", options, 't'));
-      expect(sql).toBe("INSERT INTO t (ad) VALUES ('''); DROP TABLE hasta; --');");
+      const sql = value(csvToInsert("ad\n'); DROP TABLE kitap; --", options, 't'));
+      expect(sql).toBe("INSERT INTO t (ad) VALUES ('''); DROP TABLE kitap; --');");
     });
 
     it('boş hücre NULL olur, tırnaklı boş dize değil', () => {
@@ -124,8 +124,8 @@ describe('csvToInsert', () => {
 
   describe('tanımlayıcı tırnaklama', () => {
     it('güvenli adlar tırnaklanmaz — Oracle\'da tırnak kasa duyarlı yapar', () => {
-      expect(value(csvToInsert('hasta_id\n1', options, 'tx_rapor'))).toContain(
-        'INSERT INTO tx_rapor (hasta_id)',
+      expect(value(csvToInsert('kitap_id\n1', options, 'tx_rapor'))).toContain(
+        'INSERT INTO tx_rapor (kitap_id)',
       );
     });
 

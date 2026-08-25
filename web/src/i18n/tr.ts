@@ -26,7 +26,7 @@ export const tr: Dictionary = {
     searchPlaceholder: 'Araç ara...',
     toLightTheme: 'Açık temaya geç',
     toDarkTheme: 'Koyu temaya geç',
-    github: "fsdev'ın GitHub sayfası",
+    github: "fsdotnet'ın GitHub sayfası",
     languageAria: 'Dil',
   },
 
@@ -154,7 +154,7 @@ toolGuides: {
     case: {
       heading: 'Türkçe kasa dönüşümü ve "file".ToUpper() neden FİLE döndürür',
       body: [
-        'Türkçede iki tane i harfi var. Noktasız ı büyük harfte I olur, noktalı i ise İ. Dolayısıyla tr-TR kültürüne duyarlı bir büyük harf dönüşümü "file" kelimesini "FİLE", geri dönerken de "HASTA_ID" kelimesini "hasta_ıd" yapar. Bu Türkçe düz metin için doğru, geri kalan her şey için yanlıştır.',
+        'Türkçede iki tane i harfi var. Noktasız ı büyük harfte I olur, noktalı i ise İ. Dolayısıyla tr-TR kültürüne duyarlı bir büyük harf dönüşümü "file" kelimesini "FİLE", geri dönerken de "KITAP_ID" kelimesini "kitap_ıd" yapar. Bu Türkçe düz metin için doğru, geri kalan her şey için yanlıştır.',
         'Bir tanımlayıcı bu dönüşümden geçtiği anda hataya dönüşüyor: kolon adı, dosya uzantısı, HTTP başlığı, kültür kodu. .NET\'te ToUpper() ve ToLower() varsayılan olarak geçerli kültürü kullanır, yani aynı kod çalıştığı makineye göre farklı sonuç üretir — hatanın genellikle geliştirici bilgisayarında değil üretimde ortaya çıkmasının sebebi de bu.',
         'Bu dönüştürücü iki sonucu yan yana gösteriyor. Tanımlayıcı olan her şey invariant kasa ister; yalnızca insana gösterilen metin Türkçe kurallarını ister.',
       ],
@@ -276,7 +276,7 @@ toolGuides: {
 
   demo: {
     open: 'aç',
-    summary: 'fsdev araçlarının örnek girdiyi dönüştürdüğü döngüsel bir gösterim.',
+    summary: 'fsdotnet araçlarının örnek girdiyi dönüştürdüğü döngüsel bir gösterim.',
   },
 
   footer: {
@@ -455,7 +455,7 @@ toolGuides: {
 
   caseConvert: {
     input: 'Tanımlayıcılar',
-    placeholder: 'Her satıra bir tane: hasta_id, eklemeTarihi…',
+    placeholder: 'Her satıra bir tane: kitap_id, eklemeTarihi…',
     localeAria: 'Kasa yereli',
     invariant: 'invariant',
     turkish: 'tr-TR',
@@ -506,7 +506,7 @@ toolGuides: {
   bindParams: {
     input: "Bind'li sorgu",
     output: 'Çalıştırılabilir sorgu',
-    placeholder: 'select * from hasta where id = :id …',
+    placeholder: 'select * from kitap where id = :id …',
     styleAria: 'Bind biçimi',
     oracle: ':ad',
     sqlserver: '@ad',

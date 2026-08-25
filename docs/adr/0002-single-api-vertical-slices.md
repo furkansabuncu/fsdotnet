@@ -24,12 +24,12 @@ One ASP.NET Core Minimal API on **.NET 10**, organised by **vertical slice** —
 holding everything that tool needs:
 
 ```
-api/src/Fsdev.Api/Features/DotnetRegex/
+api/src/Fsdotnet.Api/Features/DotnetRegex/
 ├── DotnetRegexEndpoint.cs   ── thin: bind, validate, delegate. No logic.
 ├── DotnetRegexEngine.cs     ── all the logic, plain class, no HTTP types
 └── DotnetRegexModels.cs     ── request/response records
 
-api/tests/Fsdev.Api.Tests/Features/DotnetRegex/
+api/tests/Fsdotnet.Api.Tests/Features/DotnetRegex/
 └── DotnetRegexEngineTests.cs
 ```
 

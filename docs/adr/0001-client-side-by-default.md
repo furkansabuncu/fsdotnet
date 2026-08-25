@@ -4,7 +4,7 @@
 
 ## Context
 
-fsdev is a collection of developer utilities. The obvious architecture for a project with a .NET
+fsdotnet is a collection of developer utilities. The obvious architecture for a project with a .NET
 backend is to expose every tool as an API endpoint. Two things argue against that.
 
 First, most of these tools are **pure functions over a string**. Base64, UUID, epoch conversion,

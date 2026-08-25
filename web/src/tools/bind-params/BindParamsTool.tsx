@@ -7,19 +7,19 @@ import { ok } from '../types';
 import { extractBinds, substituteBinds, type BindStyle, type BindType, type BindValue } from './bindParams';
 
 const SAMPLE = [
-  'select r.rapor_id, r.rapor_tarihi, h.ad, h.soyad',
-  '  from txhastarapor r',
-  '  join hasta h on h.hasta_id = r.hasta_id',
-  ' where r.grup_id      = :grup_id',
-  "   and r.rapor_tarihi >= :bas_tarih",
-  '   and h.ad like :ad_filtre',
-  '   and nvl(r.iptal, 0) = 0',
+  'select s.siparis_id, s.siparis_tarihi, k.baslik',
+  '  from siparis s',
+  '  join kitap k on k.kitap_id = s.kitap_id',
+  ' where s.kanal_id       = :kanal_id',
+  "   and s.siparis_tarihi >= :bas_tarih",
+  '   and k.baslik like :baslik_filtre',
+  '   and nvl(s.iptal, 0) = 0',
 ].join('\n');
 
 const SAMPLE_VALUES: Record<string, BindValue> = {
-  grup_id: { type: 'auto', value: '5029' },
+  kanal_id: { type: 'auto', value: '12' },
   bas_tarih: { type: 'auto', value: '2026-08-01' },
-  ad_filtre: { type: 'auto', value: 'Ömer%' },
+  baslik_filtre: { type: 'auto', value: 'Sessiz%' },
 };
 
 export default function BindParamsTool() {

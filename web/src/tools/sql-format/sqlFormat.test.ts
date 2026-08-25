@@ -35,9 +35,9 @@ describe('formatSql', () => {
   });
 
   it('T-SQL sözdizimini tanır', () => {
-    const out = format('select top 10 [Ad] from [dbo].[Hasta]', 'transactsql');
+    const out = format('select top 10 [Ad] from [dbo].[Kitap]', 'transactsql');
     expect(out).toContain('TOP');
-    expect(out).toContain('[dbo].[Hasta]');
+    expect(out).toContain('[dbo].[Kitap]');
   });
 
   it('boş girdi boş çıktı verir', () => {

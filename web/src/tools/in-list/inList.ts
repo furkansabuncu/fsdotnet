@@ -3,7 +3,7 @@ import { err, ok, type ToolResult } from '../types';
 export type QuoteMode = 'auto' | 'always' | 'never';
 
 export interface InListOptions {
-  /** `hasta_id IN (…)` — boşsa yalnızca liste üretilir. */
+  /** `kitap_id IN (…)` — boşsa yalnızca liste üretilir. */
   column: string;
   quote: QuoteMode;
   dedupe: boolean;

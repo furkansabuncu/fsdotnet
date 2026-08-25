@@ -96,7 +96,7 @@ describe('toLiteral', () => {
 });
 
 describe('substituteBinds', () => {
-  const sql = 'select * from hasta where id = :id and ad = :ad and t > :t';
+  const sql = 'select * from kitap where id = :id and ad = :ad and t > :t';
 
   it('değerleri yerine koyar', () => {
     const result = substituteBinds(
@@ -105,7 +105,7 @@ describe('substituteBinds', () => {
       'oracle',
     );
     expect(result.sql).toBe(
-      "select * from hasta where id = 42 and ad = 'Ömer' and t > DATE '2026-08-24'",
+      "select * from kitap where id = 42 and ad = 'Ömer' and t > DATE '2026-08-24'",
     );
     expect(result.missing).toEqual([]);
   });
@@ -150,10 +150,10 @@ describe('substituteBinds', () => {
   it('enjeksiyon denemesi literal olarak kaçırılır', () => {
     const result = substituteBinds(
       'where ad = :ad',
-      { ad: v("'; drop table hasta; --") },
+      { ad: v("'; drop table kitap; --") },
       'oracle',
     );
-    expect(result.sql).toBe("where ad = '''; drop table hasta; --'");
+    expect(result.sql).toBe("where ad = '''; drop table kitap; --'");
   });
 
   it('bind yoksa sorgu aynen döner', () => {

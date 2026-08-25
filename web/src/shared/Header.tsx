@@ -7,7 +7,7 @@ import { LOCALES } from '../i18n/locale';
 import { commandPalette } from './useCommandPalette';
 import { useTheme } from './useTheme';
 
-const REPO_URL = 'https://github.com/furkansabuncu/fsdev';
+const REPO_URL = 'https://github.com/furkansabuncu/fsdotnet';
 
 /**
  * Kare ikon düğmesi sınıfları. Tema düğmesi bir <button>, GitHub bir <a> —
@@ -70,7 +70,7 @@ export default function Header() {
           <span style={categoryVars('dotnet')}>
             <span className="text-fg">fs</span>
             <span className="bg-gradient-to-r from-cat to-accent bg-clip-text text-transparent">
-              dev
+              dotnet
             </span>
           </span>
         </Link>

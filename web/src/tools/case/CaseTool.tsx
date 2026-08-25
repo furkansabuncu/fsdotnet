@@ -6,7 +6,7 @@ import { useI18n } from '../../i18n/I18nProvider';
 import { CASE_FORMATS, convertLines, localeDiffers, type CaseLocale } from './caseConvert';
 
 /** ORIGO'nun gerçek kolon adları: FE↔BE sınırında çevrilen tam bu liste. */
-const SAMPLE = ['hasta_id', 'ekleme_tarihi', 'rapor_kodu', 'iptal_durumu', 'XMLHttpRequest'].join('\n');
+const SAMPLE = ['kitap_id', 'ekleme_tarihi', 'rapor_kodu', 'iptal_durumu', 'XMLHttpRequest'].join('\n');
 
 export default function CaseTool() {
   const { t } = useI18n();

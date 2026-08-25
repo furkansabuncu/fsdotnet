@@ -15,14 +15,14 @@ export interface CaseFormat {
 }
 
 export const CASE_FORMATS: readonly CaseFormat[] = [
-  { id: 'camel', sample: 'hastaId' },
-  { id: 'pascal', sample: 'HastaId' },
-  { id: 'snake', sample: 'hasta_id' },
-  { id: 'constant', sample: 'HASTA_ID' },
-  { id: 'kebab', sample: 'hasta-id' },
-  { id: 'title', sample: 'Hasta Id' },
-  { id: 'sentence', sample: 'Hasta id' },
-  { id: 'dot', sample: 'hasta.id' },
+  { id: 'camel', sample: 'kitapId' },
+  { id: 'pascal', sample: 'KitapId' },
+  { id: 'snake', sample: 'kitap_id' },
+  { id: 'constant', sample: 'KITAP_ID' },
+  { id: 'kebab', sample: 'kitap-id' },
+  { id: 'title', sample: 'Kitap Id' },
+  { id: 'sentence', sample: 'Kitap id' },
+  { id: 'dot', sample: 'kitap.id' },
 ];
 
 /**

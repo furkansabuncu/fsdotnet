@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>fsdev — Open Graph card generator</title>
+    <title>fsdotnet — Open Graph card generator</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -131,11 +131,11 @@
         ctx.fillStyle = COLORS.fg;
         ctx.fillText('fs', PAD, 208);
 
-        const gradient = ctx.createLinearGradient(PAD + fsWidth, 0, PAD + fsWidth + 190, 0);
+        const gradient = ctx.createLinearGradient(PAD + fsWidth, 0, PAD + fsWidth + 340, 0);
         gradient.addColorStop(0, COLORS.dotnet);
         gradient.addColorStop(1, COLORS.accent);
         ctx.fillStyle = gradient;
-        ctx.fillText('dev', PAD + fsWidth, 208);
+        ctx.fillText('dotnet', PAD + fsWidth, 208);
 
         ctx.font = '600 46px Inter, system-ui, sans-serif';
         ctx.fillStyle = COLORS.fg;

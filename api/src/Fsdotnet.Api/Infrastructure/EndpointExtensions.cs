@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Fsdev.Api.Infrastructure;
+namespace Fsdotnet.Api.Infrastructure;
 
 public static class EndpointExtensions
 {

@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
-using Fsdev.Api.Features.Health;
+using Fsdotnet.Api.Features.Health;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace Fsdev.Api.Tests.Features.Health;
+namespace Fsdotnet.Api.Tests.Features.Health;
 
 public sealed class HealthEndpointTests(WebApplicationFactory<Program> factory)
     : IClassFixture<WebApplicationFactory<Program>>

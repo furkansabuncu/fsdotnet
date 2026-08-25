@@ -1,4 +1,4 @@
-namespace Fsdev.Api.Infrastructure;
+namespace Fsdotnet.Api.Infrastructure;
 
 /// <summary>
 /// Bir dikey dilimin HTTP yüzü.

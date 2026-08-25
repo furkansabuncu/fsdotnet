@@ -15,7 +15,7 @@ export default function NotFoundPage() {
 
   return (
     <>
-      <title>{`${t.notFound.title} · fsdev`}</title>
+      <title>{`${t.notFound.title} · fsdotnet`}</title>
       <meta name="robots" content="noindex, follow" />
 
       <div className="flex flex-col items-start gap-3 py-16">

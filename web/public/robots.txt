@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://fsdev.pages.dev/sitemap.xml
+Sitemap: https://fsdotnet.pages.dev/sitemap.xml

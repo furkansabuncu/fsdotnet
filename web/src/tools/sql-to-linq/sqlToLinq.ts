@@ -19,7 +19,7 @@ export type LinqSyntax = 'query' | 'method';
 
 export interface LinqOptions {
   syntax: LinqSyntax;
-  /** `db.Hasta` içindeki `db` — DbContext değişkeninin adı. */
+  /** `db.Kitap` içindeki `db` — DbContext değişkeninin adı. */
   context: string;
 }
 
@@ -78,7 +78,7 @@ function one(clauses: Map<string, string[]>, keyword: string): string | null {
   return value === undefined || value === '' ? null : value;
 }
 
-/** `HASTA H` / `HASTA AS H` / `SCHEMA.HASTA H` → tablo + takma ad. */
+/** `KITAP H` / `KITAP AS H` / `SCHEMA.KITAP H` → tablo + takma ad. */
 function parseSource(text: string): { table: string; alias: string } {
   const cleaned = text.replace(/\s+AS\s+/i, ' ').trim();
   const [rawTable = '', rawAlias] = cleaned.split(/\s+/);
@@ -87,7 +87,7 @@ function parseSource(text: string): { table: string; alias: string } {
   return { table: bare, alias: (rawAlias ?? bare).replace(/"/g, '') };
 }
 
-/** `TXHASTARAPOR` → `Txhastarapor`, `hasta_kayit` → `HastaKayit`. */
+/** `TBLSIPARISKALEM` → `Tblsipariskalem`, `kitap_kayit` → `KitapKayit`. */
 export function toEntityName(table: string): string {
   const words = table.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
   return words.map((word) => word[0]!.toUpperCase() + word.slice(1).toLowerCase()).join('');
@@ -349,7 +349,7 @@ function splitColumns(select: string): string[] {
 
 /* ---------------------------------------------------------------- yazdırma */
 
-/** `H.AD_SOYAD AS AD` → ifade + hedef ad. */
+/** `H.BASLIK AS AD` → ifade + hedef ad. */
 function parseColumn(column: string): { expression: string; name: string | null } {
   const aliased = /^(.*?)\s+(?:AS\s+)?([\w"]+)$/is.exec(column.replace(/\s+/g, ' ').trim());
   if (aliased) return { expression: aliased[1]!.trim(), name: aliased[2]!.replace(/"/g, '') };

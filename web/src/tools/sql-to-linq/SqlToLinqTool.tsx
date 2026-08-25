@@ -5,13 +5,13 @@ import SegmentedControl from '../../shared/SegmentedControl';
 import { useI18n } from '../../i18n/I18nProvider';
 import { sqlToLinq, type LinqSyntax } from './sqlToLinq';
 
-const SAMPLE = `SELECT H.HASTA_ID, H.AD_SOYAD, I.ISTEM_TARIHI
-FROM HASTA H
-LEFT JOIN ISTEM I ON I.HASTA_ID = H.HASTA_ID
-WHERE H.AKTIF = 1
-  AND H.AD_SOYAD LIKE 'Ali%'
-  AND I.DURUM IN (1, 2, 3)
-ORDER BY I.ISTEM_TARIHI DESC`;
+const SAMPLE = `SELECT K.KITAP_ID, K.BASLIK, S.SIPARIS_TARIHI
+FROM KITAP K
+LEFT JOIN SIPARIS S ON S.KITAP_ID = K.KITAP_ID
+WHERE K.AKTIF = 1
+  AND K.BASLIK LIKE 'Sessiz%'
+  AND S.DURUM IN (1, 2, 3)
+ORDER BY S.SIPARIS_TARIHI DESC`;
 
 export default function SqlToLinqTool() {
   const { t } = useI18n();

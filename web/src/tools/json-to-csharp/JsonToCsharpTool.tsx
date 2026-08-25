@@ -8,15 +8,15 @@ import { generateTypes, type CodeTarget, type FractionStyle } from './jsonToCsha
    gelen küçük harf snake_case alanlar, iç içe bir nesne ve bir dizi. */
 const SAMPLE = JSON.stringify(
   {
-    hasta_id: 10427,
-    ad_soyad: 'Örnek Hasta',
+    kitap_id: 10427,
+    baslik: 'Örnek Kitap',
     dogum_tarihi: '1984-03-17',
     aktif: true,
     bakiye: 1250.5,
-    protokol: { protokol_no: 'P-2026-0091', acilis_tarihi: '2026-08-24T09:30:00Z' },
-    tetkikler: [
-      { kod: 'RAD-001', ad: 'Akciğer Grafisi', sonuc: null },
-      { kod: 'RAD-014', ad: 'Toraks BT', sonuc: 'normal', rapor_id: 55120 },
+    raf: { raf_kodu: 'P-2026-0091', acilis_tarihi: '2026-08-24T09:30:00Z' },
+    etiketler: [
+      { kod: 'KTP-001', ad: 'Sessiz Bahçe', sonuc: null },
+      { kod: 'KTP-014', ad: 'Kırık Pusula', sonuc: 'normal', rapor_id: 55120 },
     ],
   },
   null,
@@ -27,7 +27,7 @@ export default function JsonToCsharpTool() {
   const { t } = useI18n();
   const [input, setInput] = useState(SAMPLE);
   const [target, setTarget] = useState<CodeTarget>('record');
-  const [rootName, setRootName] = useState('HastaDto');
+  const [rootName, setRootName] = useState('KitapDto');
   const [pascalCase, setPascalCase] = useState(true);
   const [nullableRefTypes, setNullableRefTypes] = useState(true);
   const [fraction, setFraction] = useState<FractionStyle>('decimal');

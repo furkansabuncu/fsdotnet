@@ -6,7 +6,7 @@ import { formatCode, type FormatLanguage, type FormatMode } from './codeFormat';
 
 type LanguageChoice = FormatLanguage | 'auto';
 
-const SAMPLE = `.hasta-karti{border:1px solid #ddd;padding:12px}.hasta-karti .ad{font-weight:600;color:#111}`;
+const SAMPLE = `.kitap-karti{border:1px solid #ddd;padding:12px}.kitap-karti .ad{font-weight:600;color:#111}`;
 
 export default function CodeFormatTool() {
   const { t } = useI18n();

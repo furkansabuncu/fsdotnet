@@ -5,7 +5,7 @@ import SegmentedControl from '../../shared/SegmentedControl';
 import { useI18n } from '../../i18n/I18nProvider';
 import { csvToInsert, csvToJson, parseCsv, type Delimiter } from './csv';
 
-const SAMPLE = ['hasta_id,ad,dogum_yili,notlar', "1,Ömer Çelikbaş,1991,", "2,Ayşe Şahin,1984,\"kontrol, 3 ay sonra\""].join(
+const SAMPLE = ['kitap_id,ad,dogum_yili,notlar', "1,Ömer Çelikbaş,1991,", "2,Ayşe Şahin,1984,\"kontrol, 3 ay sonra\""].join(
   '\n',
 );
 
@@ -17,7 +17,7 @@ export default function CsvTool() {
   const [mode, setMode] = useState<Mode>('json');
   const [delimiter, setDelimiter] = useState<Delimiter>(',');
   const [headerRow, setHeaderRow] = useState(true);
-  const [table, setTable] = useState('hasta');
+  const [table, setTable] = useState('kitap');
 
   const options = { delimiter, headerRow };
   const result = mode === 'json' ? csvToJson(input, options) : csvToInsert(input, options, table);

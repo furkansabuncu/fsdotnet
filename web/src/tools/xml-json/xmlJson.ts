@@ -44,7 +44,7 @@ function coerce(text: string, inferTypes: boolean): JsonValue {
   if (trimmed === 'null') return null;
   if (!NUMBER.test(trimmed)) return text;
 
-  /* Baştaki sıfır anlamlıdır: `00123` bir protokol numarası olabilir,
+  /* Baştaki sıfır anlamlıdır: `00123` bir raf numarası olabilir,
      sayıya çevrilirse veri kaybolur. */
   if (/^-?0\d/.test(trimmed)) return text;
 
@@ -149,7 +149,7 @@ function rootFromJson(value: JsonValue): ToolResult<XmlElement> {
 
   const entries = Object.entries(value).filter(([key]) => !key.startsWith(ATTRIBUTE_PREFIX));
 
-  /* Tek anahtar varsa o zaten köktür (`{"hasta": {...}}` → `<hasta>`).
+  /* Tek anahtar varsa o zaten köktür (`{"kitap": {...}}` → `<kitap>`).
      Birden fazlaysa hepsini tutacak bir sarmalayıcı gerekir — XML'in tek
      kök kuralı bunu zorunlu kılıyor. */
   if (entries.length === 1) {

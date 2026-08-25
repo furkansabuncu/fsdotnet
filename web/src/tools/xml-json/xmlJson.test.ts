@@ -39,11 +39,11 @@ describe('decodeEntities', () => {
 
 describe('isValidXmlName', () => {
   it.each([
-    ['hasta', true],
-    ['ns:hasta', true],
+    ['kitap', true],
+    ['ns:kitap', true],
     ['_x', true],
-    ['hasta-id', true],
-    ['1hasta', false],
+    ['kitap-id', true],
+    ['1kitap', false],
     ['', false],
     ['a b', false],
     ['@id', false],
@@ -222,10 +222,10 @@ describe('convertXmlJson — JSON → XML', () => {
 
 describe('convertXmlJson — gidiş dönüş', () => {
   it('XML → JSON → XML aynı yapıyı verir', () => {
-    const source = '<istem id="5"><t kod="A">x</t><t kod="B">y</t></istem>';
+    const source = '<siparis id="5"><t kod="A">x</t><t kod="B">y</t></siparis>';
     const json = run(source);
     const back = run(json, { direction: 'toXml' });
-    expect(back).toContain('<istem id="5">');
+    expect(back).toContain('<siparis id="5">');
     expect(back).toContain('<t kod="A">x</t>');
     expect(back).toContain('<t kod="B">y</t>');
   });

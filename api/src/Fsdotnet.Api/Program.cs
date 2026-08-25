@@ -1,5 +1,5 @@
 using System.Threading.RateLimiting;
-using Fsdev.Api.Infrastructure;
+using Fsdotnet.Api.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 

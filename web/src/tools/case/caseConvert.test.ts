@@ -4,12 +4,12 @@ import { convertCase, convertLines, localeDiffers, splitWords } from './caseConv
 describe('splitWords', () => {
   describe('ayraçlı biçimler', () => {
     it.each([
-      ['hasta_id', ['hasta', 'id']],
-      ['hasta-id', ['hasta', 'id']],
-      ['hasta.id', ['hasta', 'id']],
-      ['hasta id', ['hasta', 'id']],
-      ['HASTA_ID', ['HASTA', 'ID']],
-      ['__hasta__id__', ['hasta', 'id']],
+      ['kitap_id', ['kitap', 'id']],
+      ['kitap-id', ['kitap', 'id']],
+      ['kitap.id', ['kitap', 'id']],
+      ['kitap id', ['kitap', 'id']],
+      ['KITAP_ID', ['KITAP', 'ID']],
+      ['__kitap__id__', ['kitap', 'id']],
     ])('%j → %j', (input, expected) => {
       expect(splitWords(input)).toEqual(expected);
     });
@@ -17,8 +17,8 @@ describe('splitWords', () => {
 
   describe('kasa sınırları', () => {
     it.each([
-      ['hastaId', ['hasta', 'Id']],
-      ['HastaId', ['Hasta', 'Id']],
+      ['kitapId', ['kitap', 'Id']],
+      ['KitapId', ['Kitap', 'Id']],
       ['eklemeTarihi', ['ekleme', 'Tarihi']],
     ])('%j → %j', (input, expected) => {
       expect(splitWords(input)).toEqual(expected);
@@ -55,18 +55,18 @@ describe('splitWords', () => {
 });
 
 describe('convertCase', () => {
-  describe('hasta_id kaynaklı tüm biçimler', () => {
+  describe('kitap_id kaynaklı tüm biçimler', () => {
     it.each([
-      ['camel', 'hastaId'],
-      ['pascal', 'HastaId'],
-      ['snake', 'hasta_id'],
-      ['constant', 'HASTA_ID'],
-      ['kebab', 'hasta-id'],
-      ['title', 'Hasta Id'],
-      ['sentence', 'Hasta id'],
-      ['dot', 'hasta.id'],
+      ['camel', 'kitapId'],
+      ['pascal', 'KitapId'],
+      ['snake', 'kitap_id'],
+      ['constant', 'KITAP_ID'],
+      ['kebab', 'kitap-id'],
+      ['title', 'Kitap Id'],
+      ['sentence', 'Kitap id'],
+      ['dot', 'kitap.id'],
     ] as const)('%s → %s', (target, expected) => {
-      expect(convertCase('hasta_id', target)).toBe(expected);
+      expect(convertCase('kitap_id', target)).toBe(expected);
     });
   });
 
@@ -111,9 +111,9 @@ describe('Türkçe kasa tuzağı', () => {
     it.each([
       ['iptal_durumu', 'constant', true],
       ['IPTAL', 'snake', true],
-      // Gerçek tuzak: "id" içindeki i, tr-TR altında HASTA_İD üretir.
-      ['hasta_id', 'constant', true],
-      ['hasta_kodu', 'constant', false],
+      // Gerçek tuzak: "id" içindeki i, tr-TR altında KITAP_İD üretir.
+      ['kitap_id', 'constant', true],
+      ['raf_kodu', 'constant', false],
       ['rapor_kodu', 'camel', false],
     ] as const)('%j / %s → %s', (input, target, expected) => {
       expect(localeDiffers(input, target)).toBe(expected);
@@ -123,8 +123,8 @@ describe('Türkçe kasa tuzağı', () => {
 
 describe('convertLines', () => {
   it('her satırı bağımsız çevirir', () => {
-    expect(convertLines('hasta_id\nekleme_tarihi\nrapor_kodu', 'camel')).toBe(
-      'hastaId\neklemeTarihi\nraporKodu',
+    expect(convertLines('kitap_id\nekleme_tarihi\nrapor_kodu', 'camel')).toBe(
+      'kitapId\neklemeTarihi\nraporKodu',
     );
   });
 
@@ -133,6 +133,6 @@ describe('convertLines', () => {
   });
 
   it('tek satır da çalışır', () => {
-    expect(convertLines('hasta_id', 'pascal')).toBe('HastaId');
+    expect(convertLines('kitap_id', 'pascal')).toBe('KitapId');
   });
 });

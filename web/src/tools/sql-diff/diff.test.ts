@@ -51,18 +51,18 @@ describe('diffLines', () => {
     const before = [
       'create or replace view vw_rapor as',
       'select r.rapor_id,',
-      '       r.hasta_id',
-      '  from txhastarapor r',
-      ' where r.grup_id = 5029',
+      '       r.kitap_id',
+      '  from siparis r',
+      ' where r.kanal_id = 12',
     ].join('\n');
 
     const after = [
       'create or replace view vw_rapor as',
       'select r.rapor_id,',
-      '       r.hasta_id,',
+      '       r.kitap_id,',
       '       r.rapor_tarihi',
-      '  from txhastarapor r',
-      ' where r.grup_id = 5029',
+      '  from siparis r',
+      ' where r.kanal_id = 12',
       '   and nvl(r.iptal, 0) = 0',
     ].join('\n');
 
@@ -77,25 +77,25 @@ describe('diffLines', () => {
 
 describe('satır içi vurgu', () => {
   it('eşleşen sil/ekle çiftinde kelime farkı işaretlenir', () => {
-    const rows = diffLines('where grup_id = 5029', 'where grup_id = 6000').rows;
+    const rows = diffLines('where kanal_id = 12', 'where kanal_id = 20').rows;
     const removed = rows.find((row) => row.op === 'delete');
     const added = rows.find((row) => row.op === 'insert');
 
-    expect(removed?.parts?.filter((part) => part.changed).map((p) => p.text)).toEqual(['5029']);
-    expect(added?.parts?.filter((part) => part.changed).map((p) => p.text)).toEqual(['6000']);
+    expect(removed?.parts?.filter((part) => part.changed).map((p) => p.text)).toEqual(['12']);
+    expect(added?.parts?.filter((part) => part.changed).map((p) => p.text)).toEqual(['20']);
     // Değişmeyen kısım her iki tarafta da aynı.
-    expect(removed?.parts?.filter((p) => !p.changed).map((p) => p.text).join('')).toBe('where grup_id = ');
+    expect(removed?.parts?.filter((p) => !p.changed).map((p) => p.text).join('')).toBe('where kanal_id = ');
   });
 
   it('blok uzunlukları farklı olsa da benzeyen çift eşleşir', () => {
     // Gerçek bir view değişikliğinin tipik şekli: 1 satır değişir, 1 eklenir.
     const rows = diffLines(
-      ' where r.grup_id = 5029',
-      ' where r.grup_id = 6000\n   and nvl(r.iptal, 0) = 0',
+      ' where r.kanal_id = 12',
+      ' where r.kanal_id = 20\n   and nvl(r.iptal, 0) = 0',
     ).rows;
 
     const removed = rows.find((row) => row.op === 'delete');
-    expect(removed?.parts?.filter((p) => p.changed).map((p) => p.text)).toEqual(['5029']);
+    expect(removed?.parts?.filter((p) => p.changed).map((p) => p.text)).toEqual(['12']);
     // Fazladan eklenen satır eşleşmez, vurgusuz kalır.
     const extra = rows.findLast((row) => row.op === 'insert');
     expect(extra?.parts).toBeUndefined();

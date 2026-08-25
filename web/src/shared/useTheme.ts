@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 export type Theme = 'dark' | 'light';
 
-const STORAGE_KEY = 'fsdev.theme';
+const STORAGE_KEY = 'fsdotnet.theme';
 
 /**
  * İlk tema.

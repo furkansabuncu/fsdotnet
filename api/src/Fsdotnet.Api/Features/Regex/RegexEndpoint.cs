@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using Fsdev.Api.Infrastructure;
+using Fsdotnet.Api.Infrastructure;
 
-namespace Fsdev.Api.Features.Regex;
+namespace Fsdotnet.Api.Features.Regex;
 
 public sealed record RegexTestRequest(string Pattern, string Input, RegexTestOptions? Options);
 

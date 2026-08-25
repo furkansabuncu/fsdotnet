@@ -2,7 +2,7 @@ import { postJson } from '../../services/api';
 import { err, ok, type ToolResult } from '../types';
 import type { RegexFlags, RegexMatch } from './regex';
 
-/** `api/src/Fsdev.Api/Features/Regex/RegexEndpoint.cs` ile birebir. */
+/** `api/src/Fsdotnet.Api/Features/Regex/RegexEndpoint.cs` ile birebir. */
 interface DotnetGroup {
   name: string;
   success: boolean;

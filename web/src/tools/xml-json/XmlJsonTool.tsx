@@ -7,18 +7,18 @@ import { convertXmlJson, type XmlJsonDirection } from './xmlJson';
 /* Eski sistemlerin konuştuğu dil SOAP; örnek de ondan bir parça olsun —
    öznitelik, iç içe eleman ve tekrar eden düğüm bir arada. */
 const SAMPLE_XML = `<?xml version="1.0" encoding="UTF-8"?>
-<istem id="55120" durum="2">
-  <hasta tc="11111111110">
-    <ad>Örnek Hasta</ad>
+<siparis id="55120" durum="2">
+  <kitap tc="11111111110">
+    <ad>Örnek Kitap</ad>
     <dogum>1984-03-17</dogum>
-  </hasta>
-  <tetkik kod="RAD-001">Akciğer Grafisi</tetkik>
-  <tetkik kod="RAD-014">Toraks BT</tetkik>
+  </kitap>
+  <etiket kod="KTP-001">Sessiz Bahçe</etiket>
+  <etiket kod="KTP-014">Kırık Pusula</etiket>
   <aciklama><![CDATA[Kontrol & takip < 30 gün]]></aciklama>
-</istem>`;
+</siparis>`;
 
 const SAMPLE_JSON = JSON.stringify(
-  { istem: { '@id': 55120, hasta: { '@tc': '11111111110', ad: 'Örnek Hasta' } } },
+  { siparis: { '@id': 55120, kitap: { '@tc': '11111111110', ad: 'Örnek Kitap' } } },
   null,
   2,
 );

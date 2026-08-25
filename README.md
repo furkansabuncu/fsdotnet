@@ -1,9 +1,9 @@
-# fsdev
+# fsdotnet
 
 **Developer toolbox for the .NET ecosystem.** Fast, private, keyboard-first.
 
-[![web](https://github.com/furkansabuncu/fsdev/actions/workflows/web.yml/badge.svg)](https://github.com/furkansabuncu/fsdev/actions/workflows/web.yml)
-[![api](https://github.com/furkansabuncu/fsdev/actions/workflows/api.yml/badge.svg)](https://github.com/furkansabuncu/fsdev/actions/workflows/api.yml)
+[![web](https://github.com/furkansabuncu/fsdotnet/actions/workflows/web.yml/badge.svg)](https://github.com/furkansabuncu/fsdotnet/actions/workflows/web.yml)
+[![api](https://github.com/furkansabuncu/fsdotnet/actions/workflows/api.yml/badge.svg)](https://github.com/furkansabuncu/fsdotnet/actions/workflows/api.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > 🔗 **Live:** _coming soon_ · Press <kbd>Ctrl</kbd>+<kbd>K</kbd> anywhere to jump to a tool.
@@ -13,7 +13,7 @@
 ## Why another dev-tools site?
 
 There are excellent general-purpose toolboxes already ([CyberChef](https://gchq.github.io/CyberChef/),
-[it-tools](https://it-tools.tech/)). fsdev is not trying to be a smaller copy of them — it targets a gap
+[it-tools](https://it-tools.tech/)). fsdotnet is not trying to be a smaller copy of them — it targets a gap
 none of them cover well: **the .NET side of everyday development.**
 
 | What you get here that you don't get elsewhere | |
@@ -31,12 +31,12 @@ none of them cover well: **the .NET side of everyday development.**
 One repository, two applications, deployed independently.
 
 ```
-fsdev/
+fsdotnet/
 ├── web/            React 19 · TypeScript · Vite · Tailwind CSS
 │   └── scripts/    sitemap, prerender, and the Open Graph card
 ├── api/            .NET 10 · Minimal API · vertical slices
-│   ├── src/Fsdev.Api/
-│   └── tests/Fsdev.Api.Tests/
+│   ├── src/Fsdotnet.Api/
+│   └── tests/Fsdotnet.Api.Tests/
 ├── docs/adr/       architecture decision records
 └── .github/        two path-filtered workflows — web changes don't run the .NET job
 ```
@@ -84,10 +84,10 @@ self-describing module that registers itself; **routing, search, the home grid a
 are all derived from one registry.**
 
 ```
-web/src/tools/base64/              api/src/Fsdev.Api/Features/Health/
+web/src/tools/base64/              api/src/Fsdotnet.Api/Features/Health/
 ├── index.ts        definition     └── HealthEndpoint.cs   thin: bind, delegate
 ├── base64.ts       pure logic
-├── base64.test.ts  table-driven   api/src/Fsdev.Api/Features/Regex/
+├── base64.test.ts  table-driven   api/src/Fsdotnet.Api/Features/Regex/
 └── Base64Tool.tsx  UI              └── RegexEndpoint.cs    the one real slice
 ```
 
@@ -137,7 +137,7 @@ Frontend:
 6. A description in both dictionaries — the compiler will not let you skip one
 
 Routing, search, the palette and the home page pick it up automatically. If the tool needs the API, add
-a matching slice under `api/src/Fsdev.Api/Features/` — it self-registers under `/api/v1`.
+a matching slice under `api/src/Fsdotnet.Api/Features/` — it self-registers under `/api/v1`.
 
 ## Tech stack
 

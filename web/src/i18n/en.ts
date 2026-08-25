@@ -32,7 +32,7 @@ export const en = {
     searchPlaceholder: 'Search tools...',
     toLightTheme: 'Switch to light theme',
     toDarkTheme: 'Switch to dark theme',
-    github: 'fsdev on GitHub',
+    github: 'fsdotnet on GitHub',
     languageAria: 'Language',
   },
 
@@ -87,7 +87,7 @@ export const en = {
     'http-status': 'Codes, headers and .NET constants.',
   } satisfies Record<ToolId, string>,
 
-/**
+  /**
    * Aracın altındaki açıklama bölümü — arama sonucundan gelen ziyaretçi için.
    *
    * Sekiz araçta var, hepsinde değil: bunlar katalogda başka yerde karşılığı
@@ -173,7 +173,7 @@ export const en = {
     case: {
       heading: 'Turkish casing, and why "file".ToUpper() can return FİLE',
       body: [
-        'Turkish has two i letters. Dotless ı uppercases to I, and dotted i uppercases to İ. A culture-aware uppercase under tr-TR therefore turns "file" into "FİLE" and "HASTA_ID" into "hasta_ıd" on the way back down. That is correct for Turkish prose and wrong for everything else.',
+        'Turkish has two i letters. Dotless ı uppercases to I, and dotted i uppercases to İ. A culture-aware uppercase under tr-TR therefore turns "file" into "FİLE" and "KITAP_ID" into "kitap_ıd" on the way back down. That is correct for Turkish prose and wrong for everything else.',
         'It becomes a bug the moment an identifier passes through it: a column name, a file extension, an HTTP header, a culture code. In .NET, ToUpper() and ToLower() use the current culture by default, so the same code produces different results depending on the machine it runs on — which is why the failure usually appears in production and not on the developer laptop.',
         'This converter shows both results side by side. Anything that is an identifier wants invariant casing; only text shown to a human wants the Turkish rules.',
       ],
@@ -297,7 +297,7 @@ export const en = {
 
   demo: {
     open: 'open',
-    summary: 'A looping demo of fsdev tools converting example input.',
+    summary: 'A looping demo of fsdotnet tools converting example input.',
   },
 
   footer: {
@@ -476,7 +476,7 @@ export const en = {
 
   caseConvert: {
     input: 'Identifiers',
-    placeholder: 'One per line: hasta_id, eklemeTarihi…',
+    placeholder: 'One per line: kitap_id, eklemeTarihi…',
     localeAria: 'Casing locale',
     invariant: 'invariant',
     turkish: 'tr-TR',
@@ -527,7 +527,7 @@ export const en = {
   bindParams: {
     input: 'Query with binds',
     output: 'Runnable query',
-    placeholder: 'select * from hasta where id = :id …',
+    placeholder: 'select * from kitap where id = :id …',
     styleAria: 'Bind style',
     oracle: ':name',
     sqlserver: '@name',

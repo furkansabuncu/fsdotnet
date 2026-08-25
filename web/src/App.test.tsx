@@ -55,7 +55,7 @@ describe('dil önekli rotalar', () => {
     renderAt('/en/t/jwt');
     await screen.findByRole('heading', { level: 1, name: 'JWT Decoder' });
 
-    await waitFor(() => expect(document.title).toBe('JWT Decoder · fsdev'));
+    await waitFor(() => expect(document.title).toBe('JWT Decoder · fsdotnet'));
     expect(document.querySelector('link[rel="canonical"]')).toHaveAttribute(
       'href',
       expect.stringContaining('/en/t/jwt'),

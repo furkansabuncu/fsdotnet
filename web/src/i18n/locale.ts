@@ -18,7 +18,7 @@ export const LOCALES: readonly Locale[] = ['en', 'tr'];
 /** Adreste dil yokken ve tarayıcı da ipucu vermezken kullanılan dil. */
 export const DEFAULT_LOCALE: Locale = 'en';
 
-export const LOCALE_STORAGE_KEY = 'fsdev.locale';
+export const LOCALE_STORAGE_KEY = 'fsdotnet.locale';
 
 export function isLocale(value: string | undefined): value is Locale {
   return value === 'en' || value === 'tr';

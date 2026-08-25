@@ -26,7 +26,7 @@ const publicDir = join(here, '..', 'public');
 /* Taban adres: Cloudflare Pages'te ortam değişkeni olarak veriliyor. Yerelde
    yoksa varsayılan alt alan kullanılıyor — canonical etiketiyle aynı
    varsayılan (src/shared/Seo.tsx), ikisinin ayrışmaması için. */
-const siteUrl = (process.env.VITE_SITE_URL ?? 'https://fsdev.pages.dev').replace(/\/+$/, '');
+const siteUrl = (process.env.VITE_SITE_URL ?? 'https://fsdotnet.pages.dev').replace(/\/+$/, '');
 
 /** Dil öneki olmadan, sitede indekslenmesini istediğimiz her yol. */
 const paths = ['/', ...TOOL_IDS.map((id) => `/t/${id}`)];

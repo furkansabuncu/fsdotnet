@@ -1,10 +1,10 @@
 using System.Globalization;
 using System.Net;
 using System.Net.Http.Json;
-using Fsdev.Api.Features.Regex;
+using Fsdotnet.Api.Features.Regex;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace Fsdev.Api.Tests.Features.Regex;
+namespace Fsdotnet.Api.Tests.Features.Regex;
 
 public sealed class RegexEndpointTests(WebApplicationFactory<Program> factory)
     : IClassFixture<WebApplicationFactory<Program>>

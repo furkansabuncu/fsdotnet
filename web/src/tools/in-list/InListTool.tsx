@@ -11,7 +11,7 @@ const SAMPLE = ['1042', '1043', '1044', '1044', '2071', ''].join('\n');
 export default function InListTool() {
   const { t } = useI18n();
   const [input, setInput] = useState(SAMPLE);
-  const [column, setColumn] = useState('hasta_id');
+  const [column, setColumn] = useState('kitap_id');
   const [quote, setQuote] = useState<QuoteMode>('auto');
   const [dedupe, setDedupe] = useState(true);
   const [chunkSize, setChunkSize] = useState(1000);

@@ -4,7 +4,7 @@
   "css.lint.unknownAtRules": "ignore",
 
   // C# eklentisinin doğru çözümü açması için — .slnx, .NET 10'un XML formatı.
-  "dotnet.defaultSolution": "api/Fsdev.slnx",
+  "dotnet.defaultSolution": "api/Fsdotnet.slnx",
 
   // Global TypeScript yerine web/ altındaki sürümü kullan.
   "typescript.tsdk": "web/node_modules/typescript/lib",

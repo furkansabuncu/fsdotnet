@@ -17,7 +17,7 @@ const gen = (json: string, options: Partial<GenerateOptions> = {}) => {
 
 describe('toPascalCase', () => {
   it.each([
-    ['hasta_id', 'HastaId'],
+    ['kitap_id', 'KitapId'],
     ['ekleme-tarihi', 'EklemeTarihi'],
     ['adSoyad', 'AdSoyad'],
     ['XMLHttpRequest', 'XMLHttpRequest'],
@@ -83,13 +83,13 @@ describe('generateTypes — nullable', () => {
 
 describe('generateTypes — yapı', () => {
   it('iç içe nesne için ayrı tip üretir ve kökü en üste koyar', () => {
-    const code = gen('{"protokol":{"no":"P-1"}}', { rootName: 'HastaDto' });
-    expect(code.indexOf('record HastaDto')).toBeLessThan(code.indexOf('record Protokol'));
-    expect(code).toContain('public Protokol Protokol { get; init; }');
+    const code = gen('{"raf":{"no":"P-1"}}', { rootName: 'KitapDto' });
+    expect(code.indexOf('record KitapDto')).toBeLessThan(code.indexOf('record Raf'));
+    expect(code).toContain('public Raf Raf { get; init; }');
   });
 
   it('dizi adını tekilleştirir', () => {
-    expect(gen('{"tetkikler":[{"kod":"A"}]}')).toContain('record Tetkikler');
+    expect(gen('{"etiketler":[{"kod":"A"}]}')).toContain('record Etiketler');
     expect(gen('{"items":[{"kod":"A"}]}')).toContain('record Item');
   });
 
@@ -106,8 +106,8 @@ describe('generateTypes — yapı', () => {
 
 describe('generateTypes — JsonPropertyName', () => {
   it('ad değiştiğinde öznitelik ekler', () => {
-    const code = gen('{"hasta_id":1}');
-    expect(code).toContain('[JsonPropertyName("hasta_id")]');
+    const code = gen('{"kitap_id":1}');
+    expect(code).toContain('[JsonPropertyName("kitap_id")]');
     expect(code).toContain('using System.Text.Json.Serialization;');
   });
 
@@ -116,8 +116,8 @@ describe('generateTypes — JsonPropertyName', () => {
   });
 
   it('pascalCase kapalıyken anahtarı olduğu gibi kullanır', () => {
-    const code = gen('{"hasta_id":1}', { pascalCase: false });
-    expect(code).toContain('public int hasta_id');
+    const code = gen('{"kitap_id":1}', { pascalCase: false });
+    expect(code).toContain('public int kitap_id');
     expect(code).not.toContain('JsonPropertyName');
   });
 
@@ -128,8 +128,8 @@ describe('generateTypes — JsonPropertyName', () => {
 
 describe('generateTypes — TypeScript', () => {
   it('anahtarı olduğu gibi bırakır', () => {
-    const code = gen('{"hasta_id":1}', { target: 'typescript' });
-    expect(code).toContain('hasta_id: number;');
+    const code = gen('{"kitap_id":1}', { target: 'typescript' });
+    expect(code).toContain('kitap_id: number;');
   });
 
   it('null görülen alana birleşim ekler', () => {
@@ -156,12 +156,12 @@ describe('generateTypes — TypeScript', () => {
     expect(code).toContain('export type Items = Item[];');
   });
 
-  /* Tekilleştirme İngilizce kurallarına göre çalışıyor; `Hastalar` çoğul
+  /* Tekilleştirme İngilizce kurallarına göre çalışıyor; `Kitaplar` çoğul
      olduğunu bilemez ve `…Item` ekine düşer. Yanlış tekilleştirmektense
      dokunmamak doğru — üretilen ad yine geçerli ve tekil. */
   it('Türkçe çoğulda güvenli eke düşer', () => {
-    expect(gen('[{"a":1}]', { target: 'typescript', rootName: 'Hastalar' })).toContain(
-      'export type Hastalar = HastalarItem[];',
+    expect(gen('[{"a":1}]', { target: 'typescript', rootName: 'Kitaplar' })).toContain(
+      'export type Kitaplar = KitaplarItem[];',
     );
   });
 

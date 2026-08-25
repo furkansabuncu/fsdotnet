@@ -11,7 +11,7 @@ describe('repairMojibake', () => {
       ['KıÄlıÄçÃ', 'Kılıç'],
       ['göÃzüÃ', 'gözü'],
       ['eşÅliğÄinde', 'eşliğinde'],
-      ['hastanıÄn', 'hastanın'],
+      ['kitapnıÄn', 'kitapnın'],
       ['FAKO+İÄOL (SAĞÄ GÖÃZ)', 'FAKO+İOL (SAĞ GÖZ)'],
       ['ÖÃn kamara', 'Ön kamara'],
       ['spançÃ', 'spanç'],
@@ -22,10 +22,10 @@ describe('repairMojibake', () => {
 
     it('tam cümlede tüm karakterleri onarır', () => {
       const broken =
-        'Lokal regional ve topikal anestezi eşÅliğÄinde hastanıÄn göÃzüÃ ' +
+        'Lokal regional ve topikal anestezi eşÅliğÄinde kitapnıÄn göÃzüÃ ' +
         'povidon iyot çÃöÃzeltisi ile kirpikler boyandıÄ.';
       expect(fix(broken)).toBe(
-        'Lokal regional ve topikal anestezi eşliğinde hastanın gözü ' +
+        'Lokal regional ve topikal anestezi eşliğinde kitapnın gözü ' +
           'povidon iyot çözeltisi ile kirpikler boyandı.',
       );
     });
