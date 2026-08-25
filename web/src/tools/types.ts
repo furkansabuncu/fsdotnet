@@ -12,35 +12,45 @@ export type ToolCategory =
 /**
  * Katalogdaki her aracın kimliği.
  *
- * Açık bir birleşim tipi olması, sözlükteki `toolDescriptions` nesnesinin
- * `Record<ToolId, string>` ile doğrulanabilmesini sağlıyor: yeni bir araç
- * eklenip açıklaması yazılmazsa proje derlenmez.
+ * Bir TİP değil, çalışma zamanı DİZİSİ — tip ondan türetiliyor. Sebebi
+ * sitemap: `scripts/sitemap.mjs` bu listeyi doğrudan içe aktarıp her araç
+ * için iki adres üretiyor. Liste yalnızca tip olsaydı script onu okuyamaz,
+ * ikinci bir kopya tutmak gerekirdi — ve o kopya er geç kayardı.
+ *
+ * Bu dosyanın çalışma zamanı `import`u yok (ikisi de `import type`), bu
+ * yüzden Node onu tip sıyırma ile doğrudan çalıştırabiliyor.
+ *
+ * Sözlükteki `toolDescriptions` de `Record<ToolId, string>` ile bağlı: yeni
+ * bir araç eklenip açıklaması yazılmazsa proje derlenmez.
  */
-export type ToolId =
-  | 'base64'
-  | 'mojibake'
-  | 'rtf'
-  | 'unicode'
-  | 'case'
-  | 'tr-data'
-  | 'in-list'
-  | 'ora-errors'
-  | 'bind-params'
-  | 'sql-diff'
-  | 'json-to-csharp'
-  | 'sql-to-linq'
-  | 'xml-json'
-  | 'csv-json'
-  | 'epoch'
-  | 'sql-format'
-  | 'code-format'
-  | 'jwt'
-  | 'hash'
-  | 'uuid'
-  | 'regex'
-  | 'cron'
-  | 'http-status'
-  | 'color';
+export const TOOL_IDS = [
+  'base64',
+  'mojibake',
+  'rtf',
+  'unicode',
+  'case',
+  'tr-data',
+  'in-list',
+  'ora-errors',
+  'bind-params',
+  'sql-diff',
+  'json-to-csharp',
+  'sql-to-linq',
+  'xml-json',
+  'csv-json',
+  'epoch',
+  'sql-format',
+  'code-format',
+  'jwt',
+  'hash',
+  'uuid',
+  'regex',
+  'cron',
+  'http-status',
+  'color',
+] as const;
+
+export type ToolId = (typeof TOOL_IDS)[number];
 
 /**
  * Aracın nerede çalıştığı.

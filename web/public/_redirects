@@ -1,5 +1,9 @@
-# İstemci tarafı yönlendirme: /t/base64 bir dosya değil, React route'u.
+# İstemci tarafı yönlendirme: /tr/t/base64 bir dosya değil, React route'u.
 # Bu kural olmadan statik barındırma o adrese doğrudan gidildiğinde ya da
 # sayfa yenilendiğinde 404 döner. 200 (rewrite) kullanılıyor, 301 değil —
 # adres çubuğu değişmemeli.
+#
+# sitemap.xml ve robots.txt bu kurala TAKILMAZ: hem Cloudflare Pages hem
+# Netlify önce gerçek bir dosya var mı diye bakar, yönlendirme kuralları
+# yalnızca eşleşme bulunamayınca çalışır.
 /*    /index.html   200
