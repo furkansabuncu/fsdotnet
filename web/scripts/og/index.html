@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>fsdev — Open Graph card generator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 24px;
+        background: #0a0a0a;
+        color: #fafafa;
+        font: 14px/1.5 Inter, system-ui, sans-serif;
+      }
+      canvas {
+        width: 600px;
+        height: 315px;
+        border: 1px solid #262626;
+        border-radius: 8px;
+      }
+      p {
+        max-width: 60ch;
+        color: #a3a3a3;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Open Graph card</h1>
+    <p>
+      Renders <code>public/og.png</code> at 1200×630. Open this page, right-click the canvas and
+      save, or read <code>window.renderOgCard()</code> from an automated browser — it returns the
+      PNG as a data URL.
+    </p>
+    <canvas id="card" width="1200" height="630"></canvas>
+
+    <script>
+      /*
+       * The card is drawn rather than designed in an image editor so it stays
+       * in the repository as source: colours are the same tokens the site
+       * uses, and editing the wording is a one-line change here.
+       */
+      const COLORS = {
+        bg: '#0a0a0a',
+        surface: '#141414',
+        border: '#262626',
+        fg: '#fafafa',
+        muted: '#a1a1aa',
+        dotnet: '#b18cff',
+        accent: '#4d9fff',
+        categories: ['#b18cff', '#4d9fff', '#59d499', '#ffc533', '#ff8ac5', '#4fd1c5'],
+      };
+
+      function roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      }
+
+      /* Bir kart, iki dil: paylaşım başlığı Türkçe çıkıp görsel İngilizce
+         kalırsa kart yamalı görünüyor. Metin kısa tutuldu — 1200px genişlikte
+         iki satırdan uzunu okunmuyor. */
+      const COPY = {
+        en: {
+          headline: 'Developer tools for the .NET ecosystem',
+          lines: [
+            'Oracle errors · IN (…) past ORA-01795 · bind values · mojibake',
+            'repair · .NET regex — free, and it all runs in your browser.',
+          ],
+          chip: '24 tools · no account · no upload',
+        },
+        tr: {
+          headline: '.NET ekosistemi için geliştirici araçları',
+          lines: [
+            'Oracle hataları · ORA-01795 sınırını aşan IN (…) · bind değerleri',
+            'bozuk Türkçe onarımı · .NET regex — ücretsiz, tarayıcınızda çalışır.',
+          ],
+          chip: '24 araç · üyelik yok · yükleme yok',
+        },
+      };
+
+      window.renderOgCard = function renderOgCard(locale = 'en') {
+        const copy = COPY[locale] ?? COPY.en;
+        const canvas = document.getElementById('card');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width;
+        const H = canvas.height;
+
+        ctx.fillStyle = COLORS.bg;
+        ctx.fillRect(0, 0, W, H);
+
+        // Aurora: the same off-centre colour wash the site paints behind the page.
+        const wash = ctx.createRadialGradient(W * 0.78, -120, 40, W * 0.78, -120, 620);
+        wash.addColorStop(0, 'rgba(177, 140, 255, 0.22)');
+        wash.addColorStop(1, 'rgba(177, 140, 255, 0)');
+        ctx.fillStyle = wash;
+        ctx.fillRect(0, 0, W, H);
+
+        // Faint grid — reads as "developer tool" without needing an illustration.
+        ctx.strokeStyle = 'rgba(255,255,255,0.035)';
+        ctx.lineWidth = 1;
+        for (let x = 0; x <= W; x += 48) {
+          ctx.beginPath();
+          ctx.moveTo(x + 0.5, 0);
+          ctx.lineTo(x + 0.5, H);
+          ctx.stroke();
+        }
+        for (let y = 0; y <= H; y += 48) {
+          ctx.beginPath();
+          ctx.moveTo(0, y + 0.5);
+          ctx.lineTo(W, y + 0.5);
+          ctx.stroke();
+        }
+
+        const PAD = 84;
+
+        // Wordmark: "fs" plain, "dev" in the header's gradient.
+        ctx.font = '700 84px "JetBrains Mono", monospace';
+        ctx.textBaseline = 'alphabetic';
+        const fsWidth = ctx.measureText('fs').width;
+        ctx.fillStyle = COLORS.fg;
+        ctx.fillText('fs', PAD, 208);
+
+        const gradient = ctx.createLinearGradient(PAD + fsWidth, 0, PAD + fsWidth + 190, 0);
+        gradient.addColorStop(0, COLORS.dotnet);
+        gradient.addColorStop(1, COLORS.accent);
+        ctx.fillStyle = gradient;
+        ctx.fillText('dev', PAD + fsWidth, 208);
+
+        ctx.font = '600 46px Inter, system-ui, sans-serif';
+        ctx.fillStyle = COLORS.fg;
+        ctx.fillText(copy.headline, PAD, 300);
+
+        ctx.font = '400 27px Inter, system-ui, sans-serif';
+        ctx.fillStyle = COLORS.muted;
+        ctx.fillText(copy.lines[0], PAD, 352);
+        ctx.fillText(copy.lines[1], PAD, 392);
+
+        // Category swatches: six dots, one per section of the catalogue.
+        let dotX = PAD;
+        for (const colour of COLORS.categories) {
+          ctx.beginPath();
+          ctx.arc(dotX + 7, 470, 7, 0, Math.PI * 2);
+          ctx.fillStyle = colour;
+          ctx.fill();
+          dotX += 30;
+        }
+
+        // Chip: the one claim worth putting on a share card.
+        const chip = copy.chip;
+        ctx.font = '500 24px "JetBrains Mono", monospace';
+        const chipWidth = ctx.measureText(chip).width + 44;
+        roundRect(ctx, PAD, 512, chipWidth, 58, 12);
+        ctx.fillStyle = COLORS.surface;
+        ctx.fill();
+        ctx.strokeStyle = COLORS.border;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.fillStyle = COLORS.muted;
+        ctx.fillText(chip, PAD + 22, 550);
+
+        return canvas.toDataURL('image/png');
+      };
+
+      // Wait for the webfonts before drawing, or Canvas silently falls back.
+      document.fonts.ready.then(() => window.renderOgCard());
+    </script>
+  </body>
+</html>

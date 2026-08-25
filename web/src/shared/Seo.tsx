@@ -37,6 +37,12 @@ interface SeoProps {
 export default function Seo({ title, description, path, locale }: SeoProps) {
   const canonical = absoluteUrl(SITE_URL, locale, path);
 
+  /* Kart dili sayfayla eşleşiyor: başlık Türkçe çıkıp görsel İngilizce
+     kalırsa paylaşım yamalı görünüyor. Adres MUTLAK olmak zorunda — göreli
+     bir yol paylaşım tarayıcıları tarafından çözülmüyor.
+     Kaynağı: scripts/og/index.html */
+  const image = `${SITE_URL}${locale === 'tr' ? '/og-tr.png' : '/og.png'}`;
+
   return (
     <>
       <title>{`${title} · ${SITE_NAME}`}</title>
@@ -62,10 +68,17 @@ export default function Seo({ title, description, path, locale }: SeoProps) {
       <meta property="og:url" content={canonical} />
       <meta property="og:title" content={`${title} · ${SITE_NAME}`} />
       <meta property="og:description" content={description} />
+      <meta property="og:image" content={image} />
+      <meta property="og:image:width" content="1200" />
+      <meta property="og:image:height" content="630" />
+      <meta property="og:image:alt" content={`${SITE_NAME} — ${title}`} />
 
+      {/* `summary_large_image` görselsiz beyan edilirse çıplak bir link
+          çıkıyor; etiket ancak görsel varken doğru. */}
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content={`${title} · ${SITE_NAME}`} />
       <meta name="twitter:description" content={description} />
+      <meta name="twitter:image" content={image} />
     </>
   );
 }
