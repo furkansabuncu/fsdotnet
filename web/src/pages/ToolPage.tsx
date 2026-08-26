@@ -3,9 +3,13 @@ import { Link, useParams } from 'react-router';
 import { ArrowLeft } from 'lucide-react';
 import { useI18n, useLocalePath } from '../i18n/I18nProvider';
 import { categoryVars } from '../tools/categories';
-import { getTool } from '../tools/registry';
+import { getTool, relatedTools } from '../tools/registry';
 import Seo from '../shared/Seo';
 import ToolGuide, { type ToolGuideContent } from '../shared/ToolGuide';
+import StructuredData from '../shared/StructuredData';
+import RelatedTools from '../shared/RelatedTools';
+import { SITE_URL } from '../shared/Seo';
+import { toolSchema } from '../shared/schema';
 import type { ToolId } from '../tools/types';
 import NotFoundPage from './NotFoundPage';
 
@@ -77,6 +81,24 @@ export default function ToolPage() {
       </Suspense>
 
       {guide && <ToolGuide guide={guide} />}
+
+      <RelatedTools tools={relatedTools(tool)} />
+
+      {/* Arama motoru için: uygulamanın kendisi, kırıntı yolu ve rehberdeki
+          soru-cevaplar. Sayfada görünen içerikten üretiliyor. */}
+      <StructuredData
+        data={toolSchema(
+          { siteUrl: SITE_URL, locale },
+          {
+            name: tool.name,
+            description: t.seo.toolDescription(t.toolDescriptions[tool.id]),
+            path: `/t/${tool.id}`,
+            homeLabel: t.nav.home,
+            categoryLabel: t.categories[tool.category].label,
+            ...(guide ? { guide } : {}),
+          },
+        )}
+      />
     </div>
   );
 }

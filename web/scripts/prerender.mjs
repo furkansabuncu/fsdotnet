@@ -18,7 +18,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { TOOL_IDS } from '../src/tools/types.ts';
-import { LOCALES, localePath } from '../src/i18n/locale.ts';
+import { LOCALES, localePath, splitLocale } from '../src/i18n/locale.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const web = join(here, '..');
@@ -62,6 +62,18 @@ const basePath = (() => {
  */
 const HEAD_TAG = /<(title|meta|link)\b[^>]*?(?:\/>|>(?:[^<]*<\/title>)?)/g;
 
+/**
+ * Sayfanın dilini KABUĞA yazar.
+ *
+ * İstemci bunu bir effect'te ayarlıyor, yani JavaScript çalışmadan önce
+ * Türkçe sayfa da `lang="en"` diyor. Paylaşım tarayıcıları ve ekran
+ * okuyucular tam olarak o anı görüyor.
+ */
+function withLang(html, route) {
+  const locale = splitLocale(route).locale ?? 'en';
+  return html.replace('<html lang="en">', `<html lang="${locale}">`);
+}
+
 function hoistHeadTags(html) {
   const head = [];
   const body = html.replace(HEAD_TAG, (tag) => {
@@ -83,21 +95,33 @@ const paths = ['/', ...TOOL_IDS.map((id) => `/t/${id}`)];
 
 const routes = LOCALES.flatMap((locale) => paths.map((path) => localePath(locale, path)));
 
+/**
+ * Bir rotayı tam belgeye çevirir.
+ *
+ * Üç çağrı yeri var (rotalar, kök, 404) ve üçü de aynı üç adımı yapıyordu:
+ * gövdeyi göm, head etiketlerini yukarı taşı, dili yaz. Üç kopya tutmanın
+ * bedeli hemen görüldü — dil yalnızca birine eklenince Türkçe sayfalar
+ * `lang="en"` demeye devam etti.
+ */
+function page(route) {
+  const { head, body } = hoistHeadTags(render(basePath + route));
+  return withLang(
+    template
+      .replace('<div id="root"></div>', `<div id="root">${body}</div>`)
+      .replace('</head>', `  ${head}\n  </head>`),
+    route,
+  );
+}
+
 let written = 0;
 
 for (const route of routes) {
-  const { head, body } = hoistHeadTags(render(basePath + route));
-
-  const html = template
-    .replace('<div id="root"></div>', `<div id="root">${body}</div>`)
-    .replace('</head>', `  ${head}\n  </head>`);
-
-  /* Cloudflare Pages ve Netlify `/en/t/base64` isteğini
-     `/en/t/base64/index.html` dosyasına eşliyor, yani her rota gerçek bir
-     dosya — hiçbir yeniden yazma kuralına ihtiyaç duymuyor. */
+  /* Barındırıcı `/en/t/base64` isteğini `/en/t/base64/index.html` dosyasına
+     eşliyor, yani her rota gerçek bir dosya — hiçbir yeniden yazma
+     kuralına ihtiyaç duymuyor. */
   const dir = join(dist, route);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, 'index.html'), html);
+  writeFileSync(join(dir, 'index.html'), page(route));
   written += 1;
 }
 

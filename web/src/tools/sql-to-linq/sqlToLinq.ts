@@ -1,5 +1,6 @@
 import { err, ok, type ToolResult } from '../types';
-import { codeMask, scan } from '../sql-fix/scan';
+import { scanSql } from '../../lint/sql';
+import { codeMask } from '../../lint/types';
 
 /**
  * SELECT ifadesini LINQ'e çevirir.
@@ -31,11 +32,11 @@ function splitTopLevel(sql: string, keywords: readonly string[]): Map<string, st
   const upper = sql.toUpperCase();
   const found: { keyword: string; start: number; end: number }[] = [];
 
-  /* Dize, tanımlayıcı ve yorumları ayıklamak `sql-fix/scan` ile ORTAK.
+  /* Dize, tanımlayıcı ve yorumları ayıklamak `lint/sql` ile ORTAK.
      Burada eskiden ayrı bir tırnak takibi vardı; hem ikinci bir kopyaydı
      hem de yorumları görmüyordu — `-- from x` yazan bir satır yan tümce
      sanılıyordu. */
-  const mask = codeMask(sql, scan(sql).spans);
+  const mask = codeMask(sql, scanSql(sql).spans);
 
   let depth = 0;
   for (let index = 0; index < sql.length; index += 1) {

@@ -98,12 +98,27 @@ describe('swapLocale', () => {
 
 describe('absoluteUrl', () => {
   it('mutlak adres kurar', () => {
-    expect(absoluteUrl('https://fsdotnet.dev', 'tr', '/t/base64')).toBe('https://fsdotnet.dev/tr/t/base64');
+    expect(absoluteUrl('https://fsdotnet.dev', 'tr', '/t/base64')).toBe('https://fsdotnet.dev/tr/t/base64/');
+  });
+
+  it('sonda bölü çizgisi bırakır', () => {
+    // GitHub Pages çizgisiz adresi 301 ile çizgiliye yönlendiriyor.
+    // Canonical çizgisiz olsaydı, gösterdiği adres 200 dönmezdi.
+    expect(absoluteUrl('https://fsdotnet.dev', 'en')).toBe('https://fsdotnet.dev/en/');
+    expect(absoluteUrl('https://fsdotnet.dev', 'en', '/t/base64')).toBe(
+      'https://fsdotnet.dev/en/t/base64/',
+    );
   });
 
   it('tabandaki fazla bölü çizgisini kırpar', () => {
     // Yanlış taban canonical etiketini bozar, o yüzden normalleştiriliyor.
-    expect(absoluteUrl('https://fsdotnet.dev/', 'en')).toBe('https://fsdotnet.dev/en');
-    expect(absoluteUrl('https://fsdotnet.dev///', 'en')).toBe('https://fsdotnet.dev/en');
+    expect(absoluteUrl('https://fsdotnet.dev/', 'en')).toBe('https://fsdotnet.dev/en/');
+    expect(absoluteUrl('https://fsdotnet.dev///', 'en')).toBe('https://fsdotnet.dev/en/');
+  });
+
+  it('iç bağlantı biçimi çizgisiz kalır', () => {
+    // Router iki biçimi de eşliyor; gezinmede yönlendirme olmasın diye
+    // `localePath` çizgisiz üretmeye devam ediyor.
+    expect(localePath('en', '/t/base64')).toBe('/en/t/base64');
   });
 });

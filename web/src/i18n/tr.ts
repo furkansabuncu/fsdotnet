@@ -75,6 +75,9 @@ export const tr: Dictionary = {
     'http-status': "Kodlar, header'lar ve .NET sabitleri.",
     'date-format': 'Oracle, .NET, Delphi ve dayjs kalıpları.',
     'sql-fix': 'Sorgu neden çalışmıyor — bul ve düzelt.',
+    'linq-11g': 'Oracle 11g’de kırılan EF Core kalıpları.',
+    'pas-sql': 'Delphi biriminden gömülü SQL’i çıkarır.',
+    'oracle-identity': 'Otomatik anahtar için sequence ve trigger.',
   },
 
 toolGuides: {
@@ -316,6 +319,7 @@ toolGuides: {
     backLink: 'Tüm araçlara dön',
     viaApi: "API üzerinden",
     runsLocally: 'yerelde çalışır',
+    related: 'İlgili araçlar',
   },
 
   notFound: {
@@ -603,6 +607,85 @@ toolGuides: {
         title: 'OFFSET / FETCH sayfalama',
         hint: 'Oracle bunu 12c’den itibaren anlıyor. 11g’de iç içe ROWNUM sayfalamasına dönmesi gerekiyor — önce üst sınır uygulanır, sonra kayma.',
       },
+    },
+  },
+
+  linq11g: {
+    input: 'C# — engine metodu ya da sorgu',
+    output: 'Güvenli düzeltmeler uygulanmış hâli',
+    placeholder: 'Bir LINQ sorgusu ya da engine metodu yapıştırın…',
+    clean: 'bulgu yok',
+    count: (total: number, fixable: number) => `${total} bulgu · ${fixable} düzeltilebilir`,
+    findingsTitle: 'Bulgular',
+    apply: 'uygula',
+    manual: 'elle',
+    applyToInput: 'Girdiye taşı',
+    sample: 'Örnek',
+
+    rules: {
+      anyAsync: {
+        title: 'AnyAsync() 11g’de çalışmıyor',
+        hint: 'Yerine FirstOrDefaultAsync(…) != null kullanın. Düzeltme güvenli: await, !=’den önce bağlandığı için ifade hem if içinde hem atamada bool kalıyor.',
+      },
+      anyInSelect: {
+        title: 'Select projeksiyonunun içinde Any(…)',
+        hint: 'Any yalnızca bir Where predicate’i içinde EXISTS’e çevriliyor. Projeksiyonda 11g patlıyor. Alt sorguyu local’e alıp Any’yi Where’e taşıyın.',
+      },
+      booleanInSelect: {
+        title: 'Projeksiyonda bool üretmek',
+        hint: 'Oracle’da TRUE / FALSE literali yok; sonuç ORA-00904: "FALSE": geçersiz belirleyici. Ham değeri seçip bool’u bellekte türetin.',
+      },
+      queryInLambda: {
+        title: 'Lambda içinde Query() çağrısı',
+        hint: 'CS0854 — ifade ağacı, isteğe bağlı argüman taşıyan bir çağrı içeremez. Alt sorguyu önce local’e alın, lambda içinde onu kullanın.',
+      },
+      skipTake: {
+        title: 'Skip / Take',
+        hint: 'EF Core bunları OFFSET … FETCH’e çeviriyor; o da 12c ile geldi. 11g’de sayfalama iç içe ROWNUM sarmalayıcısıyla elle yazılmak zorunda.',
+      },
+      executeUpdate: {
+        title: 'ExecuteUpdate / ExecuteDelete',
+        hint: 'Değişiklik takibi olmayan küme temelli ifade. Kullandığınız Oracle sağlayıcısının desteklediğini ve SaveChanges’i atlamanın çevredeki mantığı devre dışı bırakmadığını doğrulayın.',
+      },
+      containsList: {
+        title: 'Koleksiyon Contains’i IN listesine dönüyor',
+        hint: 'Oracle IN listesinde 1000 ifadeyi geçince ORA-01795 veriyor; ayrıca her farklı liste uzunluğu yeni bir sorgu üretip hard parse’a sokuyor. Listeyi parçalayın.',
+      },
+      rawSqlInterpolation: {
+        title: 'Raw metoduna enterpolasyonlu string verilmiş',
+        hint: 'FromSqlRaw enterpolasyonun değerini SQL’e olduğu gibi yapıştırıyor — bu enjeksiyon. FromSqlInterpolated aynı söz dizimini alıyor ve her deliği bağlama değişkenine çeviriyor.',
+      },
+      dateOnly: {
+        title: 'DateOnly / TimeOnly',
+        hint: 'Oracle’da karşılık gelen kolon tipi yok ve sağlayıcı desteği tutarsız. Saat kısmı yok sayılan DateTime daha güvenli eşleme.',
+      },
+    },
+  },
+
+  pasSql: {
+    input: 'Delphi .pas kaynağı',
+    placeholder: 'Bir birim ya da tek bir event handler yapıştırın…',
+    sample: 'Örnek',
+    empty: 'Henüz SQL bulunamadı.',
+    count: (total) => `${total} ifade`,
+    binds: 'bağlama',
+    interpolations: 'metne gömülen:',
+  },
+
+  oracleIdentity: {
+    table: 'Tablo adı',
+    column: 'anahtar kolon',
+    output: 'Betik',
+    placeholder: 'siparis',
+    versionAria: 'Oracle sürümü',
+    startWith: 'başlangıç',
+    allowExplicit: 'elle değer verilebilsin',
+
+    warnings: {
+      nameTooLong: 'Tanımlayıcı sınırını aşıyor. Betik ORA-00972 ile yazarken değil ÇALIŞIRKEN patlıyor — üstelik sınırı aşan ad sizin tablonuz değil, üretilen ad.',
+      invalidIdentifier: 'Geçerli bir tırnaksız tanımlayıcı değil. Oracle adları harfle başlar; harf, rakam, _, $ ve # ile sürer. Gerisi çift tırnak ister ve o zaman büyük/küçük harf kalıcı olarak bağlayıcı olur.',
+      sequenceGaps: 'Sequence boşluk bırakır. CACHE 20, örnek yeniden başladığında kullanılmayan numaraları kaybeder; geri alınan bir insert de numarasını iade etmez. Anahtarı sayaç değil kimlik sayın.',
+      identityPreferred: '12c’den itibaren tetikleyiciye gerek yok: identity kolon aynı işi yapıyor, daha hızlı, ve ON NULL sayesinde elle değer vermek yine mümkün.',
     },
   },
 
@@ -958,5 +1041,9 @@ toolGuides: {
     dateFormatEmpty: 'Bir tarih biçim kalıbı girin.',
     dateFormatNoTokens: 'Burada tarih alanı yok — girilenin tamamı düz metin.',
     sqlFixEmpty: 'Denetlenecek bir sorgu yapıştırın.',
+    linqEmpty: 'Denetlenecek C# kodu yapıştırın.',
+    pasEmpty: 'Bir Delphi birimi yapıştırın.',
+    pasNoSql: 'Bu kaynakta SQL ifadesi bulunamadı.',
+    identityEmpty: 'Bir tablo ve kolon adı girin.',
   },
 };

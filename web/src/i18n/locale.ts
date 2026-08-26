@@ -68,12 +68,22 @@ export function swapLocale(pathname: string, next: Locale): string {
 }
 
 /**
- * Mutlak adres — canonical, hreflang ve sitemap için.
+ * Mutlak adres — canonical, hreflang, og:url ve sitemap için.
  *
  * Taban adres derleme zamanında `VITE_SITE_URL` ile geliyor. Yanlış ya da
  * eksik bir taban, canonical etiketini sessizce başka bir siteye
- * yönlendirebileceği için sondaki bölü çizgisi burada kırpılıyor.
+ * yönlendirebileceği için sondaki bölü çizgileri kırpılıyor.
+ *
+ * 🔴 Yol SONDA bölü çizgisi taşır, `localePath`in aksine. Sebebi ölçüldü:
+ * GitHub Pages her dizin adresini çizgili hâline **301 ile yönlendiriyor**
+ * (`/en/t/base64` → `/en/t/base64/`). Çizgisiz yazarsak canonical'ın
+ * gösterdiği adres ile gerçekten 200 dönen adres farklı olur — yani
+ * canonical'ın çözmesi gereken belirsizliği canonical'ın kendisi üretir,
+ * ve sitemap'teki her satır bir yönlendirmeye çarpar.
+ *
+ * İç bağlantılar `localePath`i kullanmaya devam ediyor: router iki biçimi
+ * de eşliyor ve gezinme sırasında yönlendirme yok.
  */
 export function absoluteUrl(siteUrl: string, locale: Locale, rest = '/'): string {
-  return `${siteUrl.replace(/\/+$/, '')}${localePath(locale, rest)}`;
+  return `${siteUrl.replace(/\/+$/, '')}${localePath(locale, rest)}/`;
 }

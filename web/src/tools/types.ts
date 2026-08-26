@@ -48,6 +48,9 @@ export const TOOL_IDS = [
   'http-status',
   'date-format',
   'sql-fix',
+  'linq-11g',
+  'pas-sql',
+  'oracle-identity',
 ] as const;
 
 export type ToolId = (typeof TOOL_IDS)[number];
@@ -133,7 +136,11 @@ export type ToolErrorKey =
   | 'sqlNoFrom'
   | 'dateFormatEmpty'
   | 'dateFormatNoTokens'
-  | 'sqlFixEmpty';
+  | 'sqlFixEmpty'
+  | 'linqEmpty'
+  | 'pasEmpty'
+  | 'pasNoSql'
+  | 'identityEmpty';
 
 /**
  * Her araç fonksiyonunun ortak dönüş tipi. Araçlar exception fırlatmaz —

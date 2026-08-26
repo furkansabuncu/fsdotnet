@@ -59,7 +59,7 @@ export default defineConfig(({ mode }) => ({
     testTimeout: 30_000,
     coverage: {
       provider: 'v8',
-      include: ['src/tools/**/*.ts'],
+      include: ['src/tools/**/*.ts', 'src/lint/**/*.ts'],
       exclude: [
         'src/tools/**/index.ts',
         'src/tools/types.ts',

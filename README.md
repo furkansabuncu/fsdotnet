@@ -53,7 +53,7 @@ compiler that only exists on .NET.
 
 | Runs entirely in your browser | Needs the API | Why the API |
 | --- | --- | --- |
-| 24 of the 25 tools | **Regex Tester** | `System.Text.RegularExpressions` genuinely cannot run in a browser |
+| 27 of the 28 tools | **Regex Tester** | `System.Text.RegularExpressions` genuinely cannot run in a browser |
 
 That table used to be longer. Three tools left it — SQL formatting, JSON → C# and SQL → LINQ. Two of
 them were justified by a T-SQL parser this project has no use for (the queries are Oracle); the third
@@ -79,7 +79,7 @@ when the API is cold or down — tools that need it are marked with an `API` bad
 
 ### 2. One tool, one folder — on both sides
 
-Twenty-five tools written as twenty-five hand-rolled pages is not an architecture. Every tool is a
+Twenty-eight tools written as twenty-eight hand-rolled pages is not an architecture. Every tool is a
 self-describing module that registers itself; **routing, search, the home grid and the command palette
 are all derived from one registry.**
 
@@ -103,6 +103,13 @@ carries the part that must not be translated: a parser's `4:12` position, or the
 Invalid input is an expected
 outcome for a converter, so error rendering is uniform and free.
 
+Three of the tools are the same machine with a different rule table. SQL Fixer, the Oracle 11g LINQ
+lint and anything that follows share `src/lint/`: a scanner per language, a `Finding` shape, a
+`patternRule` factory and one conflict-aware `applyFixes`. The findings UI is shared too, so a new
+linter is a rule table and a dictionary section — not a new page. The SQL scanner also backs
+`minifySql` and `sqlToLinq`, which used to carry their own copies; one of those copies did not know
+what a comment was.
+
 → [ADR-0002: Single API, vertical slices](docs/adr/0002-single-api-vertical-slices.md) ·
 [ADR-0003: Tool registry](docs/adr/0003-tool-registry.md)
 
@@ -117,13 +124,21 @@ state change, and each route carries its own `<title>`, description, canonical U
 `hreflang` links. React 19 hoists metadata rendered inside components, so no helmet library is
 involved.
 
-`sitemap.xml` and `robots.txt` are generated from the catalogue at build time — 52 addresses that
+`sitemap.xml` and `robots.txt` are generated from the catalogue at build time — 58 addresses that
 would otherwise be maintained by hand and quietly fall behind.
 
-The build then renders all 52 to static HTML. That is not an optimisation: **share crawlers do not run
+The build then renders all 58 to static HTML. That is not an optimisation: **share crawlers do not run
 JavaScript**, so without it the Open Graph cards were invisible to exactly the clients they exist for.
 Lazily loaded tools are deliberately not awaited — the crawler needs the heading, the description and
 the guide text, all of which live outside the lazy boundary, not the interactive widget.
+
+Two details are worth naming because they were wrong first. Canonical URLs now end in a slash: GitHub
+Pages answers `/en/t/base64` with a **301** to `/en/t/base64/`, so the slashless form meant every
+canonical tag and every sitemap entry pointed at a redirect — the exact ambiguity canonical exists to
+remove. And the prerenderer writes `lang` per page; the client set it in an effect, which is too late
+for the crawlers that do not run JavaScript, so every Turkish page claimed to be English. Each tool
+page also emits JSON-LD built from what is actually on the page — `SoftwareApplication`, a breadcrumb,
+and `FAQPage` only where a visible guide really has questions.
 
 ## Adding a tool
 
@@ -176,7 +191,7 @@ happens on static hosting.
 
 ## Roadmap
 
-**Shipped — 25 tools, nothing left in a "soon" state.** The ones worth naming, because they do not
+**Shipped — 28 tools, nothing left in a "soon" state.** The ones worth naming, because they do not
 exist elsewhere:
 
 | | |
@@ -194,6 +209,9 @@ exist elsewhere:
 | **JSON → C# / TS** | one sample, two languages — merges every element of an array before deciding a type, so an optional field is not missed |
 | **Hash & HMAC** | SHA from WebCrypto; CRC32 and MD5 hand-written because WebCrypto refuses MD5, verified against the RFC 1321 and RFC 2202 vectors |
 | **Date Format Converter** | Oracle ⇄ .NET ⇄ dayjs ⇄ Delphi patterns, parsed into named fields rather than mapped dialect-to-dialect — so it can say `HH` means 12-hour in Oracle, `mm` means the month in Delphi, and `/` is a culture placeholder that prints a dot under `tr-TR` |
+| **Oracle 11g LINQ Lint** | the EF Core patterns that compile and then fail at runtime on 11g: `AnyAsync`, a bool produced inside a `Select` (`ORA-00904: "FALSE"`), `Query()` inside a lambda (CS0854), `Skip`/`Take`. It knows where to stay quiet — `Any(…)` inside a `Where` is valid and is not reported |
+| **Delphi PAS → SQL** | pulls the SQL out of a `.pas` unit: reassembles the string concatenation, restores the space lost at the seam, and lists bind variables separately from values interpolated into the text |
+| **Oracle Auto-Increment** | sequence + `BEFORE INSERT` trigger for 11g, identity column for 12c — with the `WHEN (NEW.x IS NULL)` clause everyone forgets, and a check on the generated names against the 30-character limit |
 | **SQL Fixer** | a linter with auto-fixes for queries that will not run: invisible characters, curly quotes, paste debris, T-SQL syntax on Oracle, `TOP` and `OFFSET/FETCH` rewritten as `ROWNUM` — and it unwraps a query pasted straight out of a `.pas` or `.cs` file. Every fix is listed and applied individually, because a query that errors is a loud failure and a quietly "fixed" one is a silent one |
 
 The rest are the everyday set: Base64, Case Converter, CSV → JSON/SQL, XML ⇄ JSON, SQL Formatter,
@@ -201,7 +219,8 @@ JSON/XML/HTML/CSS formatter, SQL → LINQ, Epoch, JWT, UUID and HTTP status.
 
 **Next** — nothing is half-built. The next additions would be Oracle-specific rather than generic:
 structural checks in the SQL Fixer (a `GROUP BY` that does not cover the select list is deterministic
-and needs no schema), DDL → EF Core entity, and a DFM inspector for the Delphi side.
+and needs no schema), DDL → EF Core entity, a culture-trap linter for `tr-TR`, and a DFM inspector for
+the Delphi side.
 
 ## Security notes
 

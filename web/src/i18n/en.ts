@@ -1,6 +1,7 @@
 import type { ToolCategory, ToolErrorKey, ToolId } from '../tools/types';
 import type { Dialect, NoteKey, Unit } from '../tools/date-format/dateFormat';
 import type { RuleKey } from '../tools/sql-fix/sqlFix';
+import type { RuleKey as LinqRuleKey } from '../tools/linq-11g/linq11g';
 
 /**
  * Kanonik sözlük.
@@ -89,6 +90,9 @@ export const en = {
     'http-status': 'Codes, headers and .NET constants.',
     'date-format': 'Oracle, .NET, Delphi and dayjs patterns.',
     'sql-fix': 'Find why a query will not run, and fix it.',
+    'linq-11g': 'EF Core patterns that break on Oracle 11g.',
+    'pas-sql': 'Pull embedded SQL out of a Delphi unit.',
+    'oracle-identity': 'Sequence and trigger for an auto key.',
   } satisfies Record<ToolId, string>,
 
   /**
@@ -339,6 +343,7 @@ export const en = {
     backLink: 'Back to all tools',
     viaApi: 'via API',
     runsLocally: 'runs locally',
+    related: 'Related tools',
   },
 
   notFound: {
@@ -633,6 +638,85 @@ export const en = {
         hint: 'Oracle understands this from 12c on. On 11g it has to become nested ROWNUM paging — the outer bound is applied first, then the offset.',
       },
     } satisfies Record<RuleKey, { title: string; hint: string }>,
+  },
+
+  linq11g: {
+    input: 'C# — engine method or query',
+    output: 'With the safe rewrites applied',
+    placeholder: 'Paste a LINQ query or an engine method…',
+    clean: 'nothing found',
+    count: (total: number, fixable: number) => `${total} found · ${fixable} fixable`,
+    findingsTitle: 'Findings',
+    apply: 'apply',
+    manual: 'no auto-fix',
+    applyToInput: 'Move to input',
+    sample: 'Example',
+
+    rules: {
+      anyAsync: {
+        title: 'AnyAsync() does not run on 11g',
+        hint: 'Use FirstOrDefaultAsync(…) != null instead. The rewrite is safe: await binds tighter than !=, so the expression stays a bool in an if and in an assignment alike.',
+      },
+      anyInSelect: {
+        title: 'Any(…) inside a Select projection',
+        hint: 'Any is only turned into EXISTS inside a Where predicate. In a projection 11g fails. Pull the subquery into a local and put the Any in the Where.',
+      },
+      booleanInSelect: {
+        title: 'Producing a bool in the projection',
+        hint: 'Oracle has no TRUE / FALSE literal, so this becomes ORA-00904: "FALSE": invalid identifier. Select the raw value and derive the bool in memory afterwards.',
+      },
+      queryInLambda: {
+        title: 'Query() called inside a lambda',
+        hint: 'CS0854 — an expression tree cannot contain a call with optional arguments. Assign the subquery to a local first, then use it inside the lambda.',
+      },
+      skipTake: {
+        title: 'Skip / Take',
+        hint: 'EF Core turns these into OFFSET … FETCH, which arrived in 12c. On 11g the query has to be paged with a nested ROWNUM wrapper written by hand.',
+      },
+      executeUpdate: {
+        title: 'ExecuteUpdate / ExecuteDelete',
+        hint: 'A set-based statement with no change tracking. Check that the Oracle provider in use supports it, and that skipping SaveChanges does not bypass logic the surrounding code relies on.',
+      },
+      containsList: {
+        title: 'Collection Contains becomes an IN list',
+        hint: 'Oracle raises ORA-01795 past 1000 expressions in an IN list, and every distinct list length also produces a new query to hard-parse. Chunk the list.',
+      },
+      rawSqlInterpolation: {
+        title: 'Interpolated string passed to a Raw method',
+        hint: 'FromSqlRaw pastes the interpolated value straight into the SQL — that is injection. FromSqlInterpolated takes the same syntax and turns every hole into a bind variable.',
+      },
+      dateOnly: {
+        title: 'DateOnly / TimeOnly',
+        hint: 'Oracle has no matching column type and provider support is uneven. DateTime with the time part ignored is the safer mapping.',
+      },
+    } satisfies Record<LinqRuleKey, { title: string; hint: string }>,
+  },
+
+  pasSql: {
+    input: 'Delphi .pas source',
+    placeholder: 'Paste a unit or a single event handler…',
+    sample: 'Example',
+    empty: 'No SQL found yet.',
+    count: (total: number) => `${total} statement${total === 1 ? '' : 's'}`,
+    binds: 'binds',
+    interpolations: 'interpolated into the text:',
+  },
+
+  oracleIdentity: {
+    table: 'Table name',
+    column: 'key column',
+    output: 'Script',
+    placeholder: 'siparis',
+    versionAria: 'Oracle version',
+    startWith: 'start',
+    allowExplicit: 'allow explicit values',
+
+    warnings: {
+      nameTooLong: 'Longer than the identifier limit. The script fails with ORA-00972 when it runs, not when you write it — and the name that breaks is the generated one, not your table.',
+      invalidIdentifier: 'Not a valid unquoted identifier. Oracle names start with a letter and continue with letters, digits, _, $ or #; anything else has to be double-quoted, and then its capitalisation becomes binding forever.',
+      sequenceGaps: 'A sequence leaves gaps. CACHE 20 loses the unused numbers when the instance restarts, and a rolled-back insert never gives its number back. Treat the key as an identifier, not a count.',
+      identityPreferred: 'From 12c on there is no reason for a trigger: an identity column does the same job, is faster, and ON NULL still lets you insert an explicit value.',
+    },
   },
 
   jwt: {
@@ -987,6 +1071,10 @@ export const en = {
     dateFormatEmpty: 'Enter a date format pattern.',
     dateFormatNoTokens: 'Nothing here is a date field — this is all literal text.',
     sqlFixEmpty: 'Paste a query to check.',
+    linqEmpty: 'Paste some C# to check.',
+    pasEmpty: 'Paste a Delphi unit.',
+    pasNoSql: 'No SQL statement found in this source.',
+    identityEmpty: 'Enter a table and a column name.',
   } satisfies Record<ToolErrorKey, string>,
 };
 

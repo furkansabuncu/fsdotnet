@@ -14,8 +14,11 @@ import httpStatus from './http-status';
 import inList from './in-list';
 import jsonToCsharp from './json-to-csharp';
 import jwt from './jwt';
+import linq11g from './linq-11g';
 import mojibake from './mojibake';
+import oracleIdentity from './oracle-identity';
 import oraErrors from './ora-errors';
+import pasSql from './pas-sql';
 import regex from './regex';
 import rtf from './rtf';
 import sqlDiff from './sql-diff';
@@ -43,7 +46,7 @@ import xmlJson from './xml-json';
  */
 const TOOL_LIST: readonly ToolDefinition[] = [
   // .NET ve veri
-  jsonToCsharp, sqlToLinq, inList, oraErrors, bindParams, sqlDiff, dateFormat, sqlFix,
+  jsonToCsharp, sqlToLinq, inList, oraErrors, bindParams, sqlDiff, dateFormat, sqlFix, linq11g, pasSql, oracleIdentity,
   // Dönüştürücüler
   base64, mojibake, rtf, unicode, caseConvert, csvJson, xmlJson,
   // Biçimlendiriciler
@@ -107,4 +110,22 @@ export function searchTools(query: string): ToolDefinition[] {
         a.tool.name.localeCompare(b.tool.name),
     )
     .map((entry) => entry.tool);
+}
+
+/**
+ * Aynı kategorideki komşu araçlar.
+ *
+ * Kayıt sırası kategori içinde ilişkiye göre dizildiği için komşuluk
+ * yeterli bir yakınlık ölçüsü; ayrı bir "ilgili araçlar" tablosu tutmak
+ * onu güncellemeyi unutmak demekti. Liste dairesel: sondaki araç baştakine
+ * bağlanıyor, yani hiçbir sayfa bağlantısız kalmıyor.
+ */
+export function relatedTools(tool: ToolDefinition, count = 3): ToolDefinition[] {
+  const siblings = TOOLS.filter((item) => item.category === tool.category);
+  const index = siblings.findIndex((item) => item.id === tool.id);
+  if (index === -1 || siblings.length < 2) return [];
+
+  return Array.from({ length: Math.min(count, siblings.length - 1) }, (_, offset) => {
+    return siblings[(index + offset + 1) % siblings.length] as ToolDefinition;
+  });
 }

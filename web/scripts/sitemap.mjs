@@ -28,6 +28,11 @@ const publicDir = join(here, '..', 'public');
    varsayılan (src/shared/Seo.tsx), ikisinin ayrışmaması için. */
 const siteUrl = (process.env.VITE_SITE_URL ?? 'https://furkansabuncu.github.io/fsdotnet').replace(/\/+$/, '');
 
+/* Derleme günü. Saat DEĞİL: sitemap her derlemede yeniden yazılıyor ve
+   damga her seferinde değişirse arama motoruna "her şey değişti" demiş
+   oluruz — bir süre sonra `lastmod` hiç dikkate alınmaz. */
+const lastmod = new Date().toISOString().slice(0, 10);
+
 /** Dil öneki olmadan, sitede indekslenmesini istediğimiz her yol. */
 const paths = ['/', ...TOOL_IDS.map((id) => `/t/${id}`)];
 
@@ -53,6 +58,7 @@ const entries = LOCALES.flatMap((locale) =>
         (alternate) =>
           `    <xhtml:link rel="alternate" hreflang="${alternate.lang}" href="${escape(alternate.href)}" />`,
       ),
+      `    <lastmod>${lastmod}</lastmod>`,
       // Ana sayfa katalog değiştikçe güncelleniyor; araç sayfaları daha durgun.
       `    <priority>${path === '/' ? '1.0' : '0.8'}</priority>`,
       '  </url>',

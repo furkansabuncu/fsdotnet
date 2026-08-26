@@ -1,5 +1,15 @@
 import { err, ok, type ToolResult } from '../types';
-import { codeMask, positionOf, scan, type Span } from './scan';
+import { GLUED_KEYWORD, scanSql } from '../../lint/sql';
+import {
+  buildContext,
+  codeMatches,
+  finding,
+  patternRule,
+  runRules,
+  type LintContext,
+  type Rule,
+} from '../../lint/engine';
+import type { Edit, Finding } from '../../lint/types';
 
 /**
  * Çalışmayan SQL'i inceleyip düzeltme öneren kural motoru.
@@ -42,112 +52,16 @@ export type RuleKey =
   | 'topClause'
   | 'offsetFetch';
 
-export type Severity = 'error' | 'warning';
-
-export interface Edit {
-  start: number;
-  end: number;
-  text: string;
-}
-
-export interface Finding {
-  /** Kullanıcının hangi düzeltmeyi kapattığını hatırlamak için kararlı anahtar. */
-  id: string;
-  rule: RuleKey;
-  severity: Severity;
-  start: number;
-  end: number;
-  /** `3:12` — çevrilmez, girdiden gelir. */
-  position: string;
-  /** Bulunan token ya da somut öneri; çevrilmez. */
-  detail?: string;
-  /** Boş dizi: tespit var, otomatik düzeltmesi yok. */
-  edits: Edit[];
-}
-
-interface Context {
-  sql: string;
-  spans: Span[];
-  mask: Uint8Array;
-  /** Parantez derinliği; üst seviye kuralları bunu okur. */
-  depth: Int32Array;
-  /** İlk anlamlı karakterin konumu, yoksa -1. */
-  firstToken: number;
+/**
+ * SQL'e özel bağlam: motorun verdiklerine ifadenin bitiş noktası ekleniyor.
+ * Sarmalayıcı kurallar (TOP, OFFSET) sonu bilmek zorunda.
+ */
+export interface SqlContext extends LintContext {
   /** Sondaki `;`, `/` ve boşluk hariç, ifadenin bittiği yer. */
   statementEnd: number;
 }
 
-interface Rule {
-  key: RuleKey;
-  run(context: Context): Finding[];
-}
-
-/* ------------------------------------------------------------------ */
-/* Ortak yardımcılar — her kural bunları kullanır, kendi kopyasını değil */
-/* ------------------------------------------------------------------ */
-
-function make(
-  context: Context,
-  rule: RuleKey,
-  severity: Severity,
-  start: number,
-  end: number,
-  edits: Edit[] = [],
-  detail?: string,
-): Finding {
-  const finding: Finding = {
-    id: `${rule}:${start}`,
-    rule,
-    severity,
-    start,
-    end,
-    position: positionOf(context.sql, start),
-    edits,
-  };
-  return detail === undefined ? finding : { ...finding, detail };
-}
-
-/** Yalnızca kodun içine düşen eşleşmeler — string ve yorumlar atlanır. */
-function* codeMatches(context: Context, pattern: RegExp): Generator<RegExpExecArray> {
-  const regex = new RegExp(pattern.source, pattern.flags.includes('g') ? pattern.flags : `${pattern.flags}g`);
-  let match = regex.exec(context.sql);
-  while (match !== null) {
-    if (context.mask[match.index]) yield match;
-    if (match[0] === '') regex.lastIndex += 1;
-    match = regex.exec(context.sql);
-  }
-}
-
-/**
- * Kuralların çoğu aynı şekle sahip: kod içinde bir kalıp ara, bulduğunu
- * başka bir metinle değiştir. Bunu her seferinde elle yazmak yerine tek
- * fabrika — yeni bir kural genelde tek satır.
- *
- * `build` null döndürürse eşleşme bulgu sayılmaz; böylece bağlama bakıp
- * yanlış pozitifleri eleyebiliyor.
- */
-function patternRule(
-  key: RuleKey,
-  severity: Severity,
-  pattern: RegExp,
-  build: (match: RegExpExecArray, context: Context) => { text?: string; detail?: string; start?: number; end?: number } | null,
-): Rule {
-  return {
-    key,
-    run(context) {
-      const findings: Finding[] = [];
-      for (const match of codeMatches(context, pattern)) {
-        const result = build(match, context);
-        if (result === null) continue;
-        const start = result.start ?? match.index;
-        const end = result.end ?? match.index + match[0].length;
-        const edits = result.text === undefined ? [] : [{ start, end, text: result.text }];
-        findings.push(make(context, key, severity, start, end, edits, result.detail));
-      }
-      return findings;
-    },
-  };
-}
+type SqlRule = Rule<RuleKey, SqlContext>;
 
 /**
  * İfadenin tamamını saran düzeltmeler (TOP, OFFSET/FETCH).
@@ -156,7 +70,7 @@ function patternRule(
  * sondaki `;` sarmalayıcının İÇİNDE kalır ve düzeltilmiş sorgu yine
  * çalışmaz.
  */
-function wrapEdits(context: Context, remove: { start: number; end: number }, prefix: string, suffix: string): Edit[] {
+function wrapEdits(context: SqlContext, remove: { start: number; end: number }, prefix: string, suffix: string): Edit[] {
   return [
     { start: context.firstToken, end: context.firstToken, text: prefix },
     { start: remove.start, end: remove.end, text: '' },
@@ -196,18 +110,18 @@ const smartQuote = patternRule('smartQuote', 'error', /[\u2018\u2019\u201A\u201B
 const PASTE_PREFIX =
   /^([ \t]*(?:SQL>|>(?=[ \t])|\d+(?=[ \t]{2,}))[ \t]*)|^([ \t]*```[a-z]*[ \t]*$)/gim;
 
-const pastePrefix: Rule = {
+const pastePrefix: SqlRule = {
   key: 'pastePrefix',
   run(context) {
-    const findings: Finding[] = [];
+    const findings: Finding<RuleKey>[] = [];
     for (const match of codeMatches(context, PASTE_PREFIX)) {
       // Çit satırının tamamı gider; önek yalnızca kendisi.
       const fence = match[1] === undefined;
       const end = fence
-        ? Math.min(context.sql.length, match.index + match[0].length + 1)
+        ? Math.min(context.source.length, match.index + match[0].length + 1)
         : match.index + match[0].length;
       findings.push(
-        make(context, 'pastePrefix', 'error', match.index, end, [{ start: match.index, end, text: '' }], match[0].trim() || '```'),
+        finding(context, 'pastePrefix', 'error', match.index, end, [{ start: match.index, end, text: '' }], match[0].trim() || '```'),
       );
     }
     return findings;
@@ -327,27 +241,27 @@ const UNTERMINATED: Record<'string' | 'identifier' | 'comment', RuleKey> = {
   comment: 'unterminatedComment',
 };
 
-const parens: Rule = {
+const parens: SqlRule = {
   key: 'unclosedParen',
   run(context) {
-    const findings: Finding[] = [];
+    const findings: Finding<RuleKey>[] = [];
     const open: number[] = [];
 
-    for (let index = 0; index < context.sql.length; index += 1) {
+    for (let index = 0; index < context.source.length; index += 1) {
       if (!context.mask[index]) continue;
-      const char = context.sql[index];
+      const char = context.source[index];
       if (char === '(') open.push(index);
       else if (char === ')') {
         if (open.length > 0) open.pop();
         // Fazladan kapanış: yerini biliyoruz, silmek güvenli.
-        else findings.push(make(context, 'extraParen', 'error', index, index + 1, [{ start: index, end: index + 1, text: '' }]));
+        else findings.push(finding(context, 'extraParen', 'error', index, index + 1, [{ start: index, end: index + 1, text: '' }]));
       }
     }
 
     // Eksik kapanışın NEREYE geleceği bilinmiyor — açılışı gösterip
     // düzeltmeyi kullanıcıya bırakıyoruz.
     for (const index of open) {
-      findings.push(make(context, 'unclosedParen', 'error', index, index + 1));
+      findings.push(finding(context, 'unclosedParen', 'error', index, index + 1));
     }
     return findings;
   },
@@ -357,11 +271,11 @@ const parens: Rule = {
 /* Sonlandırıcılar                                                      */
 /* ------------------------------------------------------------------ */
 
-const terminators: Rule = {
+const terminators: SqlRule = {
   key: 'trailingSemicolon',
   run(context) {
-    const findings: Finding[] = [];
-    const { sql, mask } = context;
+    const findings: Finding<RuleKey>[] = [];
+    const { source: sql, mask } = context;
     let end = sql.length;
     const back = () => {
       while (end > 0 && /\s/.test(sql[end - 1] as string)) end -= 1;
@@ -377,7 +291,7 @@ const terminators: Rule = {
         end = lineStart;
         // Önündeki satır sonu da silinir; yoksa geriye boş bir satır kalır.
         back();
-        findings.push(make(context, 'sqlPlusSlash', 'warning', end, slashEnd, [{ start: end, end: slashEnd, text: '' }]));
+        findings.push(finding(context, 'sqlPlusSlash', 'warning', end, slashEnd, [{ start: end, end: slashEnd, text: '' }]));
       }
     }
 
@@ -385,7 +299,7 @@ const terminators: Rule = {
       const semicolon = end - 1;
       end = semicolon;
       back();
-      findings.push(make(context, 'trailingSemicolon', 'warning', end, semicolon + 1, [{ start: end, end: semicolon + 1, text: '' }]));
+      findings.push(finding(context, 'trailingSemicolon', 'warning', end, semicolon + 1, [{ start: end, end: semicolon + 1, text: '' }]));
     }
     return findings;
   },
@@ -402,37 +316,7 @@ const extraComma = patternRule(
   () => ({ text: '' }),
 );
 
-/*
- * Yapışmış anahtar kelime — `'...siparis ' + 'where...'` yazarken aradaki
- * boşluğun kaybolması. Sonrasındaki kalıp her kelime için ayrı: `ORDER`
- * ancak `BY` geliyorsa yan tümcedir, yoksa `WORKORDER` gibi bir kolon adını
- * ikiye bölerdik.
- */
-const GLUED_KEYWORDS: Record<string, string> = {
-  WHERE: String.raw`\s`,
-  FROM: String.raw`\s`,
-  SELECT: String.raw`\s`,
-  HAVING: String.raw`\s`,
-  UNION: String.raw`\s`,
-  JOIN: String.raw`\s`,
-  ORDER: String.raw`\s+BY\b`,
-  GROUP: String.raw`\s+BY\b`,
-  INNER: String.raw`\s+JOIN\b`,
-  LEFT: String.raw`\s+JOIN\b`,
-};
-
-const GLUED = new RegExp(
-  // Anahtar kelimeden hemen önce `_` olmasın: `SIPARIS_WHERE` tek bir
-  // tanımlayıcıdır, yapışma değil.
-  String.raw`\b([A-Za-z0-9_$]*[A-Za-z0-9$])(` +
-    Object.entries(GLUED_KEYWORDS)
-      .map(([word, follow]) => `${word}(?=${follow})`)
-      .join('|') +
-    ')',
-  'gi',
-);
-
-const gluedKeyword = patternRule('gluedKeyword', 'warning', GLUED, (match) => ({
+const gluedKeyword = patternRule('gluedKeyword', 'warning', GLUED_KEYWORD, (match) => ({
   text: `${match[1]} ${match[2]}`,
   detail: match[0],
 }));
@@ -442,17 +326,17 @@ const gluedKeyword = patternRule('gluedKeyword', 'warning', GLUED, (match) => ({
    Karşılaştırma bağlamı şart: `SELECT "Kolon Adı"` tamamen geçerlidir. */
 const COMPARISON_BEFORE = /(?:=|<>|!=|<=|>=|<|>|\bLIKE|\bIN\s*\()\s*$/i;
 
-const doubleQuotedString: Rule = {
+const doubleQuotedString: SqlRule = {
   key: 'doubleQuotedString',
   run(context) {
-    const findings: Finding[] = [];
+    const findings: Finding<RuleKey>[] = [];
     for (const span of context.spans) {
       if (span.kind !== 'identifier') continue;
-      if (!COMPARISON_BEFORE.test(context.sql.slice(0, span.start))) continue;
+      if (!COMPARISON_BEFORE.test(context.source.slice(0, span.start))) continue;
 
-      const body = context.sql.slice(span.start + 1, span.end - 1).replace(/""/g, '"');
+      const body = context.source.slice(span.start + 1, span.end - 1).replace(/""/g, '"');
       const text = `'${body.replace(/'/g, "''")}'`;
-      findings.push(make(context, 'doubleQuotedString', 'error', span.start, span.end, [{ start: span.start, end: span.end, text }]));
+      findings.push(finding(context, 'doubleQuotedString', 'error', span.start, span.end, [{ start: span.start, end: span.end, text }]));
     }
     return findings;
   },
@@ -463,27 +347,27 @@ const NAME = /^(?:"[^"\n]*"|[A-Za-z_][\w$#]*)(?:\.(?:"[^"\n]*"|[A-Za-z_][\w$#]*)
 /* `FROM tablo AS t` — Oracle tablo takma adında AS kabul etmez (ORA-00933).
    Kolon takma adında ise kabul eder, o yüzden yalnızca FROM/JOIN sonrası
    bakılıyor. `WITH x AS (` de buraya düşmez. */
-const tableAliasAs: Rule = {
+const tableAliasAs: SqlRule = {
   key: 'tableAliasAs',
   run(context) {
-    const findings: Finding[] = [];
+    const findings: Finding<RuleKey>[] = [];
     for (const match of codeMatches(context, /\b(?:FROM|JOIN)\b/gi)) {
       let cursor = match.index + match[0].length;
       const skip = () => {
-        while (cursor < context.sql.length && /\s/.test(context.sql[cursor] as string)) cursor += 1;
+        while (cursor < context.source.length && /\s/.test(context.source[cursor] as string)) cursor += 1;
       };
 
       skip();
-      const name = NAME.exec(context.sql.slice(cursor));
+      const name = NAME.exec(context.source.slice(cursor));
       if (name === null) continue;
       cursor += name[0].length;
 
       const asStart = cursor;
       skip();
-      if (!/^AS\b/i.test(context.sql.slice(cursor))) continue;
+      if (!/^AS\b/i.test(context.source.slice(cursor))) continue;
       const asEnd = cursor + 2;
 
-      findings.push(make(context, 'tableAliasAs', 'error', cursor, asEnd, [{ start: asStart, end: asEnd, text: '' }]));
+      findings.push(finding(context, 'tableAliasAs', 'error', cursor, asEnd, [{ start: asStart, end: asEnd, text: '' }]));
     }
     return findings;
   },
@@ -568,10 +452,10 @@ const tsqlNoEquivalent = patternRule(
 
 /* T-SQL metni `+` ile birleştirir, Oracle `||` ile. Yalnızca bir metin
    sabitine komşu `+` işaretleniyor; sayısal toplama dokunulmaz. */
-const plusConcat: Rule = {
+const plusConcat: SqlRule = {
   key: 'plusConcat',
   run(context) {
-    const findings: Finding[] = [];
+    const findings: Finding<RuleKey>[] = [];
     const seen = new Set<number>();
 
     for (const span of context.spans) {
@@ -579,12 +463,12 @@ const plusConcat: Rule = {
 
       for (const side of [-1, 1] as const) {
         let cursor = side === -1 ? span.start - 1 : span.end;
-        while (cursor >= 0 && cursor < context.sql.length && /[ \t]/.test(context.sql[cursor] as string)) cursor += side;
-        if (cursor < 0 || cursor >= context.sql.length) continue;
-        if (context.sql[cursor] !== '+' || !context.mask[cursor] || seen.has(cursor)) continue;
+        while (cursor >= 0 && cursor < context.source.length && /[ \t]/.test(context.source[cursor] as string)) cursor += side;
+        if (cursor < 0 || cursor >= context.source.length) continue;
+        if (context.source[cursor] !== '+' || !context.mask[cursor] || seen.has(cursor)) continue;
 
         seen.add(cursor);
-        findings.push(make(context, 'plusConcat', 'error', cursor, cursor + 1, [{ start: cursor, end: cursor + 1, text: '||' }]));
+        findings.push(finding(context, 'plusConcat', 'error', cursor, cursor + 1, [{ start: cursor, end: cursor + 1, text: '||' }]));
       }
     }
     return findings.sort((a, b) => a.start - b.start);
@@ -597,10 +481,10 @@ const plusConcat: Rule = {
 
 const TOP = /\bSELECT\s+(?:DISTINCT\s+|ALL\s+)?(TOP\s*\(?\s*(\d+)\s*\)?\s+)(?!PERCENT\b|WITH\b)/gi;
 
-const topClause: Rule = {
+const topClause: SqlRule = {
   key: 'topClause',
   run(context) {
-    const findings: Finding[] = [];
+    const findings: Finding<RuleKey>[] = [];
     for (const match of codeMatches(context, TOP)) {
       const removeStart = match.index + match[0].length - (match[1] as string).length;
       const remove = { start: removeStart, end: match.index + match[0].length };
@@ -613,7 +497,7 @@ const topClause: Rule = {
         ? wrapEdits(context, remove, 'SELECT * FROM (\n', `\n) WHERE ROWNUM <= ${match[2]}`)
         : [];
 
-      findings.push(make(context, 'topClause', 'error', match.index, remove.end, edits, `TOP ${match[2]}`));
+      findings.push(finding(context, 'topClause', 'error', match.index, remove.end, edits, `TOP ${match[2]}`));
     }
     return findings;
   },
@@ -622,10 +506,10 @@ const topClause: Rule = {
 const OFFSET_FETCH =
   /\bOFFSET\s+(\d+|:\w+)\s+ROWS?\s*(?:FETCH\s+(?:NEXT|FIRST)\s+(\d+|:\w+)\s+ROWS?\s+ONLY)?/gi;
 
-const offsetFetch: Rule = {
+const offsetFetch: SqlRule = {
   key: 'offsetFetch',
   run(context) {
-    const findings: Finding[] = [];
+    const findings: Finding<RuleKey>[] = [];
     for (const match of codeMatches(context, OFFSET_FETCH)) {
       const remove = { start: match.index, end: match.index + match[0].length };
       const offset = match[1] as string;
@@ -644,7 +528,7 @@ const offsetFetch: Rule = {
             )
           : [];
 
-      findings.push(make(context, 'offsetFetch', 'error', remove.start, remove.end, edits, match[0]));
+      findings.push(finding(context, 'offsetFetch', 'error', remove.start, remove.end, edits, match[0]));
     }
     return findings;
   },
@@ -661,7 +545,7 @@ function sumOrExpression(offset: string, limit: string): string {
 /* Motor                                                                */
 /* ------------------------------------------------------------------ */
 
-const RULES: readonly Rule[] = [
+const RULES: readonly SqlRule[] = [
   invisibleChar,
   smartQuote,
   pastePrefix,
@@ -680,36 +564,27 @@ const RULES: readonly Rule[] = [
   offsetFetch,
 ];
 
-function buildContext(sql: string): Context {
-  const { spans } = scan(sql);
-  const mask = codeMask(sql, spans);
-  const depth = new Int32Array(sql.length);
+function buildSqlContext(sql: string): SqlContext {
+  const base = buildContext(sql, scanSql(sql).spans);
 
-  let level = 0;
-  let firstToken = -1;
-  for (let index = 0; index < sql.length; index += 1) {
-    depth[index] = level;
-    if (!mask[index]) continue;
-    const char = sql[index];
-    if (char === '(') level += 1;
-    else if (char === ')') level = Math.max(0, level - 1);
-    if (firstToken === -1 && !/\s/.test(char as string)) firstToken = index;
-  }
-
+  /* Sarmalayıcı sonek buraya yazılıyor, girdinin sonuna değil: aksi hâlde
+     sondaki `;` sarmalayıcının İÇİNDE kalır ve düzeltilmiş sorgu yine
+     çalışmaz. */
   let statementEnd = sql.length;
   const trimBack = () => {
     while (statementEnd > 0 && /\s/.test(sql[statementEnd - 1] as string)) statementEnd -= 1;
   };
+
   trimBack();
   while (statementEnd > 0 && (sql[statementEnd - 1] === ';' || sql[statementEnd - 1] === '/')) {
     statementEnd -= 1;
     trimBack();
   }
 
-  return { sql, spans, mask, depth, firstToken: Math.max(0, firstToken), statementEnd };
+  return { ...base, statementEnd };
 }
 
-export function analyze(sql: string): ToolResult<Finding[]> {
+export function analyze(sql: string): ToolResult<Finding<RuleKey>[]> {
   if (sql.trim() === '') return err('sqlFixEmpty');
 
   /* Girdi ana dilden yapıştırılmış bir string ifadesiyse öteki kuralların
@@ -717,58 +592,18 @@ export function analyze(sql: string): ToolResult<Finding[]> {
      metin sabiti. Önce bu çözülmeli. */
   const host = unwrapHostString(sql);
   if (host !== null) {
-    const context = buildContext(sql);
+    const context = buildSqlContext(sql);
     return ok([
-      make(context, 'hostStringLiteral', 'error', 0, sql.length, [{ start: 0, end: sql.length, text: host.text }], host.flavour),
+      finding(context, 'hostStringLiteral', 'error', 0, sql.length, [{ start: 0, end: sql.length, text: host.text }], host.flavour),
     ]);
   }
 
-  const context = buildContext(sql);
-  const findings = RULES.flatMap((rule) => rule.run(context));
+  const context = buildSqlContext(sql);
+  const findings = runRules(context, RULES);
 
-  const { unterminated } = scan(sql);
+  const { unterminated } = scanSql(sql);
   if (unterminated !== null) {
-    findings.push(make(context, UNTERMINATED[unterminated.kind], 'error', unterminated.start, sql.length));
+    findings.push(finding(context, UNTERMINATED[unterminated.kind], 'error', unterminated.start, sql.length));
   }
-
-  return ok(findings.sort((a, b) => a.start - b.start || a.rule.localeCompare(b.rule)));
-}
-
-/**
- * Seçili düzeltmeleri uygular.
- *
- * Çakışan düzeltmeler ATLANIR, kırpılmaz: iki kural aynı aralığı farklı
- * biçimde değiştirmek istiyorsa ikisini karıştırmak ortaya hiçbirinin
- * kastetmediği bir metin çıkarır. Atlanan kural bir sonraki turda yeniden
- * bulunur, çünkü girdi hâlâ o hâlde.
- */
-export function applyFixes(
-  sql: string,
-  findings: readonly Finding[],
-  excluded: ReadonlySet<string> = new Set(),
-): string {
-  const claimed: Edit[] = [];
-
-  for (const finding of findings) {
-    if (finding.edits.length === 0 || excluded.has(finding.id)) continue;
-    const overlaps = finding.edits.some((edit) =>
-      claimed.some((other) =>
-        edit.start === edit.end && other.start === other.end
-          ? edit.start === other.start
-          : edit.start < other.end && other.start < edit.end,
-      ),
-    );
-    if (!overlaps) claimed.push(...finding.edits);
-  }
-
-  let output = sql;
-  for (const edit of [...claimed].sort((a, b) => b.start - a.start || b.end - a.end)) {
-    output = output.slice(0, edit.start) + edit.text + output.slice(edit.end);
-  }
-  return output;
-}
-
-/** Otomatik düzeltmesi olan bulgu sayısı — arayüz "hepsini uygula"yı buna göre gösterir. */
-export function fixableCount(findings: readonly Finding[]): number {
-  return findings.filter((finding) => finding.edits.length > 0).length;
+  return ok(findings);
 }

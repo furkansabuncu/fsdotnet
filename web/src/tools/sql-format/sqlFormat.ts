@@ -1,6 +1,6 @@
 import { format } from 'sql-formatter';
 import { err, ok, type ToolResult } from '../types';
-import { scan } from '../sql-fix/scan';
+import { scanSql } from '../../lint/sql';
 
 /**
  * Desteklenen lehçeler.
@@ -69,7 +69,7 @@ const WHITESPACE = /\s/;
  * girdi bölgelere ayrılıyor: literal, tanımlayıcı ve yorumlar bir bütün
  * olarak geçirilir, boşluk yalnızca kodun içinde toplanır.
  *
- * Bölge ayrımı `sql-fix/scan` ile ORTAK. Eskiden burada kendi tarayıcısı
+ * Bölge ayrımı `lint/sql` ile ORTAK. Eskiden burada kendi tarayıcısı
  * vardı; iki kopya tutmak, birinde düzeltilen bir tırnak kaçışının ötekinde
  * bozuk kalması demekti.
  */
@@ -100,7 +100,7 @@ export function minifySql(input: string): ToolResult<string> {
     out.push(text);
   };
 
-  for (const span of scan(input).spans) {
+  for (const span of scanSql(input).spans) {
     const text = input.slice(span.start, span.end);
 
     // Yorum silinir ama yerine boşluk kalır, yoksa iki token birleşir.

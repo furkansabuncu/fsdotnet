@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { analyze, applyFixes, fixableCount, unwrapHostString, type Finding, type RuleKey } from './sqlFix';
-import { positionOf, scan } from './scan';
+import { analyze, unwrapHostString, type RuleKey } from './sqlFix';
+import { applyFixes, fixableCount } from '../../lint/engine';
+import type { Finding } from '../../lint/types';
 
-const findings = (sql: string): Finding[] => {
+const findings = (sql: string): Finding<RuleKey>[] => {
   const result = analyze(sql);
   if (!result.ok) throw new Error(`beklenmeyen hata: ${result.error}`);
   return result.value;
@@ -12,29 +13,6 @@ const rules = (sql: string): RuleKey[] => findings(sql).map((finding) => finding
 
 /** Tüm düzeltmeleri uygulayıp sonucu verir — kuralların net etkisi. */
 const fix = (sql: string): string => applyFixes(sql, findings(sql));
-
-describe('scan', () => {
-  it('metin, tanımlayıcı ve yorumu koddan ayırır', () => {
-    const { spans } = scan(`select 'a--b' /* x */ from t -- son`);
-    expect(spans.filter((span) => span.kind === 'string')).toHaveLength(1);
-    expect(spans.filter((span) => span.kind === 'comment')).toHaveLength(2);
-  });
-
-  it('ikiye katlanmış tırnak kaçıştır, kapanış değil', () => {
-    const { spans, unterminated } = scan(`select 'it''s' from t`);
-    expect(unterminated).toBeNull();
-    const literal = spans.find((span) => span.kind === 'string');
-    expect(`select 'it''s' from t`.slice(literal!.start, literal!.end)).toBe("'it''s'");
-  });
-
-  it('kapanmamış tırnağı bildirir', () => {
-    expect(scan(`select 'a from t`).unterminated).toEqual({ kind: 'string', start: 7 });
-  });
-
-  it('konumu satır:sütun verir', () => {
-    expect(positionOf('bir\niki\nuc', 8)).toBe('3:1');
-  });
-});
 
 describe('yapıştırma hasarı', () => {
   it('görünmez karakteri bulur ve kod noktasını söyler', () => {
@@ -307,7 +285,7 @@ describe('applyFixes', () => {
 
   it('çakışan düzeltmeleri karıştırmaz', () => {
     const sql = 'select 1 from dual';
-    const overlapping: Finding[] = [
+    const overlapping: Finding<RuleKey>[] = [
       { id: 'a', rule: 'extraComma', severity: 'error', start: 0, end: 6, position: '1:1', edits: [{ start: 0, end: 6, text: 'SELECT' }] },
       { id: 'b', rule: 'extraComma', severity: 'error', start: 2, end: 4, position: '1:3', edits: [{ start: 2, end: 4, text: 'XX' }] },
     ];

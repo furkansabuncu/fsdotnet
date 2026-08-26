@@ -3,7 +3,9 @@ import { useI18n } from '../i18n/I18nProvider';
 import { CATEGORIES, categoryVars } from '../tools/categories';
 import { CLIENT_COUNT, TOTAL_COUNT, toolsByCategory } from '../tools/registry';
 import HeroDemo from '../shared/HeroDemo';
-import Seo from '../shared/Seo';
+import Seo, { SITE_URL } from '../shared/Seo';
+import StructuredData from '../shared/StructuredData';
+import { websiteSchema } from '../shared/schema';
 import ToolCard from '../shared/ToolCard';
 
 
@@ -30,6 +32,13 @@ export default function HomePage() {
   return (
     <div className="flex flex-col gap-10 py-8">
       <Seo title={t.seo.homeTitle} description={t.seo.homeDescription} path="/" locale={locale} />
+
+      <StructuredData
+        data={websiteSchema(
+          { siteUrl: SITE_URL, locale },
+          { name: t.seo.homeTitle, description: t.seo.homeDescription },
+        )}
+      />
 
       <section className="grid items-center gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,440px)]">
         <div className="flex flex-col gap-4">
