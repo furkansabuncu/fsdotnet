@@ -1,5 +1,6 @@
 import type { ToolCategory, ToolErrorKey, ToolId } from '../tools/types';
 import type { Dialect, NoteKey, Unit } from '../tools/date-format/dateFormat';
+import type { RuleKey } from '../tools/sql-fix/sqlFix';
 
 /**
  * Kanonik sözlük.
@@ -87,6 +88,7 @@ export const en = {
     cron: 'Unix and Quartz, with the next runs.',
     'http-status': 'Codes, headers and .NET constants.',
     'date-format': 'Oracle, .NET, Delphi and dayjs patterns.',
+    'sql-fix': 'Find why a query will not run, and fix it.',
   } satisfies Record<ToolId, string>,
 
   /**
@@ -268,6 +270,30 @@ export const en = {
         {
           q: 'Will the month and day names come out in Turkish?',
           a: 'That depends on the runtime, not the pattern. Oracle takes them from NLS_DATE_LANGUAGE, .NET from the thread culture, dayjs from the loaded locale. The sample output here uses the language of this page, so it shows you the shape rather than promising you the wording.',
+        },
+      ],
+    },
+
+    'sql-fix': {
+      heading: 'Why a query that looks correct refuses to run',
+      body: [
+        'Most queries that will not run are not broken grammar. They are damaged in transit. A query copied out of Word arrives with curly quotes and non-breaking spaces; one copied from a chat window brings an SQL*Plus prompt or a markdown fence with it; one built by concatenating strings in Delphi or C# loses the space at the seam, so a table name and the next clause become one word. Oracle reports these as ORA-00911, invalid character — which is true, and tells you nothing, because the character it is complaining about is invisible on screen.',
+        'The second group is dialect. A query written for SQL Server is valid SQL and still fails on Oracle: square brackets around identifiers, AS in front of a table alias, @ in front of a parameter, ISNULL instead of NVL, and double quotes around a text value — which Oracle reads as a column name and answers with ORA-00904. SELECT TOP and OFFSET / FETCH are the same story one level up: they need to be rewritten as ROWNUM, not renamed.',
+        'This tool is a linter with auto-fixes, not a repair service. Every finding is listed on its own and applied on its own, and it says which ones it will not touch. That is a deliberate choice: a query that errors is a loud failure and you see it, while a query that was quietly "fixed" is a silent one and returns the wrong rows. Deleting a stray comma is safe; changing the shape of a statement is your decision, not the tool’s.',
+        'What it cannot do is anything that needs the database. A misspelled table or column, an ambiguous column across two joined tables, a type that will not convert — those need the schema, and the schema is not here. Nothing you paste leaves the browser, which is the other half of the same design: internal queries have no business being uploaded to a website to be checked.',
+      ],
+      faq: [
+        {
+          q: 'Is my query uploaded anywhere?',
+          a: 'No. Every check runs in this tab; there is no request to a server and no analytics on the content. That matters here more than on most tools, because the queries people want to check are usually the ones they are least allowed to share.',
+        },
+        {
+          q: 'Why did it only report one finding on my Delphi query?',
+          a: 'Because the whole input was still a quoted string from a .pas file. Until that is unwrapped, every other check would be examining one long text literal and everything it said would be wrong. Apply that fix, move the result into the input, and the query gets checked properly on the second pass.',
+        },
+        {
+          q: 'It found nothing but the query still fails. Now what?',
+          a: 'Then the problem needs the database. The most common causes are a name that does not exist, a column that exists in both joined tables (ORA-00918), a value that will not convert (ORA-01722), or missing privileges. None of those can be decided from the text of the query alone.',
         },
       ],
     },
@@ -494,6 +520,119 @@ export const en = {
       dropped: 'Some fields have no equivalent in this dialect and were left out.',
       approx: 'One token is the closest match rather than an exact one — check the sample output.',
     } satisfies Record<NoteKey, string>,
+  },
+
+  sqlFix: {
+    input: 'Query that will not run',
+    output: 'With the selected fixes applied',
+    placeholder: 'Paste a query — nothing is uploaded…',
+    clean: 'nothing found',
+    count: (total: number, fixable: number) => `${total} found · ${fixable} fixable`,
+    findingsTitle: 'Findings',
+    apply: 'apply',
+    manual: 'no auto-fix',
+    applyToInput: 'Move to input',
+    reset: 'Example',
+
+    samples: {
+      tsql: 'T-SQL → Oracle',
+      delphi: 'Delphi string',
+      paste: 'Paste damage',
+    },
+
+    /* Başlık listede taranmak için kısa; ipucu "neden çalışmıyor"u
+       anlatıyor — asıl değer orada, çünkü Oracle'ın kendi mesajı
+       semptomu söylüyor, sebebi değil. */
+    rules: {
+      hostStringLiteral: {
+        title: 'This is source code, not SQL',
+        hint: 'The whole input is a quoted, concatenated string from a .pas or .cs file. Unwrap it first — until then every other check would be reading one long text literal.',
+      },
+      invisibleChar: {
+        title: 'Invisible character',
+        hint: 'A non-breaking space or zero-width character, almost always from Word, Teams or a PDF. Oracle answers ORA-00911 and the query looks perfect on screen.',
+      },
+      smartQuote: {
+        title: 'Curly quote',
+        hint: 'A word processor replaced the straight quote with a typographic one. SQL only understands the straight version.',
+      },
+      pastePrefix: {
+        title: 'Paste debris at the start of the line',
+        hint: 'An SQL*Plus prompt, a line number, an email quote marker or a markdown fence came along with the copy.',
+      },
+      unterminatedString: {
+        title: 'Unclosed quote',
+        hint: 'A string literal is never closed, so everything after it is being read as text. Where the closing quote belongs cannot be guessed.',
+      },
+      unterminatedIdentifier: {
+        title: 'Unclosed double quote',
+        hint: 'A quoted identifier is never closed. In Oracle double quotes name a column, they do not open a string.',
+      },
+      unterminatedComment: {
+        title: 'Unclosed block comment',
+        hint: 'A /* was opened and never closed, so the rest of the query is commented out.',
+      },
+      unclosedParen: {
+        title: 'Unclosed parenthesis',
+        hint: 'This bracket is never closed. No fix is offered because where the closing bracket belongs changes what the query means.',
+      },
+      extraParen: {
+        title: 'Extra closing parenthesis',
+        hint: 'There is no opening bracket for this one, so deleting it is safe.',
+      },
+      trailingSemicolon: {
+        title: 'Trailing semicolon',
+        hint: 'Fine in SQL*Plus or SQL Developer, but ODP.NET and JDBC send the statement as-is and Oracle answers ORA-00911.',
+      },
+      sqlPlusSlash: {
+        title: 'SQL*Plus run marker',
+        hint: 'The lone slash tells SQL*Plus to execute the buffer. It is not part of the statement.',
+      },
+      extraComma: {
+        title: 'Comma with nothing after it',
+        hint: 'Usually what is left behind after deleting a column. Oracle answers ORA-00936, missing expression.',
+      },
+      gluedKeyword: {
+        title: 'Keyword glued to the word before it',
+        hint: 'The classic result of building a query by concatenating strings: the space at the seam is missing, so a table name and a clause became one word.',
+      },
+      doubleQuotedString: {
+        title: 'Double quotes around a value',
+        hint: 'In Oracle double quotes name an identifier, so this is read as a column and you get ORA-00904. Text literals take single quotes.',
+      },
+      tableAliasAs: {
+        title: 'AS before a table alias',
+        hint: 'SQL Server allows it, Oracle does not — ORA-00933. AS is still correct in front of a column alias.',
+      },
+      bracketIdentifier: {
+        title: 'Square-bracket identifier',
+        hint: 'Brackets are T-SQL. Oracle needs the bare name, or double quotes when the name contains a space — and then its capitalisation becomes binding.',
+      },
+      atParameter: {
+        title: 'Bind variable written with @',
+        hint: 'T-SQL marks parameters with @, Oracle with a colon. A database link (table@link) is left alone.',
+      },
+      tsqlFunction: {
+        title: 'T-SQL function with a direct equivalent',
+        hint: 'The arguments mean the same thing, so the name can simply be swapped.',
+      },
+      tsqlNoEquivalent: {
+        title: 'T-SQL function without a direct equivalent',
+        hint: 'Not fixed automatically: the argument order or the structure changes, and a silent rewrite would give you a query that runs and returns the wrong thing.',
+      },
+      plusConcat: {
+        title: 'Text joined with +',
+        hint: 'Oracle joins text with ||. With +, one string operand makes Oracle try to read the other as a number — ORA-01722.',
+      },
+      topClause: {
+        title: 'SELECT TOP',
+        hint: 'T-SQL only. The equivalent that works on every Oracle version is a ROWNUM wrapper around the ordered query.',
+      },
+      offsetFetch: {
+        title: 'OFFSET / FETCH paging',
+        hint: 'Oracle understands this from 12c on. On 11g it has to become nested ROWNUM paging — the outer bound is applied first, then the offset.',
+      },
+    } satisfies Record<RuleKey, { title: string; hint: string }>,
   },
 
   jwt: {
@@ -847,6 +986,7 @@ export const en = {
     sqlNoFrom: 'The statement has no FROM clause.',
     dateFormatEmpty: 'Enter a date format pattern.',
     dateFormatNoTokens: 'Nothing here is a date field — this is all literal text.',
+    sqlFixEmpty: 'Paste a query to check.',
   } satisfies Record<ToolErrorKey, string>,
 };
 

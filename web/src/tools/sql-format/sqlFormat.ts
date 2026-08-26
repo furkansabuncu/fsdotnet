@@ -1,5 +1,6 @@
 import { format } from 'sql-formatter';
 import { err, ok, type ToolResult } from '../types';
+import { scan } from '../sql-fix/scan';
 
 /**
  * Desteklenen lehçeler.
@@ -60,17 +61,17 @@ export function formatSql(input: string, options: SqlFormatOptions): ToolResult<
 
 /** Minify sırasında bir parçanın dokunulmaz olup olmadığı. */
 const WHITESPACE = /\s/;
-
 /**
  * Sorguyu tek satıra indirir.
  *
  * Naif bir `replace(/\s+/g, ' ')` string literal'lerin İÇİNDEKİ boşluğu da
  * ezer — `'a   b'` sessizce `'a b'` olur ve sorgunun anlamı değişir. Bu yüzden
- * girdi elle taranıyor: literal, tanımlayıcı ve yorumlar bir bütün olarak
- * geçirilir, boşluk yalnızca onların DIŞINDA toplanır.
+ * girdi bölgelere ayrılıyor: literal, tanımlayıcı ve yorumlar bir bütün
+ * olarak geçirilir, boşluk yalnızca kodun içinde toplanır.
  *
- * Bilinen sınır: Oracle'ın `q'[...]'` alternatif tırnak sözdizimi
- * desteklenmiyor — sıradan tırnak gibi okunur.
+ * Bölge ayrımı `sql-fix/scan` ile ORTAK. Eskiden burada kendi tarayıcısı
+ * vardı; iki kopya tutmak, birinde düzeltilen bir tırnak kaçışının ötekinde
+ * bozuk kalması demekti.
  */
 export function minifySql(input: string): ToolResult<string> {
   if (input.trim() === '') return ok('');
@@ -99,59 +100,25 @@ export function minifySql(input: string): ToolResult<string> {
     out.push(text);
   };
 
-  let i = 0;
-  while (i < input.length) {
-    const char = input[i] as string;
-    const next = input[i + 1];
+  for (const span of scan(input).spans) {
+    const text = input.slice(span.start, span.end);
 
-    // Satır yorumu — silinir ama yerine boşluk kalır, yoksa iki token birleşir.
-    if (char === '-' && next === '-') {
-      while (i < input.length && input[i] !== '\n') i += 1;
+    // Yorum silinir ama yerine boşluk kalır, yoksa iki token birleşir.
+    if (span.kind === 'comment') {
       pendingSpace = true;
       continue;
     }
 
-    // Blok yorumu.
-    if (char === '/' && next === '*') {
-      i += 2;
-      while (i < input.length && !(input[i] === '*' && input[i + 1] === '/')) i += 1;
-      i += 2;
-      pendingSpace = true;
+    // Dize ve tanımlayıcı aynen geçer — içindeki boşluk veridir.
+    if (span.kind !== 'code') {
+      emit(text);
       continue;
     }
 
-    // Tek tırnaklı dize ve çift tırnaklı tanımlayıcı: aynen geçer.
-    if (char === "'" || char === '"') {
-      const quote = char;
-      let literal = quote;
-      i += 1;
-      while (i < input.length) {
-        if (input[i] === quote) {
-          // SQL'de tırnak, ikiye katlanarak kaçırılır: 'it''s'
-          if (input[i + 1] === quote) {
-            literal += quote + quote;
-            i += 2;
-            continue;
-          }
-          literal += quote;
-          i += 1;
-          break;
-        }
-        literal += input[i];
-        i += 1;
-      }
-      emit(literal);
-      continue;
+    for (const char of text) {
+      if (WHITESPACE.test(char)) pendingSpace = true;
+      else emit(char);
     }
-
-    if (WHITESPACE.test(char)) {
-      pendingSpace = true;
-      while (i < input.length && WHITESPACE.test(input[i] as string)) i += 1;
-      continue;
-    }
-
-    emit(char);
-    i += 1;
   }
 
   return ok(out.join('').trim());

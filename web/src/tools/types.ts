@@ -47,6 +47,7 @@ export const TOOL_IDS = [
   'cron',
   'http-status',
   'date-format',
+  'sql-fix',
 ] as const;
 
 export type ToolId = (typeof TOOL_IDS)[number];
@@ -131,7 +132,8 @@ export type ToolErrorKey =
   | 'sqlSelectOnly'
   | 'sqlNoFrom'
   | 'dateFormatEmpty'
-  | 'dateFormatNoTokens';
+  | 'dateFormatNoTokens'
+  | 'sqlFixEmpty';
 
 /**
  * Her araç fonksiyonunun ortak dönüş tipi. Araçlar exception fırlatmaz —

@@ -19,6 +19,7 @@ import oraErrors from './ora-errors';
 import regex from './regex';
 import rtf from './rtf';
 import sqlDiff from './sql-diff';
+import sqlFix from './sql-fix';
 import sqlFormat from './sql-format';
 import sqlToLinq from './sql-to-linq';
 import trData from './tr-data';
@@ -42,7 +43,7 @@ import xmlJson from './xml-json';
  */
 const TOOL_LIST: readonly ToolDefinition[] = [
   // .NET ve veri
-  jsonToCsharp, sqlToLinq, inList, oraErrors, bindParams, sqlDiff, dateFormat,
+  jsonToCsharp, sqlToLinq, inList, oraErrors, bindParams, sqlDiff, dateFormat, sqlFix,
   // Dönüştürücüler
   base64, mojibake, rtf, unicode, caseConvert, csvJson, xmlJson,
   // Biçimlendiriciler

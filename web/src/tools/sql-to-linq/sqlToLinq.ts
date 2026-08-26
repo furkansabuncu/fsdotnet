@@ -1,4 +1,5 @@
 import { err, ok, type ToolResult } from '../types';
+import { codeMask, scan } from '../sql-fix/scan';
 
 /**
  * SELECT ifadesini LINQ'e çevirir.
@@ -30,19 +31,17 @@ function splitTopLevel(sql: string, keywords: readonly string[]): Map<string, st
   const upper = sql.toUpperCase();
   const found: { keyword: string; start: number; end: number }[] = [];
 
+  /* Dize, tanımlayıcı ve yorumları ayıklamak `sql-fix/scan` ile ORTAK.
+     Burada eskiden ayrı bir tırnak takibi vardı; hem ikinci bir kopyaydı
+     hem de yorumları görmüyordu — `-- from x` yazan bir satır yan tümce
+     sanılıyordu. */
+  const mask = codeMask(sql, scan(sql).spans);
+
   let depth = 0;
-  let quote = '';
   for (let index = 0; index < sql.length; index += 1) {
+    if (!mask[index]) continue;
     const char = sql[index]!;
 
-    if (quote) {
-      if (char === quote) quote = '';
-      continue;
-    }
-    if (char === "'" || char === '"') {
-      quote = char;
-      continue;
-    }
     if (char === '(') depth += 1;
     if (char === ')') depth -= 1;
     if (depth !== 0) continue;

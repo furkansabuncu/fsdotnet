@@ -74,6 +74,7 @@ export const tr: Dictionary = {
     cron: 'Unix ve Quartz, sonraki çalışmalarla.',
     'http-status': "Kodlar, header'lar ve .NET sabitleri.",
     'date-format': 'Oracle, .NET, Delphi ve dayjs kalıpları.',
+    'sql-fix': 'Sorgu neden çalışmıyor — bul ve düzelt.',
   },
 
 toolGuides: {
@@ -248,6 +249,30 @@ toolGuides: {
         {
           q: 'Ay ve gün adları Türkçe mi gelecek?',
           a: 'Bu kalıba değil, çalışma ortamına bağlı. Oracle NLS_DATE_LANGUAGE’dan, .NET iş parçacığının kültüründen, dayjs yüklü yerelden alır. Buradaki örnek çıktı bu sayfanın dilini kullanıyor; yani size biçimi gösteriyor, kelimeyi vaat etmiyor.',
+        },
+      ],
+    },
+
+    'sql-fix': {
+      heading: 'Doğru görünen bir sorgu neden çalışmaz',
+      body: [
+        'Çalışmayan sorguların çoğunun grameri bozuk değildir; yolda hasar görmüştür. Word’den kopyalanan sorgu kıvrık tırnaklar ve kırılmaz boşluklarla gelir; sohbet penceresinden kopyalanan yanında SQL*Plus istemini ya da markdown çitini getirir; Delphi veya C#’ta string birleştirerek kurulan sorgu ekteki boşluğu kaybeder ve tablo adıyla bir sonraki yan tümce tek kelime olur. Oracle bunlara ORA-00911 “geçersiz karakter” der — doğrudur ve hiçbir şey anlatmaz, çünkü şikâyet ettiği karakter ekranda görünmüyordur.',
+        'İkinci grup lehçe. SQL Server için yazılmış bir sorgu geçerli SQL’dir ve Oracle’da yine de patlar: tanımlayıcı etrafında köşeli parantez, tablo takma adından önce AS, parametre önünde @, NVL yerine ISNULL, ve metin değerinin etrafında çift tırnak — ki Oracle onu kolon adı okur ve ORA-00904 der. SELECT TOP ile OFFSET / FETCH aynı hikâyenin bir üst basamağı: adı değiştirilerek değil, ROWNUM’a yeniden yazılarak çevrilirler.',
+        'Bu araç bir tamir servisi değil, auto-fix’li bir linter. Her bulgu ayrı listeleniyor, ayrı uygulanıyor ve dokunmayacaklarını da söylüyor. Bu bilinçli bir tercih: hata veren sorgu gürültülü bir arızadır, görürsünüz; sessizce “düzeltilmiş” sorgu ise sessiz bir arızadır ve yanlış satırları döndürür. Fazladan bir virgülü silmek güvenli, ama ifadenin yapısını değiştirmek aracın değil sizin kararınız.',
+        'Yapamayacağı şey, veritabanı gerektiren her şey. Yanlış yazılmış tablo ya da kolon adı, iki tabloda birden bulunan belirsiz kolon, dönüşmeyen bir tip — bunlar için şema gerekir ve şema burada yok. Yapıştırdığınız hiçbir şey tarayıcıdan çıkmıyor; bu da aynı tasarımın öteki yarısı: kurum içi sorguların denetlenmek için bir siteye yüklenmesi gerekmez.',
+      ],
+      faq: [
+        {
+          q: 'Sorgum bir yere yükleniyor mu?',
+          a: 'Hayır. Bütün denetimler bu sekmede çalışıyor; sunucuya istek gitmiyor, içerik üzerinden ölçüm yapılmıyor. Bu araçta bu, çoğundan daha önemli: insanların denetlemek istediği sorgular genellikle paylaşmaya en az izinli oldukları sorgulardır.',
+        },
+        {
+          q: 'Delphi sorgumda neden tek bir bulgu çıktı?',
+          a: 'Çünkü girdinin tamamı hâlâ bir .pas dosyasından gelen tırnaklı bir string’di. O çözülmeden öteki denetimler tek bir uzun metin sabitine bakmış olur ve söyledikleri her şey yanlış olurdu. O düzeltmeyi uygulayıp sonucu girdiye taşıyın; sorgu ikinci turda gerçekten denetlenir.',
+        },
+        {
+          q: 'Hiçbir bulgu çıkmadı ama sorgu yine çalışmıyor. Şimdi ne olacak?',
+          a: 'O hâlde sorun veritabanını gerektiriyor. En sık sebepler: var olmayan bir ad, birleştirilen iki tabloda da bulunan bir kolon (ORA-00918), dönüşmeyen bir değer (ORA-01722) ya da eksik yetki. Bunların hiçbirine sorgunun metnine bakarak karar verilemez.',
         },
       ],
     },
@@ -468,6 +493,116 @@ toolGuides: {
         'Bu token’lardan biri dayjs eklentisi istiyor — advancedFormat, isoWeek ya da timezone. Moment’te hepsi hazır gelir.',
       dropped: 'Bazı alanların bu lehçede karşılığı yok, kalıba yazılmadı.',
       approx: 'Bir token birebir değil, en yakın karşılık — örnek çıktıyı kontrol edin.',
+    },
+  },
+
+  sqlFix: {
+    input: 'Çalışmayan sorgu',
+    output: 'Seçili düzeltmeler uygulanmış hâli',
+    placeholder: 'Bir sorgu yapıştırın — hiçbir şey yüklenmez…',
+    clean: 'bulgu yok',
+    count: (total: number, fixable: number) => `${total} bulgu · ${fixable} düzeltilebilir`,
+    findingsTitle: 'Bulgular',
+    apply: 'uygula',
+    manual: 'elle',
+    applyToInput: 'Girdiye taşı',
+    reset: 'Örnek',
+
+    samples: {
+      tsql: 'T-SQL → Oracle',
+      delphi: 'Delphi string',
+      paste: 'Yapıştırma hasarı',
+    },
+
+    rules: {
+      hostStringLiteral: {
+        title: 'Bu SQL değil, kaynak kodu',
+        hint: 'Girdinin tamamı bir .pas ya da .cs dosyasından kopyalanmış, tırnaklı ve birleştirilmiş bir string ifadesi. Önce bu çözülmeli — çözülmeden öteki denetimler tek bir uzun metin sabiti okumuş olur.',
+      },
+      invisibleChar: {
+        title: 'Görünmez karakter',
+        hint: 'Kırılmaz boşluk ya da sıfır genişlikli bir karakter; neredeyse her zaman Word, Teams veya PDF’ten geliyor. Oracle ORA-00911 diyor, sorgu ekranda kusursuz duruyor.',
+      },
+      smartQuote: {
+        title: 'Kıvrık tırnak',
+        hint: 'Kelime işlemci düz tırnağı tipografik olanla değiştirmiş. SQL yalnızca düz olanı tanıyor.',
+      },
+      pastePrefix: {
+        title: 'Satır başında yapıştırma kiri',
+        hint: 'Kopyalarken SQL*Plus istemi, satır numarası, e-posta alıntı işareti ya da markdown çiti de gelmiş.',
+      },
+      unterminatedString: {
+        title: 'Kapanmamış tırnak',
+        hint: 'Bir metin sabiti hiç kapanmıyor, dolayısıyla sonrasındaki her şey metin olarak okunuyor. Kapanışın nereye geleceği tahmin edilemez.',
+      },
+      unterminatedIdentifier: {
+        title: 'Kapanmamış çift tırnak',
+        hint: 'Tırnaklı bir tanımlayıcı kapanmamış. Oracle’da çift tırnak metin açmaz, kolon adlandırır.',
+      },
+      unterminatedComment: {
+        title: 'Kapanmamış blok yorum',
+        hint: 'Açılan /* hiç kapanmamış, yani sorgunun geri kalanı yorum içinde kalıyor.',
+      },
+      unclosedParen: {
+        title: 'Kapanmamış parantez',
+        hint: 'Bu parantez hiç kapanmıyor. Düzeltme önerilmiyor, çünkü kapanışın nereye konduğu sorgunun anlamını değiştirir.',
+      },
+      extraParen: {
+        title: 'Fazladan kapanış parantezi',
+        hint: 'Buna karşılık gelen bir açılış yok, dolayısıyla silmek güvenli.',
+      },
+      trailingSemicolon: {
+        title: 'Sondaki noktalı virgül',
+        hint: 'SQL*Plus ve SQL Developer’da sorun değil; ama ODP.NET ve JDBC ifadeyi olduğu gibi gönderiyor ve Oracle ORA-00911 diyor.',
+      },
+      sqlPlusSlash: {
+        title: 'SQL*Plus çalıştırma işareti',
+        hint: 'Yalnız duran bölü çizgisi SQL*Plus’a tamponu çalıştır demek. İfadenin parçası değil.',
+      },
+      extraComma: {
+        title: 'Ardında hiçbir şey olmayan virgül',
+        hint: 'Genelde bir kolon silindiğinde geriye kalan artık. Oracle ORA-00936 “eksik ifade” diyor.',
+      },
+      gluedKeyword: {
+        title: 'Önündeki kelimeye yapışmış anahtar kelime',
+        hint: 'Sorguyu string birleştirerek kurmanın klasik sonucu: ekteki boşluk kaybolmuş, tablo adıyla yan tümce tek kelime olmuş.',
+      },
+      doubleQuotedString: {
+        title: 'Değerin etrafında çift tırnak',
+        hint: 'Oracle’da çift tırnak tanımlayıcı adlandırır, yani bu bir kolon olarak okunuyor ve ORA-00904 alıyorsunuz. Metin sabitleri tek tırnak ister.',
+      },
+      tableAliasAs: {
+        title: 'Tablo takma adından önce AS',
+        hint: 'SQL Server izin veriyor, Oracle vermiyor — ORA-00933. Kolon takma adının önünde AS hâlâ doğru.',
+      },
+      bracketIdentifier: {
+        title: 'Köşeli parantezli tanımlayıcı',
+        hint: 'Köşeli parantez T-SQL’e ait. Oracle çıplak adı ister; ad boşluk içeriyorsa çift tırnak gerekir ve o zaman büyük/küçük harf de bağlayıcı olur.',
+      },
+      atParameter: {
+        title: '@ ile yazılmış bağlama değişkeni',
+        hint: 'T-SQL parametreleri @ ile, Oracle iki nokta ile işaretler. Veri bağlantısına (tablo@link) dokunulmuyor.',
+      },
+      tsqlFunction: {
+        title: 'Doğrudan karşılığı olan T-SQL fonksiyonu',
+        hint: 'Argümanlar aynı şeyi anlattığı için yalnızca adı değiştirmek yeterli.',
+      },
+      tsqlNoEquivalent: {
+        title: 'Doğrudan karşılığı olmayan T-SQL fonksiyonu',
+        hint: 'Otomatik düzeltilmiyor: argüman sırası ya da yapı değişiyor. Sessizce çevirmek, çalışan ama yanlış sonuç veren bir sorgu bırakırdı.',
+      },
+      plusConcat: {
+        title: 'Metin + ile birleştirilmiş',
+        hint: 'Oracle metni || ile birleştirir. + kullanıldığında bir taraf metin olduğu için Oracle ötekini sayı okumaya çalışır — ORA-01722.',
+      },
+      topClause: {
+        title: 'SELECT TOP',
+        hint: 'Yalnızca T-SQL’de var. Her Oracle sürümünde çalışan karşılığı, sıralanmış sorgunun etrafına ROWNUM sarmalayıcısı koymak.',
+      },
+      offsetFetch: {
+        title: 'OFFSET / FETCH sayfalama',
+        hint: 'Oracle bunu 12c’den itibaren anlıyor. 11g’de iç içe ROWNUM sayfalamasına dönmesi gerekiyor — önce üst sınır uygulanır, sonra kayma.',
+      },
     },
   },
 
@@ -822,5 +957,6 @@ toolGuides: {
     sqlNoFrom: 'İfadede FROM yan tümcesi yok.',
     dateFormatEmpty: 'Bir tarih biçim kalıbı girin.',
     dateFormatNoTokens: 'Burada tarih alanı yok — girilenin tamamı düz metin.',
+    sqlFixEmpty: 'Denetlenecek bir sorgu yapıştırın.',
   },
 };

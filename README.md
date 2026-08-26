@@ -6,7 +6,7 @@
 [![api](https://github.com/furkansabuncu/fsdotnet/actions/workflows/api.yml/badge.svg)](https://github.com/furkansabuncu/fsdotnet/actions/workflows/api.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> 🔗 **Live:** _coming soon_ · Press <kbd>Ctrl</kbd>+<kbd>K</kbd> anywhere to jump to a tool.
+> 🔗 **Live:** <https://furkansabuncu.github.io/fsdotnet/> · Press <kbd>Ctrl</kbd>+<kbd>K</kbd> anywhere to jump to a tool.
 
 ---
 
@@ -53,7 +53,7 @@ compiler that only exists on .NET.
 
 | Runs entirely in your browser | Needs the API | Why the API |
 | --- | --- | --- |
-| 23 of the 24 tools | **Regex Tester** | `System.Text.RegularExpressions` genuinely cannot run in a browser |
+| 24 of the 25 tools | **Regex Tester** | `System.Text.RegularExpressions` genuinely cannot run in a browser |
 
 That table used to be longer. Three tools left it — SQL formatting, JSON → C# and SQL → LINQ. Two of
 them were justified by a T-SQL parser this project has no use for (the queries are Oracle); the third
@@ -79,7 +79,7 @@ when the API is cold or down — tools that need it are marked with an `API` bad
 
 ### 2. One tool, one folder — on both sides
 
-Twenty-four tools written as twenty-four hand-rolled pages is not an architecture. Every tool is a
+Twenty-five tools written as twenty-five hand-rolled pages is not an architecture. Every tool is a
 self-describing module that registers itself; **routing, search, the home grid and the command palette
 are all derived from one registry.**
 
@@ -117,10 +117,10 @@ state change, and each route carries its own `<title>`, description, canonical U
 `hreflang` links. React 19 hoists metadata rendered inside components, so no helmet library is
 involved.
 
-`sitemap.xml` and `robots.txt` are generated from the catalogue at build time — 48 addresses that
+`sitemap.xml` and `robots.txt` are generated from the catalogue at build time — 52 addresses that
 would otherwise be maintained by hand and quietly fall behind.
 
-The build then renders all 48 to static HTML. That is not an optimisation: **share crawlers do not run
+The build then renders all 52 to static HTML. That is not an optimisation: **share crawlers do not run
 JavaScript**, so without it the Open Graph cards were invisible to exactly the clients they exist for.
 Lazily loaded tools are deliberately not awaited — the crawler needs the heading, the description and
 the guide text, all of which live outside the lazy boundary, not the interactive widget.
@@ -176,7 +176,7 @@ happens on static hosting.
 
 ## Roadmap
 
-**Shipped — 24 tools, nothing left in a "soon" state.** The ones worth naming, because they do not
+**Shipped — 25 tools, nothing left in a "soon" state.** The ones worth naming, because they do not
 exist elsewhere:
 
 | | |
@@ -194,12 +194,14 @@ exist elsewhere:
 | **JSON → C# / TS** | one sample, two languages — merges every element of an array before deciding a type, so an optional field is not missed |
 | **Hash & HMAC** | SHA from WebCrypto; CRC32 and MD5 hand-written because WebCrypto refuses MD5, verified against the RFC 1321 and RFC 2202 vectors |
 | **Date Format Converter** | Oracle ⇄ .NET ⇄ dayjs ⇄ Delphi patterns, parsed into named fields rather than mapped dialect-to-dialect — so it can say `HH` means 12-hour in Oracle, `mm` means the month in Delphi, and `/` is a culture placeholder that prints a dot under `tr-TR` |
+| **SQL Fixer** | a linter with auto-fixes for queries that will not run: invisible characters, curly quotes, paste debris, T-SQL syntax on Oracle, `TOP` and `OFFSET/FETCH` rewritten as `ROWNUM` — and it unwraps a query pasted straight out of a `.pas` or `.cs` file. Every fix is listed and applied individually, because a query that errors is a loud failure and a quietly "fixed" one is a silent one |
 
 The rest are the everyday set: Base64, Case Converter, CSV → JSON/SQL, XML ⇄ JSON, SQL Formatter,
 JSON/XML/HTML/CSS formatter, SQL → LINQ, Epoch, JWT, UUID and HTTP status.
 
 **Next** — nothing is half-built. The next additions would be Oracle-specific rather than generic:
-DDL → EF Core entity, and a DFM inspector for the Delphi side.
+structural checks in the SQL Fixer (a `GROUP BY` that does not cover the select list is deterministic
+and needs no schema), DDL → EF Core entity, and a DFM inspector for the Delphi side.
 
 ## Security notes
 
