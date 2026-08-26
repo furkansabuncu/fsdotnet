@@ -7,6 +7,7 @@ import caseConvert from './case';
 import codeFormat from './code-format';
 import cron from './cron';
 import csvJson from './csv-json';
+import dateFormat from './date-format';
 import epoch from './epoch';
 import hash from './hash';
 import httpStatus from './http-status';
@@ -41,7 +42,7 @@ import xmlJson from './xml-json';
  */
 const TOOL_LIST: readonly ToolDefinition[] = [
   // .NET ve veri
-  jsonToCsharp, sqlToLinq, inList, oraErrors, bindParams, sqlDiff,
+  jsonToCsharp, sqlToLinq, inList, oraErrors, bindParams, sqlDiff, dateFormat,
   // Dönüştürücüler
   base64, mojibake, rtf, unicode, caseConvert, csvJson, xmlJson,
   // Biçimlendiriciler

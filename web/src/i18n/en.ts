@@ -1,4 +1,5 @@
 import type { ToolCategory, ToolErrorKey, ToolId } from '../tools/types';
+import type { Dialect, NoteKey, Unit } from '../tools/date-format/dateFormat';
 
 /**
  * Kanonik sözlük.
@@ -85,6 +86,7 @@ export const en = {
     regex: 'The real .NET engine, next to JavaScript.',
     cron: 'Unix and Quartz, with the next runs.',
     'http-status': 'Codes, headers and .NET constants.',
+    'date-format': 'Oracle, .NET, Delphi and dayjs patterns.',
   } satisfies Record<ToolId, string>,
 
   /**
@@ -245,6 +247,30 @@ export const en = {
         },
       ],
     },
+
+    'date-format': {
+      heading: 'The same date, four incompatible patterns',
+      body: [
+        'Every one of these dialects spells a date pattern with the same handful of letters, and each of them means something different by them. In Oracle the month is MM and the minute is MI. In .NET the month is MM and the minute is mm. In Delphi the month is mm and the minute is nn — so a Delphi pattern written as hh:mm prints the hour followed by the month, and it does it silently, because the pattern is perfectly valid.',
+        'The second trap is the hour. Oracle reads a bare HH as HH12, not as 24-hour: a timestamp at 13:05 prints as 01:05 with no AM/PM anywhere to give it away. Delphi reads hh as 24-hour, but flips to 12-hour if the same pattern happens to contain am/pm. Only .NET and dayjs make the distinction visible, with uppercase H for 24-hour and lowercase h for 12.',
+        'The third is the separator. In .NET and Delphi, / and : are not characters — they are placeholders for the culture’s date and time separators. Under tr-TR the date separator is a dot, so dd/MM/yyyy prints 24.08.2026. This tool quotes the slash in its output for that reason, and leaves the colon alone because almost every culture keeps it.',
+        'Rather than mapping each dialect to each of the others, the pattern is parsed into named fields first — year, padded month, 24-hour hour — and then written back out in the target dialect. That is also why the tool can tell you when a field simply has no equivalent: .NET has no quarter or ISO week specifier, and Oracle has no way to say "milliseconds, but trim the trailing zeros".',
+      ],
+      faq: [
+        {
+          q: 'Why did FM appear in the Oracle output?',
+          a: 'Because a field in the source pattern was unpadded. Without FM, Oracle zero-pads numbers and pads MONTH and DAY with spaces out to nine characters. FM is a toggle rather than a prefix, so a second FM turns padding back on — which is why FMDD.FMMM.YYYY prints the day unpadded and the month padded, a result almost nobody intends.',
+        },
+        {
+          q: 'Why does the .NET output start with a percent sign?',
+          a: 'A .NET format string of exactly one character is read as a standard format specifier, not a custom one: ToString("M") gives "August 24", not "8". Writing %M forces it to be read as the custom month specifier. The tool adds the percent sign only when the whole pattern collapses to a single character.',
+        },
+        {
+          q: 'Will the month and day names come out in Turkish?',
+          a: 'That depends on the runtime, not the pattern. Oracle takes them from NLS_DATE_LANGUAGE, .NET from the thread culture, dayjs from the loaded locale. The sample output here uses the language of this page, so it shows you the shape rather than promising you the wording.',
+        },
+      ],
+    },
   },
 
   nav: {
@@ -382,6 +408,92 @@ export const en = {
     labelSeconds: 'Unix (s)',
     labelMillis: 'Unix (ms)',
     labelTicks: '.NET ticks',
+  },
+
+  dateFormat: {
+    input: (dialect: string) => `${dialect} pattern`,
+    placeholder: 'DD.MM.YYYY HH24:MI',
+    sourceAria: 'Source dialect',
+    sample: 'Sample output:',
+    copy: (dialect: string) => `Copy the ${dialect} pattern`,
+    dropped: (fields: string) => `No equivalent here, left out: ${fields}`,
+    referenceTitle: 'The same field in all four dialects',
+    referenceField: 'Field',
+    noEquivalent: 'No equivalent in this dialect',
+
+    /* Lehçe adları çevrilmez — hepsi ürün adı. Ayrı bir anahtar olarak
+       duruyorlar çünkü tabloda ve satır başlıklarında tek kaynaktan
+       okunuyorlar. */
+    dialects: {
+      oracle: 'Oracle',
+      dotnet: '.NET',
+      js: 'dayjs',
+      delphi: 'Delphi',
+    } satisfies Record<Dialect, string>,
+
+    units: {
+      year4: 'Year, 4 digits',
+      year2: 'Year, 2 digits',
+      quarter: 'Quarter',
+      month2: 'Month, 01–12',
+      month1: 'Month, 1–12',
+      monthShort: 'Month name, short',
+      monthLong: 'Month name, full',
+      day2: 'Day, 01–31',
+      day1: 'Day, 1–31',
+      dayOfYear: 'Day of year',
+      weekdayShort: 'Weekday, short',
+      weekdayLong: 'Weekday, full',
+      weekdayNumber: 'Weekday number',
+      hour24_2: 'Hour, 24h, 00–23',
+      hour24_1: 'Hour, 24h, 0–23',
+      hour12_2: 'Hour, 12h, 01–12',
+      hour12_1: 'Hour, 12h, 1–12',
+      minute2: 'Minute, 00–59',
+      minute1: 'Minute, 0–59',
+      second2: 'Second, 00–59',
+      second1: 'Second, 0–59',
+      fraction1: 'Tenths of a second',
+      fraction2: 'Hundredths of a second',
+      fraction3: 'Milliseconds',
+      meridiemUpper: 'AM / PM',
+      meridiemLower: 'am / pm',
+      offsetColon: 'UTC offset, +03:00',
+      offsetCompact: 'UTC offset, +0300',
+      offsetHours: 'UTC offset, +03',
+      zoneName: 'Time zone name',
+      era: 'Era, AD / BC',
+      isoWeek: 'ISO week',
+      isoYear: 'ISO week-year',
+      secondsOfDay: 'Seconds since midnight',
+      localeDate: 'Locale short date',
+      localeTime: 'Locale short time',
+    } satisfies Record<Unit, string>,
+
+    notes: {
+      oracleFm:
+        'FM added: without it Oracle zero-pads numbers and pads MONTH and DAY with spaces out to nine characters. FM is a toggle rather than a prefix — a second one turns padding back on.',
+      oracleNamePad:
+        'MONTH and DAY are padded with spaces out to nine characters. Write FMMONTH to trim them.',
+      oracleHh12:
+        'A bare HH in Oracle means HH12, not 24-hour: 13:05 prints as 01:05. Use HH24 unless you also print AM/PM.',
+      oracleMinute: 'Minutes are MI in Oracle. MM is the month.',
+      dotnetSingle:
+        'Written as %M because a one-character .NET format string is read as a standard specifier: ToString("M") gives a whole date, not the month.',
+      dotnetSeparator:
+        '/ and : are culture placeholders in .NET, not literal characters. The slash is quoted here because under tr-TR it prints as a dot; the colon is left alone since almost every culture keeps it — quote it too if it has to be exact.',
+      dotnetMeridiem:
+        'tt follows the culture: AM under en-US, ÖÖ under tr-TR. There is no lowercase specifier.',
+      delphiMinute: 'Minutes are nn in Delphi. mm is the month, so hh:mm prints the month.',
+      delphiHour:
+        'Delphi reads hh as 24-hour unless am/pm appears in the same pattern. This one has a 12-hour field but no am/pm.',
+      delphiSeparator:
+        '/ and : are the DateSeparator and TimeSeparator globals in Delphi. The slash is quoted here so it stays a slash under a Turkish locale.',
+      dayjsPlugin:
+        'One of these tokens needs a dayjs plugin — advancedFormat, isoWeek or timezone. Moment has them built in.',
+      dropped: 'Some fields have no equivalent in this dialect and were left out.',
+      approx: 'One token is the closest match rather than an exact one — check the sample output.',
+    } satisfies Record<NoteKey, string>,
   },
 
   jwt: {
@@ -733,6 +845,8 @@ export const en = {
     regexServerDown: 'The .NET engine is not available.',
     sqlSelectOnly: 'Only SELECT statements can be translated.',
     sqlNoFrom: 'The statement has no FROM clause.',
+    dateFormatEmpty: 'Enter a date format pattern.',
+    dateFormatNoTokens: 'Nothing here is a date field — this is all literal text.',
   } satisfies Record<ToolErrorKey, string>,
 };
 

@@ -46,6 +46,7 @@ export const TOOL_IDS = [
   'regex',
   'cron',
   'http-status',
+  'date-format',
 ] as const;
 
 export type ToolId = (typeof TOOL_IDS)[number];
@@ -128,7 +129,9 @@ export type ToolErrorKey =
   | 'regexInvalid'
   | 'regexServerDown'
   | 'sqlSelectOnly'
-  | 'sqlNoFrom';
+  | 'sqlNoFrom'
+  | 'dateFormatEmpty'
+  | 'dateFormatNoTokens';
 
 /**
  * Her araç fonksiyonunun ortak dönüş tipi. Araçlar exception fırlatmaz —

@@ -170,6 +170,13 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/en/t/date-format</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/date-format" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/date-format" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/date-format" />
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://furkansabuncu.github.io/fsdotnet/tr</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en" />
     <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr" />
@@ -335,6 +342,13 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/http-status" />
     <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/http-status" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/http-status" />
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/tr/t/date-format</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/date-format" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/date-format" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/date-format" />
     <priority>0.8</priority>
   </url>
 </urlset>

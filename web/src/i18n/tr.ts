@@ -73,6 +73,7 @@ export const tr: Dictionary = {
     regex: 'Gerçek .NET motoru, JavaScript ile yan yana.',
     cron: 'Unix ve Quartz, sonraki çalışmalarla.',
     'http-status': "Kodlar, header'lar ve .NET sabitleri.",
+    'date-format': 'Oracle, .NET, Delphi ve dayjs kalıpları.',
   },
 
 toolGuides: {
@@ -226,6 +227,30 @@ toolGuides: {
         },
       ],
     },
+
+    'date-format': {
+      heading: 'Aynı tarih, birbirini tutmayan dört kalıp',
+      body: [
+        'Bu dört lehçe de tarih kalıbını aynı avuç dolusu harfle yazıyor ve her biri o harflerle başka bir şey kastediyor. Oracle’da ay MM, dakika MI. .NET’te ay MM, dakika mm. Delphi’de ay mm, dakika nn — yani Delphi’de hh:mm yazan kişi saatin yanına dakikayı değil AYI bastırıyor, üstelik sessizce, çünkü kalıp gayet geçerli.',
+        'İkinci tuzak saat. Oracle çıplak HH’yi HH24 değil HH12 okur: 13:05 olan bir kayıt 01:05 basılır ve bunu ele verecek bir AM/PM de yoktur. Delphi hh’yi 24 saatlik okur, ama aynı kalıpta ampm geçiyorsa 12 saatliğe döner. Ayrımı görünür kılan yalnızca .NET ve dayjs: 24 saat için büyük H, 12 saat için küçük h.',
+        'Üçüncüsü ayraç. .NET ve Delphi’de / ile : birer karakter değil, kültürün tarih ve saat ayracının yer tutucusudur. tr-TR altında tarih ayracı noktadır, yani dd/MM/yyyy kalıbı 24.08.2026 basar. Araç bu yüzden çıktıdaki bölü işaretini tırnaklıyor; iki noktayı ise neredeyse her kültür aynı bıraktığı için serbest bırakıyor.',
+        'Her lehçeyi diğer üçüne tek tek eşlemek yerine kalıp önce adlandırılmış alanlara ayrıştırılıyor — yıl, dolgulu ay, 24 saatlik saat — sonra hedef lehçede yeniden yazılıyor. Bir alanın karşılığının hiç olmadığını söyleyebilmesinin sebebi de bu: .NET’te çeyrek ya da ISO hafta belirteci yok, Oracle’da da "milisaniye ama sondaki sıfırları at" diyebilmenin bir yolu yok.',
+      ],
+      faq: [
+        {
+          q: 'Oracle çıktısında FM nereden çıktı?',
+          a: 'Kaynak kalıptaki bir alan dolgusuz olduğu için. FM olmadan Oracle sayıların başına sıfır koyar, MONTH ve DAY’i de dokuz karaktere kadar boşlukla doldurur. FM bir önek değil ANAHTAR olduğu için ikinci bir FM dolguyu geri açar — FMDD.FMMM.YYYY kalıbının günü dolgusuz, ayı dolgulu basmasının sebebi budur ve bunu kimse kasten yazmaz.',
+        },
+        {
+          q: '.NET çıktısı neden yüzde işaretiyle başlıyor?',
+          a: 'Tek karakterlik bir .NET biçim dizesi özel değil STANDART belirteç sayılır: ToString("M") ayı değil "24 Ağustos"u verir. %M yazmak onu özel ay belirteci olarak okutur. Araç bu işareti yalnızca kalıbın tamamı tek karaktere indiğinde ekliyor.',
+        },
+        {
+          q: 'Ay ve gün adları Türkçe mi gelecek?',
+          a: 'Bu kalıba değil, çalışma ortamına bağlı. Oracle NLS_DATE_LANGUAGE’dan, .NET iş parçacığının kültüründen, dayjs yüklü yerelden alır. Buradaki örnek çıktı bu sayfanın dilini kullanıyor; yani size biçimi gösteriyor, kelimeyi vaat etmiyor.',
+        },
+      ],
+    },
   },
 
   nav: {
@@ -361,6 +386,89 @@ toolGuides: {
     labelSeconds: 'Unix (sn)',
     labelMillis: 'Unix (ms)',
     labelTicks: '.NET tick',
+  },
+
+  dateFormat: {
+    input: (dialect: string) => `${dialect} kalıbı`,
+    placeholder: 'DD.MM.YYYY HH24:MI',
+    sourceAria: 'Kaynak lehçe',
+    sample: 'Örnek çıktı:',
+    copy: (dialect: string) => `${dialect} kalıbını kopyala`,
+    dropped: (fields: string) => `Bu lehçede karşılığı yok, yazılmadı: ${fields}`,
+    referenceTitle: 'Aynı alan dört lehçede',
+    referenceField: 'Alan',
+    noEquivalent: 'Bu lehçede karşılığı yok',
+
+    dialects: {
+      oracle: 'Oracle',
+      dotnet: '.NET',
+      js: 'dayjs',
+      delphi: 'Delphi',
+    },
+
+    units: {
+      year4: 'Yıl, 4 hane',
+      year2: 'Yıl, 2 hane',
+      quarter: 'Çeyrek',
+      month2: 'Ay, 01–12',
+      month1: 'Ay, 1–12',
+      monthShort: 'Ay adı, kısa',
+      monthLong: 'Ay adı, tam',
+      day2: 'Gün, 01–31',
+      day1: 'Gün, 1–31',
+      dayOfYear: 'Yılın günü',
+      weekdayShort: 'Haftanın günü, kısa',
+      weekdayLong: 'Haftanın günü, tam',
+      weekdayNumber: 'Haftanın günü, sayı',
+      hour24_2: 'Saat, 24’lük, 00–23',
+      hour24_1: 'Saat, 24’lük, 0–23',
+      hour12_2: 'Saat, 12’lik, 01–12',
+      hour12_1: 'Saat, 12’lik, 1–12',
+      minute2: 'Dakika, 00–59',
+      minute1: 'Dakika, 0–59',
+      second2: 'Saniye, 00–59',
+      second1: 'Saniye, 0–59',
+      fraction1: 'Saniyenin onda biri',
+      fraction2: 'Saniyenin yüzde biri',
+      fraction3: 'Milisaniye',
+      meridiemUpper: 'AM / PM',
+      meridiemLower: 'am / pm',
+      offsetColon: 'UTC farkı, +03:00',
+      offsetCompact: 'UTC farkı, +0300',
+      offsetHours: 'UTC farkı, +03',
+      zoneName: 'Saat dilimi adı',
+      era: 'Çağ, AD / BC',
+      isoWeek: 'ISO hafta',
+      isoYear: 'ISO hafta yılı',
+      secondsOfDay: 'Gece yarısından beri saniye',
+      localeDate: 'Yerelin kısa tarihi',
+      localeTime: 'Yerelin kısa saati',
+    },
+
+    notes: {
+      oracleFm:
+        'FM eklendi: onsuz Oracle sayıların başına sıfır koyar, MONTH ve DAY’i dokuz karaktere kadar boşlukla doldurur. FM bir önek değil anahtardır — ikincisi dolguyu geri açar.',
+      oracleNamePad:
+        'MONTH ve DAY dokuz karaktere kadar boşlukla dolduruluyor. Kırpmak için FMMONTH yazın.',
+      oracleHh12:
+        'Oracle’da çıplak HH, HH24 değil HH12 demektir: 13:05 olan saat 01:05 basılır. AM/PM de yazmıyorsanız HH24 kullanın.',
+      oracleMinute: 'Oracle’da dakika MI’dir. MM aydır.',
+      dotnetSingle:
+        '%M olarak yazıldı, çünkü tek karakterlik bir .NET biçim dizesi standart belirteç sayılır: ToString("M") ayı değil, tam bir tarih verir.',
+      dotnetSeparator:
+        '.NET’te / ve : birer karakter değil, kültürün ayraç yer tutucusudur. Bölü işareti burada tırnaklandı çünkü tr-TR altında nokta basıyor; iki nokta neredeyse her kültürde aynı kaldığı için serbest bırakıldı — birebir kalması şartsa onu da tırnaklayın.',
+      dotnetMeridiem:
+        'tt kültürü izler: en-US’te AM, tr-TR’de ÖÖ. Küçük harfli bir belirteç yok.',
+      delphiMinute: 'Delphi’de dakika nn’dir. mm aydır, yani hh:mm saatin yanına ayı basar.',
+      delphiHour:
+        'Delphi hh’yi, aynı kalıpta ampm geçmiyorsa 24 saatlik okur. Bu kalıpta 12 saatlik bir alan var ama ampm yok.',
+      delphiSeparator:
+        'Delphi’de / ve : global DateSeparator ve TimeSeparator değişkenleridir. Bölü işareti, Türkçe yerel altında bölü kalsın diye tırnaklandı.',
+      dayjsPlugin:
+        'Bu token’lardan biri dayjs eklentisi istiyor — advancedFormat, isoWeek ya da timezone. Moment’te hepsi hazır gelir.',
+      dropped: 'Bazı alanların bu lehçede karşılığı yok, kalıba yazılmadı.',
+      approx: 'Bir token birebir değil, en yakın karşılık — örnek çıktıyı kontrol edin.',
+    },
   },
 
   jwt: {
@@ -712,5 +820,7 @@ toolGuides: {
     regexServerDown: '.NET motoru kullanılamıyor.',
     sqlSelectOnly: 'Yalnızca SELECT ifadeleri çevrilebilir.',
     sqlNoFrom: 'İfadede FROM yan tümcesi yok.',
+    dateFormatEmpty: 'Bir tarih biçim kalıbı girin.',
+    dateFormatNoTokens: 'Burada tarih alanı yok — girilenin tamamı düz metin.',
   },
 };
