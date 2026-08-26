@@ -51,6 +51,12 @@ export const TOOL_IDS = [
   'linq-11g',
   'pas-sql',
   'oracle-identity',
+  'turkish-culture',
+  'guid-raw',
+  'ddl-entity',
+  'odp-call',
+  'conn-string',
+  'merge-sql',
 ] as const;
 
 export type ToolId = (typeof TOOL_IDS)[number];
@@ -140,7 +146,19 @@ export type ToolErrorKey =
   | 'linqEmpty'
   | 'pasEmpty'
   | 'pasNoSql'
-  | 'identityEmpty';
+  | 'identityEmpty'
+  | 'cultureEmpty'
+  | 'guidEmpty'
+  | 'guidInvalid'
+  | 'ddlEmpty'
+  | 'ddlNoTable'
+  | 'ddlNoColumns'
+  | 'odpEmpty'
+  | 'odpNoRoutine'
+  | 'connEmpty'
+  | 'connNoPairs'
+  | 'mergeEmpty'
+  | 'mergeBadName';
 
 /**
  * Her araç fonksiyonunun ortak dönüş tipi. Araçlar exception fırlatmaz —

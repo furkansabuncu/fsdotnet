@@ -1,3 +1,4 @@
+import { codeMask } from './types';
 import type { Region, ScanResult, Span } from './types';
 
 /**
@@ -122,4 +123,109 @@ export const GLUED_KEYWORD = new RegExp(
 /** Yapışmayı onarır — bildirmek değil, düzeltmek isteyen çağıranlar için. */
 export function separateGluedKeywords(sql: string): string {
   return sql.replace(GLUED_KEYWORD, (_, identifier: string, keyword: string) => `${identifier} ${keyword}`);
+}
+
+/* ------------------------------------------------------------------ */
+/* Yan tümce ayırma                                                     */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Üst seviye yan tümce anahtarları. Sıra ÖNEMSİZ — eşleştirmeden önce
+ * uzunluğa göre sıralanıyor, yoksa `LEFT JOIN` girdisinde `JOIN` eşleşir
+ * ve `LEFT` düz metin olarak kalırdı.
+ */
+export const CLAUSE_KEYWORDS = [
+  'SELECT', 'FROM', 'CROSS JOIN', 'INNER JOIN', 'LEFT OUTER JOIN', 'LEFT JOIN',
+  'RIGHT OUTER JOIN', 'RIGHT JOIN', 'FULL OUTER JOIN', 'FULL JOIN', 'NATURAL JOIN', 'JOIN',
+  'WHERE', 'CONNECT BY', 'START WITH', 'GROUP BY', 'HAVING', 'ORDER BY',
+  'FETCH FIRST', 'OFFSET', 'LIMIT', 'UNION ALL', 'UNION', 'MINUS', 'INTERSECT',
+] as const;
+
+export interface Clause {
+  /** Büyük harfe normalleştirilmiş anahtar. */
+  keyword: string;
+  /** Anahtarın kaynaktaki başlangıcı. */
+  start: number;
+  /** Gövdenin başlangıcı — anahtarın hemen sonrası. */
+  bodyStart: number;
+  /** Bir sonraki anahtara kadar olan metin, kırpılmış. */
+  body: string;
+}
+
+/**
+ * Sorguyu üst seviye yan tümcelere böler.
+ *
+ * "Üst seviye" iki şey demek: parantez derinliği sıfır (alt sorgunun
+ * `WHERE`i dış sorgunun sanılmasın) ve kodun içinde (dize ya da yorumdaki
+ * `FROM` yan tümce değildir).
+ *
+ * Konum da veriliyor, yalnızca metin değil: SQL Fixer bulguyu kaynakta
+ * göstermek zorunda ve konumu sonradan geri bulmak eşleşme aramak demekti.
+ */
+export function splitClauses(sql: string): Clause[] {
+  const upper = sql.toUpperCase();
+  const mask = codeMask(sql, scanSql(sql).spans);
+  const keywords = [...CLAUSE_KEYWORDS].sort((a, b) => b.length - a.length);
+
+  const found: { keyword: string; start: number; bodyStart: number }[] = [];
+  let depth = 0;
+
+  for (let index = 0; index < sql.length; index += 1) {
+    if (!mask[index]) continue;
+    const char = sql[index];
+
+    if (char === '(') depth += 1;
+    else if (char === ')') depth -= 1;
+    if (depth !== 0) continue;
+
+    for (const keyword of keywords) {
+      if (!upper.startsWith(keyword, index)) continue;
+      // Sözcük sınırı: `ORDERS` tablosu `ORDER BY` sanılmasın.
+      const before = index === 0 ? ' ' : (sql[index - 1] as string);
+      const after = sql[index + keyword.length] ?? ' ';
+      if (/[\w$]/.test(before) || /[\w$]/.test(after)) continue;
+
+      found.push({ keyword, start: index, bodyStart: index + keyword.length });
+      index += keyword.length - 1;
+      break;
+    }
+  }
+
+  return found.map((entry, position) => {
+    const stop = found[position + 1]?.start ?? sql.length;
+    return {
+      keyword: entry.keyword,
+      start: entry.start,
+      bodyStart: entry.bodyStart,
+      body: sql.slice(entry.bodyStart, stop).trim(),
+    };
+  });
+}
+
+/**
+ * Virgülle ayrılmış listeyi üst seviyede böler.
+ *
+ * `nvl(a, 0)` içindeki virgül ayraç DEĞİL; naif bir `split(',')` select
+ * listesini yanlış sayar ve GROUP BY denetimi tamamen kayar.
+ */
+export function splitList(text: string): { text: string; offset: number }[] {
+  const mask = codeMask(text, scanSql(text).spans);
+  const items: { text: string; offset: number }[] = [];
+  let depth = 0;
+  let start = 0;
+
+  for (let index = 0; index < text.length; index += 1) {
+    if (!mask[index]) continue;
+    const char = text[index];
+    if (char === '(') depth += 1;
+    else if (char === ')') depth -= 1;
+    else if (char === ',' && depth === 0) {
+      items.push({ text: text.slice(start, index).trim(), offset: start });
+      start = index + 1;
+    }
+  }
+
+  const tail = text.slice(start).trim();
+  if (tail !== '') items.push({ text: tail, offset: start });
+  return items;
 }

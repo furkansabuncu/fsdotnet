@@ -1,8 +1,12 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router';
 import CopyButton from '../../shared/CopyButton';
 import SegmentedControl from '../../shared/SegmentedControl';
-import { useI18n } from '../../i18n/I18nProvider';
+import { useI18n, useLocalePath } from '../../i18n/I18nProvider';
+import { getTool } from '../registry';
+import { toolForOraCode } from '../errorRouting';
 import { ORA_GROUPS, formatCode, searchOraErrors, type OraGroup } from './oraErrors';
 
 /** Grup rengi anlamı taşır: bağlantı/kaynak kırmızı, sözdizimi sarı. */
@@ -21,6 +25,7 @@ type Filter = OraGroup | 'all';
 
 export default function OraErrorsTool() {
   const { t } = useI18n();
+  const path = useLocalePath();
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
 
@@ -77,6 +82,23 @@ export default function OraErrorsTool() {
                 <p className="text-sm font-medium text-fg">{item.message}</p>
                 {/* Asıl değer burada: resmî belge "ne" der, bu satır "neden" der. */}
                 <p className="mt-0.5 text-xs text-muted">{item.cause}</p>
+                {/* …ve bu satır "şimdi ne yapayım" der. Kodu bulmakla iş
+                    bitmiyor; çözen araç zaten sitede duruyor. */}
+                {(() => {
+                  const route = toolForOraCode(item.code);
+                  const tool = route === null ? undefined : getTool(route.tool);
+                  if (tool === undefined) return null;
+
+                  return (
+                    <Link
+                      to={path(`/t/${tool.id}`)}
+                      className="mt-1 inline-flex items-center gap-1 text-xs text-cat hover:underline"
+                    >
+                      {tool.name}
+                      <ArrowRight size={11} aria-hidden="true" />
+                    </Link>
+                  );
+                })()}
               </div>
 
               <span className="hidden shrink-0 items-center gap-1 sm:flex">

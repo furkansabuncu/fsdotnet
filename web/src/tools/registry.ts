@@ -6,16 +6,21 @@ import bindParams from './bind-params';
 import caseConvert from './case';
 import codeFormat from './code-format';
 import cron from './cron';
+import connString from './conn-string';
 import csvJson from './csv-json';
+import ddlEntity from './ddl-entity';
 import dateFormat from './date-format';
 import epoch from './epoch';
+import guidRaw from './guid-raw';
 import hash from './hash';
 import httpStatus from './http-status';
 import inList from './in-list';
 import jsonToCsharp from './json-to-csharp';
 import jwt from './jwt';
 import linq11g from './linq-11g';
+import mergeSql from './merge-sql';
 import mojibake from './mojibake';
+import odpCall from './odp-call';
 import oracleIdentity from './oracle-identity';
 import oraErrors from './ora-errors';
 import pasSql from './pas-sql';
@@ -26,6 +31,7 @@ import sqlFix from './sql-fix';
 import sqlFormat from './sql-format';
 import sqlToLinq from './sql-to-linq';
 import trData from './tr-data';
+import turkishCulture from './turkish-culture';
 import unicode from './unicode';
 import uuid from './uuid';
 import xmlJson from './xml-json';
@@ -46,7 +52,12 @@ import xmlJson from './xml-json';
  */
 const TOOL_LIST: readonly ToolDefinition[] = [
   // .NET ve veri
-  jsonToCsharp, sqlToLinq, inList, oraErrors, bindParams, sqlDiff, dateFormat, sqlFix, linq11g, pasSql, oracleIdentity,
+  // Denetleyiciler — hepsi aynı motorun farklı kural tablosu (src/lint/).
+  sqlFix, linq11g, turkishCulture,
+  // Çeviriciler ve üreteçler
+  jsonToCsharp, sqlToLinq, ddlEntity, odpCall, pasSql, mergeSql, oracleIdentity,
+  // Sorgu ve bağlantı
+  inList, oraErrors, bindParams, sqlDiff, connString, dateFormat, guidRaw,
   // Dönüştürücüler
   base64, mojibake, rtf, unicode, caseConvert, csvJson, xmlJson,
   // Biçimlendiriciler

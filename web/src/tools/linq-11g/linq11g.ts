@@ -2,11 +2,12 @@ import { err, ok, type ToolResult } from '../types';
 import { scanCSharp } from '../../lint/csharp';
 import {
   buildContext,
+  closeParen,
   codeMatches,
+  enclosingCall,
   finding,
   patternRule,
   runRules,
-  type LintContext,
   type Rule,
 } from '../../lint/engine';
 import type { Finding } from '../../lint/types';
@@ -37,50 +38,6 @@ export type RuleKey =
   | 'dateOnly';
 
 type LinqRule = Rule<RuleKey>;
-
-/* ------------------------------------------------------------------ */
-/* Parantez yardımcıları — kuralların bağlamı bunlardan çıkıyor         */
-/* ------------------------------------------------------------------ */
-
-/** `open` konumundaki parantezin eşi; bulunamazsa -1. */
-function closeParen(context: LintContext, open: number): number {
-  let depth = 0;
-  for (let index = open; index < context.source.length; index += 1) {
-    if (!context.mask[index]) continue;
-    const char = context.source[index];
-    if (char === '(') depth += 1;
-    else if (char === ')') {
-      depth -= 1;
-      if (depth === 0) return index;
-    }
-  }
-  return -1;
-}
-
-/**
- * `index` konumunu saran çağrının adı — `.Where(… buradayız …)` içinse
- * `Where`. Saran parantez yoksa null, parantez var ama adsızsa boş dize.
- *
- * Kuralların çoğu "nerede" sorusuna bağlı: aynı `Any(...)` bir `Where`
- * içinde EXISTS'e çevrilir, bir `Select` içinde 11g'yi patlatır.
- */
-function enclosingCall(context: LintContext, index: number): { name: string; open: number } | null {
-  let depth = 0;
-  for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
-    if (!context.mask[cursor]) continue;
-    const char = context.source[cursor];
-
-    if (char === ')') depth += 1;
-    else if (char === '(') {
-      if (depth === 0) {
-        const name = /([A-Za-z_]\w*)\s*$/.exec(context.source.slice(0, cursor));
-        return { name: name?.[1] ?? '', open: cursor };
-      }
-      depth -= 1;
-    }
-  }
-  return null;
-}
 
 /* ------------------------------------------------------------------ */
 /* Kurallar                                                             */

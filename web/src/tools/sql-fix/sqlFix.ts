@@ -10,6 +10,7 @@ import {
   type Rule,
 } from '../../lint/engine';
 import type { Edit, Finding } from '../../lint/types';
+import { STRUCTURAL_RULES } from './structural';
 
 /**
  * Çalışmayan SQL'i inceleyip düzeltme öneren kural motoru.
@@ -50,7 +51,15 @@ export type RuleKey =
   | 'tsqlNoEquivalent'
   | 'plusConcat'
   | 'topClause'
-  | 'offsetFetch';
+  | 'offsetFetch'
+  // Faz 2 — yapısal kurallar (structural.ts)
+  | 'groupByScope'
+  | 'aggregateInWhere'
+  | 'joinWithoutOn'
+  | 'unknownAlias'
+  | 'mixedJoins'
+  | 'twelveCSyntax'
+  | 'listaggOverflow';
 
 /**
  * SQL'e özel bağlam: motorun verdiklerine ifadenin bitiş noktası ekleniyor.
@@ -61,7 +70,7 @@ export interface SqlContext extends LintContext {
   statementEnd: number;
 }
 
-type SqlRule = Rule<RuleKey, SqlContext>;
+export type SqlRule = Rule<RuleKey, SqlContext>;
 
 /**
  * İfadenin tamamını saran düzeltmeler (TOP, OFFSET/FETCH).
@@ -562,6 +571,7 @@ const RULES: readonly SqlRule[] = [
   plusConcat,
   topClause,
   offsetFetch,
+  ...STRUCTURAL_RULES,
 ];
 
 function buildSqlContext(sql: string): SqlContext {

@@ -174,3 +174,56 @@ export function applyFixes(
 export function fixableCount(findings: readonly Finding[]): number {
   return findings.filter((item) => item.edits.length > 0).length;
 }
+
+/* ------------------------------------------------------------------ */
+/* Parantez yardımcıları                                                */
+/* ------------------------------------------------------------------ */
+
+/**
+ * `open` konumundaki parantezin eşi; bulunamazsa -1.
+ *
+ * Çağrının argüman listesinin nerede bittiğini bilmek gerekiyor: bir
+ * düzeltme oraya `, StringComparison.Ordinal` eklerken ya da bir kural
+ * projeksiyonun içine bakarken.
+ */
+export function closeParen(context: LintContext, open: number): number {
+  let depth = 0;
+  for (let index = open; index < context.source.length; index += 1) {
+    if (!context.mask[index]) continue;
+    const char = context.source[index];
+    if (char === OPEN) depth += 1;
+    else if (char === CLOSE) {
+      depth -= 1;
+      if (depth === 0) return index;
+    }
+  }
+  return -1;
+}
+
+/**
+ * `index` konumunu saran çağrının adı — `.Where(… buradayız …)` içinse
+ * `Where`. Saran parantez yoksa null, parantez var ama adsızsa boş dize.
+ *
+ * Kuralların çoğu "nerede" sorusuna bağlı: aynı `Any(...)` bir `Where`
+ * içinde EXISTS'e çevrilir, bir `Select` içinde 11g'yi patlatır.
+ */
+export function enclosingCall(
+  context: LintContext,
+  index: number,
+): { name: string; open: number } | null {
+  let depth = 0;
+  for (let cursor = index - 1; cursor >= 0; cursor -= 1) {
+    if (!context.mask[cursor]) continue;
+    const char = context.source[cursor];
+
+    if (char === CLOSE) depth += 1;
+    else if (char === OPEN) {
+      if (depth === 0) {
+        const name = /([A-Za-z_]\w*)\s*$/.exec(context.source.slice(0, cursor));
+        return { name: name?.[1] ?? '', open: cursor };
+      }
+      depth -= 1;
+    }
+  }
+  return null;
+}

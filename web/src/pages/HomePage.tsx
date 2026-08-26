@@ -2,6 +2,7 @@ import { Keyboard, ShieldCheck, Zap } from 'lucide-react';
 import { useI18n } from '../i18n/I18nProvider';
 import { CATEGORIES, categoryVars } from '../tools/categories';
 import { CLIENT_COUNT, TOTAL_COUNT, toolsByCategory } from '../tools/registry';
+import ErrorRouter from '../shared/ErrorRouter';
 import HeroDemo from '../shared/HeroDemo';
 import Seo, { SITE_URL } from '../shared/Seo';
 import StructuredData from '../shared/StructuredData';
@@ -54,6 +55,8 @@ export default function HomePage() {
           </h1>
 
           <p className="max-w-xl text-sm leading-6 text-muted">{t.home.subtitle}</p>
+
+          <ErrorRouter />
 
           <ul className="flex flex-wrap items-center gap-2">
             {stats.map(({ icon: Icon, label }) => (

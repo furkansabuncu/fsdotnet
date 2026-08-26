@@ -234,6 +234,54 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/en/t/turkish-culture/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/turkish-culture/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/turkish-culture/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/turkish-culture/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/en/t/guid-raw/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/guid-raw/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/guid-raw/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/guid-raw/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/en/t/ddl-entity/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/ddl-entity/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/ddl-entity/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/ddl-entity/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/en/t/odp-call/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/odp-call/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/odp-call/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/odp-call/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/en/t/conn-string/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/conn-string/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/conn-string/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/conn-string/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/en/t/merge-sql/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/merge-sql/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/merge-sql/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/merge-sql/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://furkansabuncu.github.io/fsdotnet/tr/</loc>
     <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/" />
     <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/" />
@@ -462,6 +510,54 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/oracle-identity/" />
     <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/oracle-identity/" />
     <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/oracle-identity/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/tr/t/turkish-culture/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/turkish-culture/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/turkish-culture/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/turkish-culture/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/tr/t/guid-raw/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/guid-raw/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/guid-raw/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/guid-raw/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/tr/t/ddl-entity/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/ddl-entity/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/ddl-entity/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/ddl-entity/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/tr/t/odp-call/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/odp-call/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/odp-call/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/odp-call/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/tr/t/conn-string/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/conn-string/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/conn-string/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/conn-string/" />
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://furkansabuncu.github.io/fsdotnet/tr/t/merge-sql/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://furkansabuncu.github.io/fsdotnet/en/t/merge-sql/" />
+    <xhtml:link rel="alternate" hreflang="tr" href="https://furkansabuncu.github.io/fsdotnet/tr/t/merge-sql/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://furkansabuncu.github.io/fsdotnet/en/t/merge-sql/" />
     <lastmod>2026-08-26</lastmod>
     <priority>0.8</priority>
   </url>
