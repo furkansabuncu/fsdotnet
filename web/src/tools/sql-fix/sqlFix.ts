@@ -29,37 +29,47 @@ import { STRUCTURAL_RULES } from './structural';
  * aracın bilebileceği şeyler değil.
  */
 
-export type RuleKey =
-  | 'hostStringLiteral'
-  | 'invisibleChar'
-  | 'smartQuote'
-  | 'pastePrefix'
-  | 'unterminatedString'
-  | 'unterminatedIdentifier'
-  | 'unterminatedComment'
-  | 'unclosedParen'
-  | 'extraParen'
-  | 'trailingSemicolon'
-  | 'sqlPlusSlash'
-  | 'extraComma'
-  | 'gluedKeyword'
-  | 'doubleQuotedString'
-  | 'tableAliasAs'
-  | 'bracketIdentifier'
-  | 'atParameter'
-  | 'tsqlFunction'
-  | 'tsqlNoEquivalent'
-  | 'plusConcat'
-  | 'topClause'
-  | 'offsetFetch'
-  // Faz 2 — yapısal kurallar (structural.ts)
-  | 'groupByScope'
-  | 'aggregateInWhere'
-  | 'joinWithoutOn'
-  | 'unknownAlias'
-  | 'mixedJoins'
-  | 'twelveCSyntax'
-  | 'listaggOverflow';
+/**
+ * Kural anahtarları — bir TİP değil, çalışma zamanı DİZİSİ; tip ondan
+ * türetiliyor (`TOOL_IDS` ile aynı kalıp).
+ *
+ * Sebebi kural kataloğu: her kuralın kendi adresi var ve katalogun eksiksiz
+ * olduğunu doğrulayan test bu listeyi okuyor. Yalnızca tip olsaydı test
+ * ikinci bir kopya tutmak zorunda kalır, o kopya da er geç kayardı.
+ */
+export const RULE_KEYS = [
+  'hostStringLiteral',
+  'invisibleChar',
+  'smartQuote',
+  'pastePrefix',
+  'unterminatedString',
+  'unterminatedIdentifier',
+  'unterminatedComment',
+  'unclosedParen',
+  'extraParen',
+  'trailingSemicolon',
+  'sqlPlusSlash',
+  'extraComma',
+  'gluedKeyword',
+  'doubleQuotedString',
+  'tableAliasAs',
+  'bracketIdentifier',
+  'atParameter',
+  'tsqlFunction',
+  'tsqlNoEquivalent',
+  'plusConcat',
+  'topClause',
+  'offsetFetch',
+  'groupByScope',
+  'aggregateInWhere',
+  'joinWithoutOn',
+  'unknownAlias',
+  'mixedJoins',
+  'twelveCSyntax',
+  'listaggOverflow',
+] as const;
+
+export type RuleKey = (typeof RULE_KEYS)[number];
 
 /**
  * SQL'e özel bağlam: motorun verdiklerine ifadenin bitiş noktası ekleniyor.

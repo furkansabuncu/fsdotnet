@@ -745,6 +745,24 @@ export const en = {
     } satisfies Record<RouteReason, string>,
   },
 
+  share: {
+    label: 'Share link',
+    copied: 'Copied',
+    tooLong: 'Too long to put in a link — copy the output instead.',
+  },
+
+  rules: {
+    title: 'Rule catalogue',
+    description: (count: number) =>
+      `Every one of the ${count} checks the linters here run, each with the input that triggers it and what it does about it. These are the mistakes that compile, pass review, and fail later.`,
+    sample: 'Input',
+    fixed: 'After the fix',
+    noFix: 'No automatic fix',
+    manualHint: 'This one is reported, not rewritten — the correction changes the meaning of the statement, so it is a decision rather than a substitution.',
+    openTool: 'open the tool',
+    tryIt: (tool: string) => `Try it with your own input in ${tool}`,
+  },
+
   nav: {
     aria: 'Tool navigation',
     home: 'Home',

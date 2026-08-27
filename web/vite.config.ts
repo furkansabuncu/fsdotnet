@@ -29,6 +29,11 @@ function basePath(mode: string): string {
 
 export default defineConfig(({ mode }) => ({
   base: basePath(mode),
+
+  /* Service worker'ın derleme zamanı sabiti. Asıl değeri `scripts/sw.mjs`
+     yazıyor; buradaki yalnızca testler ve tip denetimi için — uygulama
+     paketi bu sabite hiç dokunmadığı için çıktıya girmiyor. */
+  define: { __SW_VERSION__: JSON.stringify('test') },
   plugins: [react(), tailwindcss()],
   server: {
     watch: {

@@ -23,6 +23,24 @@ for (const tag of document.head.querySelectorAll('[data-ssr-head]')) tag.remove(
  * içinde duruyor (`LocaleLayout`). Sağlayıcı burada kalsaydı `:locale`
  * parametresini göremezdi.
  */
+/*
+ * Service worker yalnızca üretim derlemesinde.
+ *
+ * Geliştirmede kayıtlı bir worker, kaynak değişikliğini önbellekten
+ * verip "değişiklik neden görünmüyor" sorusunu üretiyor — HMR ile
+ * birlikte yaşaması zor ve kazancı sıfır.
+ *
+ * Yol öneke bağlı: worker'ın KAPSAMI bulunduğu klasördür, kökten
+ * kaydedilen bir worker proje sitesinin alt yolunu görmezdi.
+ */
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    // Hata yutuluyor: kayıt başarısız olsa da site tamamen çalışıyor,
+    // yalnızca çevrimdışı desteği olmuyor.
+    void navigator.serviceWorker.register(`${BASE_PATH}/sw.js`).catch(() => undefined);
+  });
+}
+
 createRoot(container).render(
   <StrictMode>
     <BrowserRouter basename={BASE_PATH}>

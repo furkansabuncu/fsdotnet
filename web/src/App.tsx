@@ -2,6 +2,8 @@ import { Route, Routes } from 'react-router';
 import LocaleLayout, { LocaleRedirect } from './pages/LocaleLayout';
 import HomePage from './pages/HomePage';
 import NotFoundPage from './pages/NotFoundPage';
+import RuleIndexPage from './pages/RuleIndexPage';
+import RulePage from './pages/RulePage';
 import ToolPage from './pages/ToolPage';
 
 /**
@@ -21,6 +23,10 @@ export default function App() {
       <Route path="/:locale" element={<LocaleLayout />}>
         <Route index element={<HomePage />} />
         <Route path="t/:toolId" element={<ToolPage />} />
+        {/* Kural kataloğu: her lint kuralının kendi adresi. Sayfalar lazy
+            DEĞİL — ön-render'ın içeriği basabilmesi gerekiyor. */}
+        <Route path="r" element={<RuleIndexPage />} />
+        <Route path="r/:ruleId" element={<RulePage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>

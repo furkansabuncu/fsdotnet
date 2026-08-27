@@ -99,3 +99,48 @@ export function toolSchema(
 
   return schemas;
 }
+
+export interface RuleSchemaInput {
+  title: string;
+  hint: string;
+  /** Dil öneki olmadan yol: `/r/sql-fix-glued-keyword`. */
+  path: string;
+  homeLabel: string;
+  catalogLabel: string;
+}
+
+/**
+ * Kural sayfası: teknik bir makale ve kırıntı yolu.
+ *
+ * `FAQPage` YOK — sayfada soru-cevap yok ve olmayan bir yapıyı işaretlemek
+ * Google'ın yapılandırılmış veri politikasının ihlali, yaptırımı da sayfanın
+ * tamamen düşmesi.
+ */
+export function ruleSchema(
+  { siteUrl, locale }: SchemaContext,
+  { title, hint, path, homeLabel, catalogLabel }: RuleSchemaInput,
+): object[] {
+  const url = absoluteUrl(siteUrl, locale, path);
+
+  return [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'TechArticle',
+      headline: title,
+      description: hint,
+      url,
+      inLanguage: locale,
+      isAccessibleForFree: true,
+      isPartOf: { '@type': 'WebSite', name: SITE_NAME, url: absoluteUrl(siteUrl, locale) },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: homeLabel, item: absoluteUrl(siteUrl, locale) },
+        { '@type': 'ListItem', position: 2, name: catalogLabel, item: absoluteUrl(siteUrl, locale, '/r') },
+        { '@type': 'ListItem', position: 3, name: title, item: url },
+      ],
+    },
+  ];
+}

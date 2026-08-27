@@ -27,17 +27,28 @@ import type { Finding } from '../../lint/types';
  * neyse açıkça yazılmalı.
  */
 
-export type RuleKey =
-  | 'toUpperLower'
-  | 'startsEndsWith'
-  | 'indexOfString'
-  | 'stringCompare'
-  | 'numberParse'
-  | 'tryParse'
-  | 'dateParse'
-  | 'formatString'
-  | 'stringFormat'
-  | 'regexIgnoreCase';
+/**
+ * Kural anahtarları — bir TİP değil, çalışma zamanı DİZİSİ; tip ondan
+ * türetiliyor (`TOOL_IDS` ile aynı kalıp).
+ *
+ * Sebebi kural kataloğu: her kuralın kendi adresi var ve katalogun eksiksiz
+ * olduğunu doğrulayan test bu listeyi okuyor. Yalnızca tip olsaydı test
+ * ikinci bir kopya tutmak zorunda kalır, o kopya da er geç kayardı.
+ */
+export const RULE_KEYS = [
+  'toUpperLower',
+  'startsEndsWith',
+  'indexOfString',
+  'stringCompare',
+  'numberParse',
+  'tryParse',
+  'dateParse',
+  'formatString',
+  'stringFormat',
+  'regexIgnoreCase',
+] as const;
+
+export type RuleKey = (typeof RULE_KEYS)[number];
 
 type CultureRule = Rule<RuleKey>;
 

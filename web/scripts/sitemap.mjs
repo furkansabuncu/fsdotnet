@@ -18,6 +18,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { TOOL_IDS } from '../src/tools/types.ts';
+import { RULE_IDS } from '../src/rules/catalog.ts';
 import { LOCALES, absoluteUrl } from '../src/i18n/locale.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -34,7 +35,13 @@ const siteUrl = (process.env.VITE_SITE_URL ?? 'https://furkansabuncu.github.io/f
 const lastmod = new Date().toISOString().slice(0, 10);
 
 /** Dil öneki olmadan, sitede indekslenmesini istediğimiz her yol. */
-const paths = ['/', ...TOOL_IDS.map((id) => `/t/${id}`)];
+const paths = [
+  '/',
+  ...TOOL_IDS.map((id) => `/t/${id}`),
+  // Kural kataloğu: dizin ve her kuralın kendi sayfası.
+  '/r',
+  ...RULE_IDS.map((id) => `/r/${id}`),
+];
 
 const escape = (value) =>
   value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

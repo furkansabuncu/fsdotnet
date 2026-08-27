@@ -2,7 +2,7 @@
 
 **Developer toolbox for the .NET ecosystem.** Fast, private, keyboard-first.
 
-[![web](https://github.com/furkansabuncu/fsdotnet/actions/workflows/web.yml/badge.svg)](https://github.com/furkansabuncu/fsdotnet/actions/workflows/web.yml)
+[![pages](https://github.com/furkansabuncu/fsdotnet/actions/workflows/pages.yml/badge.svg)](https://github.com/furkansabuncu/fsdotnet/actions/workflows/pages.yml)
 [![api](https://github.com/furkansabuncu/fsdotnet/actions/workflows/api.yml/badge.svg)](https://github.com/furkansabuncu/fsdotnet/actions/workflows/api.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -33,12 +33,12 @@ One repository, two applications, deployed independently.
 ```
 fsdotnet/
 ├── web/            React 19 · TypeScript · Vite · Tailwind CSS
-│   └── scripts/    sitemap, prerender, and the Open Graph card
+│   └── scripts/    sitemap, prerender, manifest, service worker, size budget
 ├── api/            .NET 10 · Minimal API · vertical slices
 │   ├── src/Fsdotnet.Api/
 │   └── tests/Fsdotnet.Api.Tests/
 ├── docs/adr/       architecture decision records
-└── .github/        two path-filtered workflows — web changes don't run the .NET job
+└── .github/        path-filtered workflows — web changes don't run the .NET job
 ```
 
 ## Architecture
@@ -51,9 +51,15 @@ smell, and for tools that handle **JWTs, HMAC keys and password hashes it is a g
 So the rule is inverted from the usual: a tool runs in the browser unless it *needs* a real parser or
 compiler that only exists on .NET.
 
-| Runs entirely in your browser | Needs the API | Why the API |
+| Runs entirely in your browser | Can use the API | Why the API |
 | --- | --- | --- |
-| 33 of the 34 tools | **Regex Tester** | `System.Text.RegularExpressions` genuinely cannot run in a browser |
+| all 34 tools | **Regex Tester** | `System.Text.RegularExpressions` genuinely cannot run in a browser |
+
+The first column says *all* 34, and that is not a rounding error: **the deployed site has no API.**
+GitHub Pages serves static files, `VITE_API_URL` is unset in the Pages build, and so the Regex Tester
+runs its JavaScript engine and says so in the UI. Start `npm run api` locally and the .NET engine
+appears next to it. The backend is built, tested and gated in CI on every push; it is simply not
+hosted anywhere, because nothing on the site stops working without it.
 
 That table used to be longer. Three tools left it — SQL formatting, JSON → C# and SQL → LINQ. Two of
 them were justified by a T-SQL parser this project has no use for (the queries are Oracle); the third
@@ -72,8 +78,9 @@ differences, the ones that compile in both and then disagree: `\d` matches Arabi
 but not in JavaScript, and `RegexOptions.IgnoreCase` follows the server culture, so `FILE` and `file`
 stop matching under `tr-TR`.
 
-Two things fall out of this for free: **no secret ever reaches the server**, and the site keeps working
-when the API is cold or down — tools that need it are marked with an `API` badge.
+Two things fall out of this: **no secret ever reaches the server**, and the site keeps working when the
+API is absent, cold or down. The live site is the proof — it runs the whole catalogue with no backend
+at all, and the one tool that would use it degrades in public rather than breaking.
 
 → [ADR-0001: Client-side by default](docs/adr/0001-client-side-by-default.md)
 
@@ -128,13 +135,20 @@ state change, and each route carries its own `<title>`, description, canonical U
 `hreflang` links. React 19 hoists metadata rendered inside components, so no helmet library is
 involved.
 
-`sitemap.xml` and `robots.txt` are generated from the catalogue at build time — 70 addresses that
+`sitemap.xml` and `robots.txt` are generated from the catalogue at build time — 168 addresses that
 would otherwise be maintained by hand and quietly fall behind.
 
-The build then renders all 70 to static HTML. That is not an optimisation: **share crawlers do not run
+The build then renders all 168 to static HTML. That is not an optimisation: **share crawlers do not run
 JavaScript**, so without it the Open Graph cards were invisible to exactly the clients they exist for.
 Lazily loaded tools are deliberately not awaited — the crawler needs the heading, the description and
 the guide text, all of which live outside the lazy boundary, not the interactive widget.
+
+Most of those addresses are not tools. Each of the 48 linter rules has its own page, in both
+languages, because that is the shape of the query: nobody searches for "LINQ lint tool", they search
+for "AnyAsync oracle not working". The pages are not stubs — each one runs its rule against a real
+sample and shows what it found and what it rewrote, so the page cannot drift from the rule. A test
+asserts every sample still triggers its own rule, which means a rule that silently stopped matching
+fails the build rather than leaving a page that quietly says nothing.
 
 Every tool page also carries a guide — the prose under the tool. That is what a search result
 actually matches: "Base64 Encoder" is not a query, "ORA-00979 not a group by expression" is. Twenty-seven
@@ -149,6 +163,42 @@ remove. And the prerenderer writes `lang` per page; the client set it in an effe
 for the crawlers that do not run JavaScript, so every Turkish page claimed to be English. Each tool
 page also emits JSON-LD built from what is actually on the page — `SoftwareApplication`, a breadcrumb,
 and `FAQPage` only where a visible guide really has questions.
+
+### 4. State lives in the fragment, not the query string
+
+A tool you cannot share the state of is a tool nobody links to. The share button puts the input in
+the URL — deflate-raw compressed, base64url encoded — so an answer can be "here is your query, and
+here is what was wrong with it" rather than a description of where to paste it.
+
+It goes in the **hash fragment**, never in a query string. A fragment is not sent to the server: it
+does not reach an access log, a referrer header or an intermediate proxy. The same data in `?q=`
+would be written to all three.
+
+And the button is absent on three tools — JWT, Hash & HMAC, and the connection string builder.
+Generating a link writes the content into browser history, the clipboard and the link preview of
+wherever it is pasted, which is precisely what those tools exist to avoid. The most important part of
+the feature is where it does not appear.
+
+### 5. It keeps working without a network
+
+Thirty-three of the thirty-four tools already ran entirely in the browser, so offline was a capability
+the site had and never declared. A service worker makes it real, which matters more than it sounds for
+this audience: hospital networks are closed, and a tool that opens a second time on a machine with no
+internet is a tool worth bookmarking.
+
+There is **no precache manifest**. Two rules decide everything: content-hashed assets are served
+cache-first (the hash is in the name, so the content cannot have changed), and everything else —
+HTML included — is network-first with a cache fallback. A precache list would mean writing build
+output filenames into the worker, and when that list drifts the result is a silently broken page.
+
+The worker itself is tested, not just the strategy: the built module runs against a fake worker scope
+and is asserted to cache the shell on install, delete only older caches on activate, fall back to the
+cache when the network is gone, and **fail rather than substitute** when a missing asset is requested
+offline. Serving the HTML shell in place of a missing script would break the page in a way nobody
+could diagnose.
+
+Full install-to-home-screen is not there: Chrome wants a 192 and a 512 pixel PNG icon, which needs a
+rasteriser and therefore a new dependency. Offline — the part that actually matters here — does not.
 
 ## Adding a tool
 
@@ -185,8 +235,9 @@ npm run dev           # → http://localhost:5173
 | `npm run dev` | Vite dev server on :5173 |
 | `npm test` | frontend test suite |
 | `npm run test:coverage` | coverage, gated at 90% on tool logic |
+| `npm run size` | bundle budget — first load and the largest lazy chunk, gzipped |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run build` | sitemap + typecheck + build + prerender |
+| `npm run build` | sitemap + manifest + typecheck + build + size budget + prerender + service worker |
 | `npm run sitemap` | regenerate `sitemap.xml` and `robots.txt` |
 | `npm run api` | .NET API on :5106, OpenAPI at `/openapi/v1.json` |
 | `npm run api:build` | build the API — warnings are errors |
@@ -196,8 +247,13 @@ npm run dev           # → http://localhost:5173
 Only the Regex Tester calls the API, and only when you switch it to the .NET
 engine. `web/.env.development` already points at `http://localhost:5106`, so
 `npm run api` in a second terminal is all it takes. Skip it and the tool says the
-.NET engine is unavailable and falls back to JavaScript — the same thing that
-happens on static hosting.
+.NET engine is unavailable and falls back to JavaScript — which is also what the
+published site does, since no API is deployed.
+
+CI splits by target rather than by check: `web.yml` runs on **pull requests**,
+`pages.yml` runs on **`main`** and then publishes. Both run the full set — lint,
+typecheck, coverage, build — so `main` is gated exactly once instead of twice by
+two workflows racing to say the same thing.
 
 ## Roadmap
 

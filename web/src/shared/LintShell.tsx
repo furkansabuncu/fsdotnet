@@ -1,9 +1,12 @@
 import { useState, type ReactNode } from 'react';
 import { ArrowUp } from 'lucide-react';
+import { Link, useParams } from 'react-router';
 import ConverterShell from './ConverterShell';
 import { applyFixes, fixableCount } from '../lint/engine';
 import type { Finding, RuleText } from '../lint/types';
 import { ok, type ToolResult } from '../tools/types';
+import { useLocalePath } from '../i18n/I18nProvider';
+import { ruleHref } from '../rules/catalog';
 
 /**
  * Lint araçlarının ortak yüzeyi.
@@ -48,6 +51,12 @@ export default function LintShell<K extends string>({
 }: LintShellProps<K>) {
   /** Kullanıcının kapattığı düzeltmeler; varsayılan hepsi açık. */
   const [excluded, setExcluded] = useState<ReadonlySet<string>>(new Set());
+
+  /* Her bulgu başlığı kendi kural sayfasına bağlanıyor: kullanıcı için
+     ayrıntılı açıklama, arama motoru için derin sayfalara giden iç
+     bağlantı. Rota bağlamı yoksa (test) düz metin kalıyor. */
+  const path = useLocalePath();
+  const { toolId } = useParams();
 
   /*
    * Girdi değişince dışlamalar sıfırlanır.
@@ -150,7 +159,13 @@ export default function LintShell<K extends string>({
 
                   <div className="min-w-0 flex-1">
                     <p className="text-sm text-fg">
-                      {rule.title}
+                      {toolId === undefined ? (
+                        rule.title
+                      ) : (
+                        <Link to={path(ruleHref(toolId, item.rule))} className="hover:text-cat hover:underline">
+                          {rule.title}
+                        </Link>
+                      )}
                       {item.detail !== undefined && (
                         /* Çevrilmez: girdiden gelen token ya da somut kod önerisi. */
                         <code className="ml-2 font-mono text-xs break-all text-cat">{item.detail}</code>

@@ -720,6 +720,24 @@ toolGuides: {
     },
   },
 
+  share: {
+    label: 'Bağlantı',
+    copied: 'Kopyalandı',
+    tooLong: 'Bağlantıya sığmayacak kadar uzun — çıktıyı kopyalayın.',
+  },
+
+  rules: {
+    title: 'Kural kataloğu',
+    description: (count: number) =>
+      `Buradaki denetleyicilerin uyguladığı ${count} kuralın tamamı — her biri, tetikleyen girdi ve ne yaptığıyla birlikte. Bunlar derlenen, incelemeden geçen ve sonradan patlayan hatalar.`,
+    sample: 'Girdi',
+    fixed: 'Düzeltildikten sonra',
+    noFix: 'Otomatik düzeltmesi yok',
+    manualHint: 'Bu kural bildiriyor, yeniden yazmıyor — düzeltme ifadenin anlamını değiştirdiği için bir yer değiştirme değil, bir karar.',
+    openTool: 'aracı aç',
+    tryIt: (tool: string) => `Kendi girdinizle ${tool} içinde deneyin`,
+  },
+
   nav: {
     aria: 'Araç gezinmesi',
     home: 'Ana sayfa',

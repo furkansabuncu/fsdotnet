@@ -5,10 +5,10 @@
  * dosya yalnızca gerçek bir .NET motoruna ihtiyaç duyan araçlar için var.
  *
  * Taban adres derleme zamanında `VITE_API_URL` ile veriliyor. TANIMSIZ
- * BIRAKMAK GEÇERLİ BİR DURUM: statik barındırmada (Cloudflare Pages) API
- * yok, o zaman sunucuya bağlı araç kendini kapatıp istemci motoruyla
- * devam ediyor. Bu yüzden `isConfigured` bir hata değil, bir yetenek
- * sorgusu.
+ * BIRAKMAK GEÇERLİ BİR DURUM — ve yayındaki durum tam olarak budur:
+ * GitHub Pages derlemesinde bu değişken yok, API dağıtılmıyor, sunucuya
+ * bağlı araç kendini kapatıp istemci motoruyla devam ediyor. Bu yüzden
+ * `isApiConfigured` bir hata değil, bir yetenek sorgusu.
  */
 
 const configured = (import.meta.env.VITE_API_URL as string | undefined)?.replace(/\/+$/, '') ?? '';

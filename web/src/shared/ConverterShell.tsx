@@ -1,6 +1,9 @@
-import { useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { X } from 'lucide-react';
+import { useParams } from 'react-router';
 import { useI18n } from '../i18n/I18nProvider';
+import ShareButton from './ShareButton';
+import { canShare, decodeState, readHash } from './shareLink';
 import type { ToolResult } from '../tools/types';
 import CopyButton from './CopyButton';
 
@@ -46,6 +49,12 @@ export default function ConverterShell({
   toolbar,
 }: ConverterShellProps) {
   const { t, locale } = useI18n();
+  /* Rota parametresi iki iş yapıyor: paylaşımın bu araçta açık olup
+     olmadığını söylüyor ve rota bağlamı olmadığında (test, gömülü
+     kullanım) düğmeyi tamamen gizliyor — kararlı bir adres yoksa
+     paylaşılacak bir bağlantı da yok. */
+  const { toolId } = useParams();
+  const shareable = canShare(toolId);
   const inputId = useId();
   const inputStatusId = useId();
   const outputStatusId = useId();
@@ -62,6 +71,29 @@ export default function ConverterShell({
    * belgelediği yol, render sırasında state'i AYARLAMAK — setter aynı değerle
    * çağrılırsa React yeni render planlamaz, yani döngü oluşmaz.
    */
+  /*
+   * Adreste durum varsa girdiyi ondan doldur.
+   *
+   * Yalnızca BİR KEZ, ilk yüklemede: kullanıcı yazmaya başladıktan sonra
+   * hash'i tekrar okumak yazdığını geri alırdı. Çözme asenkron olduğu için
+   * bu bir effect; bozuk bir yük null dönüyor ve girdi olduğu gibi kalıyor.
+   */
+  useEffect(() => {
+    if (!shareable) return;
+    const payload = readHash(window.location.hash);
+    if (payload === null) return;
+
+    let current = true;
+    void decodeState(payload).then((text) => {
+      if (current && text !== null) onInputChange(text);
+    });
+    return () => {
+      current = false;
+    };
+    // Bilerek yalnızca mount'ta: bağımlılıklar eklenirse her tuşta yeniden koşar.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const [lastValid, setLastValid] = useState('');
   if (result.ok && result.value !== lastValid) setLastValid(result.value);
 
@@ -72,7 +104,12 @@ export default function ConverterShell({
 
   return (
     <div className="flex flex-col gap-3">
-      {toolbar ? <div className="flex min-h-8 flex-wrap items-center gap-2">{toolbar}</div> : null}
+      {(toolbar || shareable) && (
+        <div className="flex min-h-8 flex-wrap items-center gap-2">
+          {toolbar}
+          {shareable && <ShareButton value={input} />}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 overflow-hidden rounded-lg border border-border-subtle bg-surface shadow-elev-1 md:grid-cols-2">
         <section className="flex min-w-0 flex-col">

@@ -50,8 +50,11 @@ jobs:
       - run: npm ci
 
       # Yayınlanan şeyin testten geçtiğinden emin olmadan yayınlamıyoruz.
+      # Denetimlerin TAMAMI burada: `main`e iten bir değişiklik başka hiçbir
+      # iş akışından geçmiyor, o yüzden kapsam eşiği de bu kapıda duruyor.
       - run: npm run lint
-      - run: npm run test
+      - run: npm run typecheck
+      - run: npm run test:coverage
       - run: npm run build
 
       - uses: actions/configure-pages@v5

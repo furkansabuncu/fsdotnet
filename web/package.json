@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run sitemap && tsc --noEmit && vite build && npm run build:ssr && npm run prerender",
+    "build": "npm run sitemap && npm run manifest && tsc --noEmit && vite build && npm run size && npm run build:ssr && npm run prerender && npm run sw",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -14,7 +14,10 @@
     "lint": "oxlint",
     "sitemap": "node scripts/sitemap.mjs",
     "build:ssr": "vite build --ssr src/entry-server.tsx --outDir .ssr",
-    "prerender": "node scripts/prerender.mjs"
+    "prerender": "node scripts/prerender.mjs",
+    "manifest": "node scripts/manifest.mjs",
+    "size": "node scripts/size.mjs",
+    "sw": "node scripts/sw.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.33.0",

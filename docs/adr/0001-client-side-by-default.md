@@ -70,7 +70,7 @@ server round-trip that would have produced a confidently wrong answer.
 
 ### The API now carries the regex tool
 
-`POST /api/v1/regex/test` is live: a real `Regex` instance, a 250 ms match timeout so catastrophic
+`POST /api/v1/regex/test` is implemented and tested: a real `Regex` instance, a 250 ms match timeout so catastrophic
 backtracking cannot hold a worker, size caps on pattern and input, and a match limit. Its tests cover
 balancing groups, conditional patterns, `\A`/`\z`, and the culture-sensitivity of
 `RegexOptions.IgnoreCase` — all things the browser engine cannot reproduce.
@@ -80,7 +80,13 @@ One design point is worth recording. **A pattern that does not compile returns 2
 a result, not a malformed request. Size-limit violations do return 400, because those really are bad
 requests. This mirrors the frontend's errors-as-values convention.
 
-The frontend treats the API as **optional**. `VITE_API_URL` may be unset — which is exactly the case
-on static hosting — and then the tool reports that the .NET engine is unavailable and falls back to
-the JavaScript result. Degradation is visible rather than silent, and the site never breaks because
-a free-tier backend went to sleep.
+The frontend treats the API as **optional**, and on the deployed site that option is currently taken:
+`VITE_API_URL` is unset in the GitHub Pages build, so **the endpoint above is not reachable in
+production.** The tool reports that the .NET engine is unavailable and falls back to the JavaScript
+result. Degradation is visible rather than silent, and the site never breaks because a free-tier
+backend went to sleep — or, as here, was never woken up.
+
+That is a deliberate stopping point rather than an unfinished one. Hosting the API would add a
+provider, a secret, a cold-start and a CORS origin to keep in sync, in exchange for one tool's second
+opinion. Publishing it is a configuration change — set `VITE_API_URL` in the Pages workflow and point
+it at a deployment — not a code change, which is the property this ADR was trying to buy.

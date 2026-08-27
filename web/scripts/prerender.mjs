@@ -18,6 +18,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { TOOL_IDS } from '../src/tools/types.ts';
+import { RULE_IDS } from '../src/rules/catalog.ts';
 import { LOCALES, localePath, splitLocale } from '../src/i18n/locale.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -91,7 +92,13 @@ function hoistHeadTags(html) {
 }
 
 /** Dil öneki olmadan, ön-render edilecek her yol. */
-const paths = ['/', ...TOOL_IDS.map((id) => `/t/${id}`)];
+const paths = [
+  '/',
+  ...TOOL_IDS.map((id) => `/t/${id}`),
+  // Kural kataloğu: dizin ve her kuralın kendi sayfası.
+  '/r',
+  ...RULE_IDS.map((id) => `/r/${id}`),
+];
 
 const routes = LOCALES.flatMap((locale) => paths.map((path) => localePath(locale, path)));
 

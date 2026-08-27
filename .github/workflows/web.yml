@@ -1,10 +1,13 @@
 name: web
 
 # Monorepo: yalnızca frontend'e dokunan değişikliklerde koş.
+#
+# `push` TETİKLEYİCİSİ BİLEREK YOK. `main`e giden her itme zaten `pages.yml`i
+# çalıştırıyor ve o da aynı denetimlerin tamamını koşuyor — ikisi birden
+# açıkken lint ve build her itmede iki kez koşuyor, iki ayrı rozet aynı şeyi
+# söylüyordu. İş bölümü şu: bu dosya PR'ları denetler, `pages.yml` `main`i
+# denetler ve yayınlar.
 on:
-  push:
-    branches: [main]
-    paths: ['web/**', '.github/workflows/web.yml']
   pull_request:
     paths: ['web/**', '.github/workflows/web.yml']
 
@@ -32,11 +35,6 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run test:coverage
+      # Yayın artefaktı üretilmiyor: PR'da derlemenin GEÇMESİ isteniyor,
+      # çıktısı değil. Yayınlanan paketi `pages.yml` kendisi üretiyor.
       - run: npm run build
-
-      - name: Upload build output
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-dist
-          path: web/dist
-          retention-days: 7
